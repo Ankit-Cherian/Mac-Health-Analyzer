@@ -204,43 +204,43 @@ class ProcessesTab(QWidget):
         try:
             self.table.setSortingEnabled(False)
             self.table.setRowCount(len(processes))
-        
-        for row, proc in enumerate(processes):
-            # PID
-            pid_item = QTableWidgetItem(str(proc['pid']))
-            pid_item.setData(Qt.ItemDataRole.DisplayRole, proc['pid'])
-            self.table.setItem(row, 0, pid_item)
             
-            # Name
-            name_item = QTableWidgetItem(proc['name'])
-            self.table.setItem(row, 1, name_item)
+            for row, proc in enumerate(processes):
+                # PID
+                pid_item = QTableWidgetItem(str(proc['pid']))
+                pid_item.setData(Qt.ItemDataRole.DisplayRole, proc['pid'])
+                self.table.setItem(row, 0, pid_item)
+                
+                # Name
+                name_item = QTableWidgetItem(proc['name'])
+                self.table.setItem(row, 1, name_item)
+                
+                # Memory (human readable)
+                memory_item = QTableWidgetItem(proc['memory_human'])
+                memory_item.setData(Qt.ItemDataRole.DisplayRole, proc['memory_mb'])
+                self.table.setItem(row, 2, memory_item)
+                
+                # Memory %
+                mem_percent = proc['memory_percent']
+                mem_percent_item = QTableWidgetItem(format_percentage(mem_percent))
+                mem_percent_item.setData(Qt.ItemDataRole.DisplayRole, mem_percent)
+                # Color code by usage
+                if mem_percent > 10:
+                    mem_percent_item.setForeground(self.get_color_for_percent(mem_percent))
+                self.table.setItem(row, 3, mem_percent_item)
+                
+                # CPU %
+                cpu_percent = proc['cpu_percent']
+                cpu_percent_item = QTableWidgetItem(format_percentage(cpu_percent))
+                cpu_percent_item.setData(Qt.ItemDataRole.DisplayRole, cpu_percent)
+                # Color code by usage
+                if cpu_percent > 10:
+                    cpu_percent_item.setForeground(self.get_color_for_percent(cpu_percent))
+                self.table.setItem(row, 4, cpu_percent_item)
+                
+                # Store process data
+                pid_item.setData(Qt.ItemDataRole.UserRole, proc)
             
-            # Memory (human readable)
-            memory_item = QTableWidgetItem(proc['memory_human'])
-            memory_item.setData(Qt.ItemDataRole.DisplayRole, proc['memory_mb'])
-            self.table.setItem(row, 2, memory_item)
-            
-            # Memory %
-            mem_percent = proc['memory_percent']
-            mem_percent_item = QTableWidgetItem(format_percentage(mem_percent))
-            mem_percent_item.setData(Qt.ItemDataRole.DisplayRole, mem_percent)
-            # Color code by usage
-            if mem_percent > 10:
-                mem_percent_item.setForeground(self.get_color_for_percent(mem_percent))
-            self.table.setItem(row, 3, mem_percent_item)
-            
-            # CPU %
-            cpu_percent = proc['cpu_percent']
-            cpu_percent_item = QTableWidgetItem(format_percentage(cpu_percent))
-            cpu_percent_item.setData(Qt.ItemDataRole.DisplayRole, cpu_percent)
-            # Color code by usage
-            if cpu_percent > 10:
-                cpu_percent_item.setForeground(self.get_color_for_percent(cpu_percent))
-            self.table.setItem(row, 4, cpu_percent_item)
-            
-            # Store process data
-            pid_item.setData(Qt.ItemDataRole.UserRole, proc)
-        
             self.table.setSortingEnabled(True)
             # Default sort by memory usage
             self.table.sortItems(3, Qt.SortOrder.DescendingOrder)

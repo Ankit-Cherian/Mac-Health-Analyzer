@@ -155,42 +155,42 @@ class Dashboard(QWidget):
             # Update system info
             mem_info = self.process_monitor.get_memory_info()
             cpu_info = self.process_monitor.get_cpu_info()
+            
+            self.overview_memory_card.update_value(
+                mem_info.get('total_human', 'N/A'),
+                "low"
+            )
         
-        self.overview_memory_card.update_value(
-            mem_info.get('total_human', 'N/A'),
-            "low"
-        )
-        
-        self.overview_cpu_card.update_value(
-            f"{cpu_info.get('count_logical', 0)} cores",
-            "low"
-        )
-        
-        self.overview_processes_card.update_value(
-            str(self.process_monitor.get_process_count()),
-            "low"
-        )
-        
-        startup_summary = self.startup_manager.get_summary()
-        startup_status = "medium" if startup_summary['enabled'] > 10 else "low"
-        self.overview_startup_card.update_value(
-            str(startup_summary['total']),
-            startup_status
-        )
-        
-        # Top consumers
-        top_memory = self.process_monitor.get_top_memory_processes(3)
-        top_cpu = self.process_monitor.get_top_cpu_processes(3)
-        
-        mem_text = "Top Memory Consumers:\n"
-        for proc in top_memory:
-            mem_text += f"  • {proc['name']}: {proc['memory_human']}\n"
-        self.top_memory_label.setText(mem_text)
-        
-        cpu_text = "Top CPU Consumers:\n"
-        for proc in top_cpu:
-            cpu_text += f"  • {proc['name']}: {proc['cpu_percent']:.1f}%\n"
-        self.top_cpu_label.setText(cpu_text)
+            self.overview_cpu_card.update_value(
+                f"{cpu_info.get('count_logical', 0)} cores",
+                "low"
+            )
+            
+            self.overview_processes_card.update_value(
+                str(self.process_monitor.get_process_count()),
+                "low"
+            )
+            
+            startup_summary = self.startup_manager.get_summary()
+            startup_status = "medium" if startup_summary['enabled'] > 10 else "low"
+            self.overview_startup_card.update_value(
+                str(startup_summary['total']),
+                startup_status
+            )
+            
+            # Top consumers
+            top_memory = self.process_monitor.get_top_memory_processes(3)
+            top_cpu = self.process_monitor.get_top_cpu_processes(3)
+            
+            mem_text = "Top Memory Consumers:\n"
+            for proc in top_memory:
+                mem_text += f"  • {proc['name']}: {proc['memory_human']}\n"
+            self.top_memory_label.setText(mem_text)
+            
+            cpu_text = "Top CPU Consumers:\n"
+            for proc in top_cpu:
+                cpu_text += f"  • {proc['name']}: {proc['cpu_percent']:.1f}%\n"
+            self.top_cpu_label.setText(cpu_text)
         except Exception as e:
             print(f"Error refreshing overview: {e}")
     
