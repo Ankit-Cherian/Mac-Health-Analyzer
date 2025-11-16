@@ -117,15 +117,15 @@ class Dashboard(QWidget):
     
     def setup_timers(self):
         """Set up auto-refresh timers."""
-        # Process monitor refresh every 2 seconds
+        # Process monitor refresh every 3 seconds (increased from 2)
         self.process_timer = QTimer()
         self.process_timer.timeout.connect(self.refresh_processes)
-        self.process_timer.start(2000)
+        self.process_timer.start(3000)
         
-        # Overview refresh every 3 seconds
+        # Overview refresh every 5 seconds (increased from 3)
         self.overview_timer = QTimer()
         self.overview_timer.timeout.connect(self.refresh_overview)
-        self.overview_timer.start(3000)
+        self.overview_timer.start(5000)
     
     def load_initial_data(self):
         """Load initial data for all tabs."""
@@ -143,14 +143,18 @@ class Dashboard(QWidget):
     def refresh_processes(self):
         """Refresh process data."""
         # Only refresh if processes tab is visible
-        if self.tab_widget.currentWidget() == self.processes_tab:
-            self.processes_tab.update_data()
+        try:
+            if self.tab_widget.currentWidget() == self.processes_tab:
+                self.processes_tab.update_data()
+        except Exception as e:
+            print(f"Error refreshing processes: {e}")
     
     def refresh_overview(self):
         """Refresh overview data."""
-        # Update system info
-        mem_info = self.process_monitor.get_memory_info()
-        cpu_info = self.process_monitor.get_cpu_info()
+        try:
+            # Update system info
+            mem_info = self.process_monitor.get_memory_info()
+            cpu_info = self.process_monitor.get_cpu_info()
         
         self.overview_memory_card.update_value(
             mem_info.get('total_human', 'N/A'),
@@ -187,9 +191,14 @@ class Dashboard(QWidget):
         for proc in top_cpu:
             cpu_text += f"  • {proc['name']}: {proc['cpu_percent']:.1f}%\n"
         self.top_cpu_label.setText(cpu_text)
+        except Exception as e:
+            print(f"Error refreshing overview: {e}")
     
     def cleanup(self):
         """Clean up resources."""
-        self.process_timer.stop()
-        self.overview_timer.stop()
+        try:
+            self.process_timer.stop()
+            self.overview_timer.stop()
+        except Exception:
+            pass
 

@@ -130,10 +130,13 @@ class ProcessesTab(QWidget):
     
     def update_data(self):
         """Update the table and metrics with current process data."""
-        self.process_monitor.refresh()
-        self.current_processes = self.process_monitor.get_processes()
-        self.apply_filters()
-        self.update_metrics()
+        try:
+            self.process_monitor.refresh()
+            self.current_processes = self.process_monitor.get_processes()
+            self.apply_filters()
+            self.update_metrics()
+        except Exception as e:
+            print(f"Error updating process data: {e}")
     
     def update_metrics(self):
         """Update metric cards."""
@@ -198,8 +201,9 @@ class ProcessesTab(QWidget):
         Args:
             processes: List of process dicts
         """
-        self.table.setSortingEnabled(False)
-        self.table.setRowCount(len(processes))
+        try:
+            self.table.setSortingEnabled(False)
+            self.table.setRowCount(len(processes))
         
         for row, proc in enumerate(processes):
             # PID
@@ -237,9 +241,12 @@ class ProcessesTab(QWidget):
             # Store process data
             pid_item.setData(Qt.ItemDataRole.UserRole, proc)
         
-        self.table.setSortingEnabled(True)
-        # Default sort by memory usage
-        self.table.sortItems(3, Qt.SortOrder.DescendingOrder)
+            self.table.setSortingEnabled(True)
+            # Default sort by memory usage
+            self.table.sortItems(3, Qt.SortOrder.DescendingOrder)
+        except Exception as e:
+            print(f"Error populating process table: {e}")
+            self.table.setSortingEnabled(True)
     
     def get_color_for_percent(self, percent: float):
         """

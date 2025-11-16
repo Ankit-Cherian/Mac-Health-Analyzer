@@ -77,7 +77,6 @@ def get_main_stylesheet() -> str:
         border-top-right-radius: 12px;
         font-size: 15px;
         font-weight: 300;
-        backdrop-filter: blur(10px);
     }}
     
     QTabBar::tab:selected {{
@@ -102,7 +101,6 @@ def get_main_stylesheet() -> str:
         font-family: "JetBrains Mono", "Menlo", monospace;
         font-size: 12px;
         font-weight: 300;
-        backdrop-filter: blur(20px);
     }}
     
     QTableWidget::item {{
