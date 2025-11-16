@@ -210,9 +210,11 @@ class ProcessesTab(QWidget):
             processes: List of process dicts
         """
         try:
+            # Block signals during update for better performance
+            self.table.blockSignals(True)
             self.table.setSortingEnabled(False)
-            # Limit to 200 processes max for performance
-            processes = processes[:200]
+            # Limit to 100 processes max for performance
+            processes = processes[:100]
             self.table.setRowCount(len(processes))
             
             for row, proc in enumerate(processes):
@@ -252,11 +254,13 @@ class ProcessesTab(QWidget):
                 pid_item.setData(Qt.ItemDataRole.UserRole, proc)
             
             self.table.setSortingEnabled(True)
+            self.table.blockSignals(False)
             # Default sort by memory usage
             self.table.sortItems(3, Qt.SortOrder.DescendingOrder)
         except Exception as e:
             print(f"Error populating process table: {e}")
             self.table.setSortingEnabled(True)
+            self.table.blockSignals(False)
     
     def get_color_for_percent(self, percent: float):
         """

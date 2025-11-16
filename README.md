@@ -62,8 +62,8 @@ The application provides three main tabs:
 
 - Custom fonts (Bricolage Grotesque, JetBrains Mono) will download automatically on first run
 - Some operations require administrator privileges
-- The application auto-refreshes process data every 5 seconds
-- Process table displays up to 200 processes for optimal performance
+- The application auto-refreshes active tab every 10 seconds
+- Process table displays up to 100 processes for optimal performance
 
 ## Built With
 

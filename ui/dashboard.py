@@ -31,8 +31,19 @@ class Dashboard(QWidget):
         self.setup_ui()
         self.setup_timers()
         
+        # Connect tab change to stop updates when switching
+        self.tab_widget.currentChanged.connect(self.on_tab_changed)
+        
         # Initial data load
         self.load_initial_data()
+    
+    def on_tab_changed(self, index):
+        """Handle tab change - refresh data for new tab."""
+        current_widget = self.tab_widget.widget(index)
+        if current_widget == self.processes_tab:
+            self.processes_tab.update_data()
+        elif current_widget == self.overview_tab:
+            self.refresh_overview()
     
     def setup_ui(self):
         """Set up the user interface."""
@@ -117,15 +128,15 @@ class Dashboard(QWidget):
     
     def setup_timers(self):
         """Set up auto-refresh timers."""
-        # Process monitor refresh every 5 seconds (increased for stability)
+        # Process monitor refresh every 10 seconds (slower for stability)
         self.process_timer = QTimer()
         self.process_timer.timeout.connect(self.refresh_processes)
-        self.process_timer.start(5000)
+        self.process_timer.start(10000)
         
-        # Overview refresh every 5 seconds
+        # Overview refresh every 10 seconds
         self.overview_timer = QTimer()
         self.overview_timer.timeout.connect(self.refresh_overview)
-        self.overview_timer.start(5000)
+        self.overview_timer.start(10000)
     
     def load_initial_data(self):
         """Load initial data for all tabs."""
@@ -142,9 +153,9 @@ class Dashboard(QWidget):
     
     def refresh_processes(self):
         """Refresh process data."""
-        # Only refresh if processes tab is visible
+        # Only refresh if processes tab is visible AND tab is visible to user
         try:
-            if self.tab_widget.currentWidget() == self.processes_tab:
+            if self.tab_widget.currentWidget() == self.processes_tab and self.isVisible():
                 self.processes_tab.update_data()
         except Exception as e:
             print(f"Error refreshing processes: {e}")
