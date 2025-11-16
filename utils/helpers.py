@@ -76,6 +76,10 @@ def get_process_list(include_system: bool = False) -> List[Dict[str, any]]:
         try:
             pinfo = proc.info
             
+            # Skip if memory info is not available
+            if not pinfo['memory_info']:
+                continue
+            
             # Skip system processes if requested
             if not include_system and pinfo['username'] in ['root', '_windowserver', 'nobody']:
                 continue

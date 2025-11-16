@@ -146,6 +146,14 @@ def parse_plist_file(filepath: str) -> Optional[Dict[str, any]]:
     try:
         with open(filepath, 'rb') as f:
             plist = plistlib.load(f)
+    except PermissionError:
+        # Skip files we don't have permission to read
+        return None
+    except Exception as e:
+        print(f"Error parsing plist {filepath}: {e}")
+        return None
+    
+    try:
             
         label = plist.get('Label', os.path.basename(filepath).replace('.plist', ''))
         program = plist.get('Program', '')
@@ -167,8 +175,7 @@ def parse_plist_file(filepath: str) -> Optional[Dict[str, any]]:
             'run_at_load': plist.get('RunAtLoad', False),
             'keep_alive': plist.get('KeepAlive', False),
         }
-    except Exception as e:
-        print(f"Error parsing plist {filepath}: {e}")
+    except Exception:
         return None
 
 

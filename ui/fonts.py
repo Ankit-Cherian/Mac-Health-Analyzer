@@ -93,8 +93,6 @@ class FontManager:
         Load all required fonts.
         Downloads fonts if not already present.
         """
-        font_db = QFontDatabase()
-        
         for font_name, font_data in FONTS.items():
             print(f"\nLoading {font_name}...")
             
@@ -102,10 +100,10 @@ class FontManager:
                 filepath = self.download_font(font_name, weight, url)
                 
                 if filepath and os.path.exists(filepath):
-                    font_id = font_db.addApplicationFont(filepath)
+                    font_id = QFontDatabase.addApplicationFont(filepath)
                     
                     if font_id != -1:
-                        families = font_db.applicationFontFamilies(font_id)
+                        families = QFontDatabase.applicationFontFamilies(font_id)
                         if families:
                             family_name = families[0]
                             self.loaded_fonts[f"{font_name}_{weight}"] = family_name
