@@ -117,12 +117,12 @@ class Dashboard(QWidget):
     
     def setup_timers(self):
         """Set up auto-refresh timers."""
-        # Process monitor refresh every 3 seconds (increased from 2)
+        # Process monitor refresh every 5 seconds (increased for stability)
         self.process_timer = QTimer()
         self.process_timer.timeout.connect(self.refresh_processes)
-        self.process_timer.start(3000)
+        self.process_timer.start(5000)
         
-        # Overview refresh every 5 seconds (increased from 3)
+        # Overview refresh every 5 seconds
         self.overview_timer = QTimer()
         self.overview_timer.timeout.connect(self.refresh_overview)
         self.overview_timer.start(5000)

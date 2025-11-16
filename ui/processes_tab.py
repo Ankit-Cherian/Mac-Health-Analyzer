@@ -31,6 +31,7 @@ class ProcessesTab(QWidget):
         super().__init__(parent)
         self.process_monitor = process_monitor
         self.current_processes = []
+        self.is_updating = False  # Lock to prevent concurrent updates
         
         self.setup_ui()
     
@@ -130,13 +131,20 @@ class ProcessesTab(QWidget):
     
     def update_data(self):
         """Update the table and metrics with current process data."""
+        # Skip if already updating
+        if self.is_updating:
+            return
+            
         try:
+            self.is_updating = True
             self.process_monitor.refresh()
             self.current_processes = self.process_monitor.get_processes()
             self.apply_filters()
             self.update_metrics()
         except Exception as e:
             print(f"Error updating process data: {e}")
+        finally:
+            self.is_updating = False
     
     def update_metrics(self):
         """Update metric cards."""
@@ -203,6 +211,8 @@ class ProcessesTab(QWidget):
         """
         try:
             self.table.setSortingEnabled(False)
+            # Limit to 200 processes max for performance
+            processes = processes[:200]
             self.table.setRowCount(len(processes))
             
             for row, proc in enumerate(processes):
