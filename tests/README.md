@@ -285,27 +285,6 @@ class TestFunctionToTest:
         assert result == "mocked"
 ```
 
-## Continuous Integration
-
-### GitHub Actions Workflow
-
-The test suite runs automatically on:
-- Push to `main`, `develop`, or `claude/*` branches
-- Pull requests to `main` or `develop`
-- Manual trigger via workflow_dispatch
-
-### CI/CD Features
-
-1. **Multi-OS Testing**: macOS 12 and macOS latest
-2. **Multi-Python Testing**: Python 3.9, 3.10, 3.11, 3.12
-3. **Code Quality Checks**:
-   - flake8 linting
-   - black formatting
-   - isort import sorting
-   - mypy type checking
-4. **Coverage Reporting**: Codecov integration
-5. **Artifact Storage**: Test results and coverage reports
-
 ## Coverage Reports
 
 ### Viewing Coverage
@@ -512,8 +491,7 @@ pytest -n 4     # Use 4 workers
 For issues or questions:
 1. Check this documentation
 2. Review test examples in `tests/unit/` and `tests/integration/`
-3. Check CI/CD logs in GitHub Actions
-4. Create an issue in the GitHub repository
+3. Create an issue in the GitHub repository
 
 ---
 
