@@ -4,6 +4,7 @@ Handles detection and management of login items, Launch Agents, and Launch Daemo
 """
 
 from typing import List, Dict
+import time
 from utils.system_info import (
     get_login_items,
     get_launch_agents,
@@ -11,6 +12,7 @@ from utils.system_info import (
     disable_login_item,
     disable_launch_agent,
     enable_launch_agent,
+    fetch_launchctl_status,
 )
 
 
@@ -25,12 +27,19 @@ class StartupManager:
         self.launch_agents = []
         self.launch_daemons = []
         self.all_items = []
+        self._launchctl_cache = set()
+        self._launchctl_cache_ts = 0.0
         
     def refresh(self):
         """Refresh all startup items."""
+        now = time.time()
+        if not self._launchctl_cache or now - self._launchctl_cache_ts > 5:
+            self._launchctl_cache = fetch_launchctl_status()
+            self._launchctl_cache_ts = now
+
         self.login_items = get_login_items()
-        self.launch_agents = get_launch_agents()
-        self.launch_daemons = get_launch_daemons()
+        self.launch_agents = get_launch_agents(loaded_labels=self._launchctl_cache)
+        self.launch_daemons = get_launch_daemons(loaded_labels=self._launchctl_cache)
         
         # Combine all items
         self.all_items = self.login_items + self.launch_agents + self.launch_daemons
