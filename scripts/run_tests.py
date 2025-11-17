@@ -62,7 +62,7 @@ Examples:
     # Add coverage
     if not args.no_cov and not args.fast:
         cmd.extend([
-            '--cov=.',
+            '--cov=src',
             '--cov-report=html',
             '--cov-report=term-missing',
             '--cov-report=xml'

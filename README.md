@@ -6,11 +6,11 @@ A simple macOS app I built to see what's running on my Mac and manage startup it
 
 ### Onboarding
 
-<img src="screenshots/start up step 1.png" width="700">
+<img src="docs/screenshots/start up step 1.png" width="700">
 
 *First-time setup guide explaining what the app does*
 
-<img src="screenshots/startupsetup4.png" width="700">
+<img src="docs/screenshots/startupsetup4.png" width="700">
 
 *Helpful tips for using the app safely*
 
@@ -18,13 +18,13 @@ A simple macOS app I built to see what's running on my Mac and manage startup it
 
 **Startup Tab** - Manage what launches when you boot up
 
-<img src="screenshots/MainStartupPage.png" width="700">
+<img src="docs/screenshots/MainStartupPage.png" width="700">
 
 *View all your startup items with stats on enabled/disabled items*
 
 **Processes Tab** - Monitor what's running
 
-<img src="screenshots/ProcessesTab.png" width="700">
+<img src="docs/screenshots/ProcessesTab.png" width="700">
 
 *Real-time CPU and memory monitoring for all running processes*
 
@@ -32,21 +32,21 @@ A simple macOS app I built to see what's running on my Mac and manage startup it
 
 **Startup Item Details**
 
-<img src="screenshots/StartupItemDetails.png" width="700">
+<img src="docs/screenshots/StartupItemDetails.png" width="700">
 
 *Simple explanations for what each startup item does*
 
-<img src="screenshots/StartupItemDetails2.png" width="700">
+<img src="docs/screenshots/StartupItemDetails2.png" width="700">
 
 *Smart recommendations based on the item type*
 
 **Process Details**
 
-<img src="screenshots/ProcessDetails.png" width="700">
+<img src="docs/screenshots/ProcessDetails.png" width="700">
 
 *Detailed info for recognized processes*
 
-<img src="screenshots/ProcessDetails2.png" width="700">
+<img src="docs/screenshots/ProcessDetails2.png" width="700">
 
 *Safety warnings for critical system processes*
 
@@ -59,12 +59,17 @@ A simple macOS app I built to see what's running on my Mac and manage startup it
    ```
 3. Run the app:
    ```bash
-   python3 main.py
+   ./scripts/run.sh
+   ```
+
+   Or directly with Python:
+   ```bash
+   PYTHONPATH=src python3 -m main
    ```
 
 That's it. If you want to see system-level processes, run with `sudo`:
 ```bash
-sudo python3 main.py
+sudo PYTHONPATH=src python3 -m main
 ```
 
 ## Requirements
@@ -76,10 +81,15 @@ sudo python3 main.py
 
 There's a test suite if you want to run it:
 ```bash
-./run_tests.sh
+./scripts/run_tests.sh
 ```
 
-It has pretty good coverage (95%+) and tests most of the functionality.
+Or use the Python test runner:
+```bash
+python3 scripts/run_tests.py
+```
+
+It has pretty good coverage (95%+) and tests most of the functionality. See [TESTING.md](docs/TESTING.md) for more details.
 
 ## Open Source
 
