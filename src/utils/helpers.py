@@ -1,5 +1,5 @@
 """
-Helper utilities for the Mac Health Analyzer.
+Helper utilities for the Mac Health Pulse.
 """
 
 import psutil

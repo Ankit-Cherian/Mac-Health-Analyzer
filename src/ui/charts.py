@@ -1,5 +1,5 @@
 """
-Chart widgets for Mac Health Analyzer - Neo-Brutalist Earth Edition.
+Chart widgets for Mac Health Pulse - Neo-Brutalist Earth Edition.
 Clean, readable visualizations with bold geometric design.
 """
 

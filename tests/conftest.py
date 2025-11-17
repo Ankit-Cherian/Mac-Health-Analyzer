@@ -233,7 +233,7 @@ def mock_plist_data():
 @pytest.fixture
 def temp_config_dir(tmp_path):
     """Create a temporary config directory."""
-    config_dir = tmp_path / ".mac-health-analyzer"
+    config_dir = tmp_path / ".mac-health-pulse"
     config_dir.mkdir(exist_ok=True)
     return config_dir
 

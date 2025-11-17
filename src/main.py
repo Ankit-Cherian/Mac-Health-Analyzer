@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Mac Health Analyzer - Main Entry Point
+Mac Health Pulse - Main Entry Point
 A beautiful, powerful macOS system monitoring and startup management tool.
 """
 
@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
     
     def setup_window(self):
         """Configure main window properties."""
-        self.setWindowTitle("Mac Health Analyzer")
+        self.setWindowTitle("Mac Health Pulse")
         self.setMinimumSize(1200, 800)
         self.resize(1400, 900)
         
@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
         """Get path to config file."""
         # Use user's home directory
         home = Path.home()
-        config_dir = home / '.mac-health-analyzer'
+        config_dir = home / '.mac-health-pulse'
         return config_dir / 'config.json'
 
 
@@ -153,8 +153,8 @@ def main():
     
     # Create application
     app = QApplication(sys.argv)
-    app.setApplicationName("Mac Health Analyzer")
-    app.setOrganizationName("Mac Health Analyzer")
+    app.setApplicationName("Mac Health Pulse")
+    app.setOrganizationName("Mac Health Pulse")
     
     # Set application-wide font
     try:

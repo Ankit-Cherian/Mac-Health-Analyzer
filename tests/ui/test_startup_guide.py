@@ -20,7 +20,7 @@ class TestStartupGuide:
         """Test StartupGuide initialization."""
         guide = StartupGuide()
 
-        assert guide.windowTitle() == "Welcome to Mac Health Analyzer"
+        assert guide.windowTitle() == "Welcome to Mac Health Pulse"
         assert guide.dont_show_again == False
 
     def test_init_ui(self, qapp):

@@ -1,6 +1,6 @@
 """
 Startup guide dialog for first-time users.
-Provides a friendly introduction to the Mac Health Analyzer app.
+Provides a friendly introduction to the Mac Health Pulse app.
 """
 
 from PyQt6.QtCore import Qt
@@ -28,7 +28,7 @@ class StartupGuide(QDialog):
         self.current_step = 0
         self.dont_show_again = False
 
-        self.setWindowTitle("Welcome to Mac Health Analyzer")
+        self.setWindowTitle("Welcome to Mac Health Pulse")
         self.setModal(True)
         self.setMinimumWidth(800)
         self.setMinimumHeight(700)
@@ -50,7 +50,7 @@ class StartupGuide(QDialog):
         layout.setContentsMargins(30, 30, 30, 30)
 
         # Title
-        title = QLabel("Welcome to Mac Health Analyzer! 👋")
+        title = QLabel("Welcome to Mac Health Pulse! 👋")
         title.setProperty("heading", "h1")
         title.setStyleSheet(f"color: {COLORS['terracotta']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -163,7 +163,7 @@ class StartupGuide(QDialog):
     def _create_step_1(self) -> QWidget:
         """Create step 1: Overview."""
         description_html = (
-            "<p>Mac Health Analyzer helps you understand what's running on your Mac and "
+            "<p>Mac Health Pulse helps you understand what's running on your Mac and "
             "keep it running smoothly. Think of it as a health checkup for your computer!</p>"
             "<ul style='margin-left: 18px; padding-left: 6px;'>"
             "<li>See what programs start automatically when you log in.</li>"
@@ -172,7 +172,7 @@ class StartupGuide(QDialog):
             "<li>Get simple recommendations to improve performance.</li>"
             "</ul>"
         )
-        return self._create_step_panel("🖥️", "What is Mac Health Analyzer?",
+        return self._create_step_panel("🖥️", "What is Mac Health Pulse?",
                                        description_html, COLORS['terracotta'])
 
     def _create_step_2(self) -> QWidget:
@@ -225,7 +225,7 @@ class StartupGuide(QDialog):
                                         tips_html, COLORS['terracotta'])
         layout.addWidget(panel, alignment=Qt.AlignmentFlag.AlignTop)
 
-        ready = QLabel("You're all set! Click \"Finish\" to start using Mac Health Analyzer.")
+        ready = QLabel("You're all set! Click \"Finish\" to start using Mac Health Pulse.")
         ready.setAlignment(Qt.AlignmentFlag.AlignCenter)
         ready.setStyleSheet(f"color: {COLORS['sage']}; font-size: 13px; font-weight: bold;")
         layout.addWidget(ready)

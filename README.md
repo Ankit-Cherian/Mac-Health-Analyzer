@@ -1,4 +1,4 @@
-# Mac Health Analyzer
+# Mac Health Pulse
 
 A simple macOS app I built to see what's running on my Mac and manage startup items.
 

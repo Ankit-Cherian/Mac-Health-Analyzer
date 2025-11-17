@@ -1,5 +1,5 @@
 """
-UI Styling for Mac Health Analyzer - Neo-Brutalist Earth Edition.
+UI Styling for Mac Health Pulse - Neo-Brutalist Earth Edition.
 Bold geometric design with warm earth tones, exceptional readability, and organic sophistication.
 """
 

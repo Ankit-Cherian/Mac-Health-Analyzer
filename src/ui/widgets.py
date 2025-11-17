@@ -1,5 +1,5 @@
 """
-Custom styled widgets for the Mac Health Analyzer.
+Custom styled widgets for the Mac Health Pulse.
 Includes toggle switches, styled buttons, and animated panels.
 """
 

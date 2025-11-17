@@ -1,5 +1,5 @@
 """
-Startup Items Tab UI for Mac Health Analyzer.
+Startup Items Tab UI for Mac Health Pulse.
 Displays and manages login items, Launch Agents, and Launch Daemons.
 """
 

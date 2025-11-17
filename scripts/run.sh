@@ -1,5 +1,5 @@
 #!/bin/bash
-# Launch script for Mac Health Analyzer
+# Launch script for Mac Health Pulse
 
 # Change to project root directory (parent of scripts/)
 cd "$(dirname "$0")/.."
@@ -18,6 +18,6 @@ if ! python3 -c "import PyQt6" 2>/dev/null; then
 fi
 
 # Run the application
-echo "Starting Mac Health Analyzer..."
+echo "Starting Mac Health Pulse..."
 PYTHONPATH=src python3 -m main
 

@@ -1,5 +1,5 @@
 """
-Processes Tab UI for Mac Health Analyzer.
+Processes Tab UI for Mac Health Pulse.
 Displays and manages running processes with resource usage.
 """
 

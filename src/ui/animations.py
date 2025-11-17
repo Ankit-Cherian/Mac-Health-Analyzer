@@ -1,5 +1,5 @@
 """
-Animation utilities for the Mac Health Analyzer.
+Animation utilities for the Mac Health Pulse.
 Provides smooth transitions, staggered reveals, and micro-interactions.
 """
 

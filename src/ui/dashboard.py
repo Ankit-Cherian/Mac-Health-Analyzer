@@ -1,5 +1,5 @@
 """
-Main Dashboard for Mac Health Analyzer - Neon Terminal Edition.
+Main Dashboard for Mac Health Pulse - Neon Terminal Edition.
 Enhanced with real-time charts, gauges, and cyberpunk visualizations.
 """
 

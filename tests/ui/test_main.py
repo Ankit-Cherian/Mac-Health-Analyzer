@@ -33,7 +33,7 @@ class TestMainWindow:
             assert window.startup_manager is not None
             assert window.process_monitor is not None
             assert window.dashboard is not None
-            assert window.windowTitle() == "Mac Health Analyzer"
+            assert window.windowTitle() == "Mac Health Pulse"
             assert window.minimumSize().width() == 1200
             assert window.minimumSize().height() == 800
 
@@ -45,7 +45,7 @@ class TestMainWindow:
 
             window = MainWindow()
 
-            assert window.windowTitle() == "Mac Health Analyzer"
+            assert window.windowTitle() == "Mac Health Pulse"
             assert window.minimumWidth() == 1200
             assert window.minimumHeight() == 800
 
@@ -142,7 +142,7 @@ class TestMainWindow:
              patch('main.get_font_manager'):
 
             # Create config file
-            config_dir = tmp_path / '.mac-health-analyzer'
+            config_dir = tmp_path / '.mac-health-pulse'
             config_dir.mkdir()
             config_file = config_dir / 'config.json'
             config_file.write_text(json.dumps({'startup_guide_shown': True}))
@@ -166,7 +166,7 @@ class TestMainWindow:
             window._save_guide_preference()
 
             # Check config was saved
-            config_file = tmp_path / '.mac-health-analyzer' / 'config.json'
+            config_file = tmp_path / '.mac-health-pulse' / 'config.json'
             assert config_file.exists()
 
             with open(config_file) as f:
@@ -184,7 +184,7 @@ class TestMainWindow:
             window = MainWindow()
             config_path = window._get_config_path()
 
-            assert config_path.parent.name == '.mac-health-analyzer'
+            assert config_path.parent.name == '.mac-health-pulse'
             assert config_path.name == 'config.json'
 
     def test_show_startup_guide_first_time(self, qapp, mock_startup_manager, mock_process_monitor, tmp_path, monkeypatch):
@@ -216,7 +216,7 @@ class TestMainWindow:
              patch('main.StartupGuide') as mock_guide:
 
             # Create config file with guide shown
-            config_dir = tmp_path / '.mac-health-analyzer'
+            config_dir = tmp_path / '.mac-health-pulse'
             config_dir.mkdir()
             config_file = config_dir / 'config.json'
             config_file.write_text(json.dumps({'startup_guide_shown': True}))

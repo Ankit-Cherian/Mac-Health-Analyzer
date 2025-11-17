@@ -1,5 +1,5 @@
 """
-Font management for the Mac Health Analyzer - Neo-Brutalist Earth Edition.
+Font management for the Mac Health Pulse - Neo-Brutalist Earth Edition.
 Downloads and loads distinctive Google Fonts (Sora, IBM Plex Mono).
 """
 
