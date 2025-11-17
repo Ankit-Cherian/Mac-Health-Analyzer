@@ -1,6 +1,6 @@
 """
-Chart widgets for Mac Health Analyzer - Neon Terminal Edition.
-Cyberpunk-style visualizations using PyQtGraph.
+Chart widgets for Mac Health Analyzer - Neo-Brutalist Earth Edition.
+Clean, readable visualizations with bold geometric design.
 """
 
 from collections import deque
@@ -11,9 +11,9 @@ from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QLinearGradient, QConica
 from .styles import COLORS
 
 
-# Configure PyQtGraph for dark theme
+# Configure PyQtGraph for light theme
 pg.setConfigOption('background', COLORS['bg_primary'])
-pg.setConfigOption('foreground', COLORS['neon_green'])
+pg.setConfigOption('foreground', COLORS['text_primary'])
 pg.setConfigOption('antialias', True)
 
 
@@ -41,29 +41,31 @@ class RealtimeLineChart(QWidget):
         self.plot_widget.showGrid(x=True, y=True, alpha=0.2)
 
         # Style the plot
-        self.plot_widget.setLabel('left', self.title, color=COLORS['neon_green'],
+        self.plot_widget.setLabel('left', self.title, color=COLORS['terracotta'],
                                   **{'font-size': '12pt', 'font-weight': 'bold'})
-        self.plot_widget.setLabel('bottom', 'Time', color=COLORS['neon_cyan'],
+        self.plot_widget.setLabel('bottom', 'Time', color=COLORS['text_secondary'],
                                   **{'font-size': '10pt'})
 
         # Set axis color
-        axis_pen = pg.mkPen(color=COLORS['border'], width=2)
+        axis_pen = pg.mkPen(color=COLORS['border_dark'], width=2)
         self.plot_widget.getAxis('left').setPen(axis_pen)
         self.plot_widget.getAxis('bottom').setPen(axis_pen)
 
         # Set Y axis range
         self.plot_widget.setYRange(0, 100)
 
-        # Create the line with neon glow effect
-        glow_pen = pg.mkPen(color=COLORS['neon_green'], width=3)
+        # Create the line with bold style
+        line_pen = pg.mkPen(color=COLORS['terracotta'], width=3)
         self.data_line = self.plot_widget.plot(
-            pen=glow_pen,
+            pen=line_pen,
             name=self.title
         )
 
         # Create fill area under the curve
+        terracotta_rgb = QColor(COLORS['terracotta'])
         self.fill_curve = pg.PlotCurveItem(pen=None,
-                                           brush=(0, 255, 65, 30),  # Semi-transparent green
+                                           brush=(terracotta_rgb.red(), terracotta_rgb.green(),
+                                                 terracotta_rgb.blue(), 40),  # Semi-transparent
                                            fillLevel=0)
         self.plot_widget.addItem(self.fill_curve)
 
@@ -123,11 +125,11 @@ class CircularGauge(QWidget):
         percent = (self.value / self.max_value) * 100 if self.max_value > 0 else 0
 
         if percent < 50:
-            return COLORS['neon_green']
+            return COLORS['sage']
         elif percent < 80:
-            return COLORS['neon_amber']
+            return COLORS['mustard']
         else:
-            return COLORS['neon_pink']
+            return COLORS['terracotta']
 
     def paintEvent(self, event):
         """Paint the circular gauge."""
@@ -210,7 +212,7 @@ class CircularGauge(QWidget):
         title_font.setPointSize(14)
         title_font.setBold(True)
         painter.setFont(title_font)
-        painter.setPen(QColor(COLORS['neon_green']))
+        painter.setPen(QColor(COLORS['text_primary']))
 
         title_rect = painter.fontMetrics().boundingRect(self.title)
         painter.drawText(center_x - title_rect.width() // 2, 18, self.title)
@@ -259,7 +261,7 @@ class SparkLine(QWidget):
             points.append((x, y))
 
         # Draw line
-        pen = QPen(QColor(COLORS['neon_cyan']), 2)
+        pen = QPen(QColor(COLORS['clay']), 2)
         painter.setPen(pen)
 
         for i in range(len(points) - 1):
@@ -301,7 +303,7 @@ class BarChart(QWidget):
         height = self.height()
 
         # Title
-        painter.setPen(QColor(COLORS['neon_green']))
+        painter.setPen(QColor(COLORS['text_primary']))
         title_font = painter.font()
         title_font.setPointSize(14)
         title_font.setBold(True)
@@ -325,11 +327,11 @@ class BarChart(QWidget):
 
             # Color based on percentage
             if percent < 0.5:
-                color = COLORS['neon_green']
+                color = COLORS['sage']
             elif percent < 0.8:
-                color = COLORS['neon_amber']
+                color = COLORS['mustard']
             else:
-                color = COLORS['neon_pink']
+                color = COLORS['terracotta']
 
             # Draw background bar
             painter.setPen(Qt.PenStyle.NoPen)

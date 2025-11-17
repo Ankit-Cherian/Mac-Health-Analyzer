@@ -1,6 +1,6 @@
 """
-Font management for the Mac Health Analyzer - Neon Terminal Edition.
-Downloads and loads unique Google Fonts (Chakra Petch, Rajdhani, Orbitron).
+Font management for the Mac Health Analyzer - Neo-Brutalist Earth Edition.
+Downloads and loads distinctive Google Fonts (Sora, DM Sans, IBM Plex Mono).
 """
 
 import os
@@ -9,38 +9,33 @@ from pathlib import Path
 from PyQt6.QtGui import QFontDatabase, QFont
 
 
-# Font URLs from Google Fonts - Unique cyberpunk fonts
+# Font URLs from Google Fonts - Distinctive, readable fonts
 FONTS = {
-    'Chakra Petch': {
+    'Sora': {
         'weights': {
-            300: 'https://github.com/google/fonts/raw/main/ofl/chakrapetch/ChakraPetch-Light.ttf',
-            400: 'https://github.com/google/fonts/raw/main/ofl/chakrapetch/ChakraPetch-Regular.ttf',
-            600: 'https://github.com/google/fonts/raw/main/ofl/chakrapetch/ChakraPetch-SemiBold.ttf',
-            700: 'https://github.com/google/fonts/raw/main/ofl/chakrapetch/ChakraPetch-Bold.ttf',
+            300: 'https://github.com/google/fonts/raw/main/ofl/sora/Sora-Light.ttf',
+            400: 'https://github.com/google/fonts/raw/main/ofl/sora/Sora-Regular.ttf',
+            600: 'https://github.com/google/fonts/raw/main/ofl/sora/Sora-SemiBold.ttf',
+            700: 'https://github.com/google/fonts/raw/main/ofl/sora/Sora-Bold.ttf',
+            800: 'https://github.com/google/fonts/raw/main/ofl/sora/Sora-ExtraBold.ttf',
         }
     },
-    'Rajdhani': {
+    'DM Sans': {
         'weights': {
-            300: 'https://github.com/google/fonts/raw/main/ofl/rajdhani/Rajdhani-Light.ttf',
-            400: 'https://github.com/google/fonts/raw/main/ofl/rajdhani/Rajdhani-Regular.ttf',
-            600: 'https://github.com/google/fonts/raw/main/ofl/rajdhani/Rajdhani-SemiBold.ttf',
-            700: 'https://github.com/google/fonts/raw/main/ofl/rajdhani/Rajdhani-Bold.ttf',
+            300: 'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans-Light.ttf',
+            400: 'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans-Regular.ttf',
+            500: 'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans-Medium.ttf',
+            600: 'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans-SemiBold.ttf',
+            700: 'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans-Bold.ttf',
         }
     },
-    'Orbitron': {
+    'IBM Plex Mono': {
         'weights': {
-            400: 'https://github.com/google/fonts/raw/main/ofl/orbitron/Orbitron%5Bwght%5D.ttf',
-            700: 'https://github.com/google/fonts/raw/main/ofl/orbitron/Orbitron%5Bwght%5D.ttf',
-            900: 'https://github.com/google/fonts/raw/main/ofl/orbitron/Orbitron%5Bwght%5D.ttf',
-        }
-    },
-    'JetBrains Mono': {
-        'weights': {
-            200: 'https://github.com/JetBrains/JetBrainsMono/raw/master/fonts/ttf/JetBrainsMono-ExtraLight.ttf',
-            300: 'https://github.com/JetBrains/JetBrainsMono/raw/master/fonts/ttf/JetBrainsMono-Light.ttf',
-            400: 'https://github.com/JetBrains/JetBrainsMono/raw/master/fonts/ttf/JetBrainsMono-Regular.ttf',
-            700: 'https://github.com/JetBrains/JetBrainsMono/raw/master/fonts/ttf/JetBrainsMono-Bold.ttf',
-            800: 'https://github.com/JetBrains/JetBrainsMono/raw/master/fonts/ttf/JetBrainsMono-ExtraBold.ttf',
+            300: 'https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-Light.ttf',
+            400: 'https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-Regular.ttf',
+            500: 'https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-Medium.ttf',
+            600: 'https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-SemiBold.ttf',
+            700: 'https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-Bold.ttf',
         }
     }
 }
@@ -130,17 +125,17 @@ class FontManager:
 
     def get_display_font(self, size: int = 24, weight: int = 700) -> QFont:
         """
-        Get the display font (Chakra Petch or Orbitron).
+        Get the display font (Sora for headings).
 
         Args:
             size: Font size
-            weight: Font weight (300, 400, 600, 700, 900)
+            weight: Font weight (300, 400, 600, 700, 800)
 
         Returns:
             QFont object
         """
-        # Use Chakra Petch for headings, Orbitron for special cases
-        font_key = f"Chakra Petch_{weight}" if weight <= 700 else f"Orbitron_{weight}"
+        # Use Sora for headings
+        font_key = f"Sora_{weight}"
 
         if font_key in self.loaded_fonts:
             font = QFont(self.loaded_fonts[font_key], size)
@@ -158,23 +153,23 @@ class FontManager:
         elif weight <= 700:
             font.setWeight(QFont.Weight.Bold)
         else:
-            font.setWeight(QFont.Weight.Black)
+            font.setWeight(QFont.Weight.ExtraBold)
 
         return font
 
     def get_mono_font(self, size: int = 12, weight: int = 400) -> QFont:
         """
-        Get the monospace font (JetBrains Mono).
+        Get the monospace font (IBM Plex Mono).
 
         Args:
             size: Font size
-            weight: Font weight (200, 300, 400, 700, 800)
+            weight: Font weight (300, 400, 500, 600, 700)
 
         Returns:
             QFont object
         """
-        # Use JetBrains Mono if available, fallback to Menlo
-        font_key = f"JetBrains Mono_{weight}"
+        # Use IBM Plex Mono if available, fallback to Menlo
+        font_key = f"IBM Plex Mono_{weight}"
 
         if font_key in self.loaded_fonts:
             font = QFont(self.loaded_fonts[font_key], size)
@@ -183,16 +178,16 @@ class FontManager:
             font = QFont("Menlo", size)
 
         # Map weight to QFont weight
-        if weight <= 200:
-            font.setWeight(QFont.Weight.ExtraLight)
-        elif weight <= 300:
+        if weight <= 300:
             font.setWeight(QFont.Weight.Light)
         elif weight <= 400:
             font.setWeight(QFont.Weight.Normal)
-        elif weight <= 700:
-            font.setWeight(QFont.Weight.Bold)
+        elif weight <= 500:
+            font.setWeight(QFont.Weight.Medium)
+        elif weight <= 600:
+            font.setWeight(QFont.Weight.DemiBold)
         else:
-            font.setWeight(QFont.Weight.ExtraBold)
+            font.setWeight(QFont.Weight.Bold)
 
         return font
 

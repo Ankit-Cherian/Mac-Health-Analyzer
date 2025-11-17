@@ -54,16 +54,16 @@ class ToggleSwitch(QWidget):
 
         # Draw background track
         if self._checked:
-            bg_color = QColor(COLORS['neon_green'])
+            bg_color = QColor(COLORS['terracotta'])
         else:
             bg_color = QColor(COLORS['border'])
 
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(QBrush(bg_color))
-        painter.drawRoundedRect(0, 0, 50, 28, 14, 14)
+        painter.drawRoundedRect(0, 0, 50, 28, 0, 0)  # Square corners for brutalist style
 
-        # Draw circle with glow effect
-        circle_color = QColor(COLORS['bg_primary']) if self._checked else QColor(COLORS['text_secondary'])
+        # Draw circle
+        circle_color = QColor(COLORS['bg_card']) if self._checked else QColor(COLORS['text_secondary'])
         painter.setBrush(QBrush(circle_color))
         painter.drawEllipse(self._circle_position, 2, 24, 24)
     

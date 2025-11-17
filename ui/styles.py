@@ -1,64 +1,68 @@
 """
-UI Styling for Mac Health Analyzer - Neon Terminal Edition.
-Cyberpunk-inspired design with electric accents, terminal aesthetics, and futuristic vibes.
+UI Styling for Mac Health Analyzer - Neo-Brutalist Earth Edition.
+Bold geometric design with warm earth tones, exceptional readability, and organic sophistication.
 """
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QPalette
 
 
-# Neon Terminal Color Palette
+# Neo-Brutalist Earth Tone Palette
 COLORS = {
-    # Backgrounds - Deep blacks with purple/blue tints
-    'bg_primary': '#0a0a0f',      # Almost black
-    'bg_secondary': '#12121a',    # Dark purple-black
-    'bg_tertiary': '#1a1a2e',     # Deep navy-purple
-    'bg_card': '#15151f',         # Card background
+    # Backgrounds - Warm, layered earth tones
+    'bg_primary': '#f5f1e8',      # Warm cream (main background)
+    'bg_secondary': '#e8dcc8',    # Light sand
+    'bg_tertiary': '#d4c4a8',     # Warm tan
+    'bg_card': '#ffffff',         # Pure white for cards
+    'bg_dark': '#2d2520',         # Rich espresso for contrast
 
-    # Neon Accents - Vibrant electric colors
-    'neon_green': '#00ff41',      # Matrix green (primary)
-    'neon_pink': '#ff006e',       # Hot magenta (secondary)
-    'neon_cyan': '#00f5ff',       # Electric cyan
-    'neon_amber': '#ffbe0b',      # Warning amber
-    'neon_purple': '#bf00ff',     # Electric purple
+    # Earth Accent Colors - Muted, sophisticated tones
+    'terracotta': '#c1614a',      # Warm terracotta (primary accent)
+    'sage': '#6b8e6f',            # Sage green (success/low status)
+    'mustard': '#d4a843',         # Warm mustard (warning)
+    'burnt_sienna': '#a0522d',    # Burnt orange/sienna (critical)
+    'clay': '#8b7355',            # Clay brown (secondary accent)
+    'olive': '#6c6c3d',           # Olive green (tertiary)
 
-    # Gradients
-    'gradient_start': '#00ff41',   # Green
-    'gradient_mid': '#00f5ff',     # Cyan
-    'gradient_end': '#bf00ff',     # Purple
+    # Gradients - Warm earth transitions
+    'gradient_start': '#c1614a',   # Terracotta
+    'gradient_mid': '#d4a843',     # Mustard
+    'gradient_end': '#6b8e6f',     # Sage
 
-    # Text
-    'text_primary': '#e0e0e0',    # Off-white (easier on eyes)
-    'text_secondary': '#8a8a9e',  # Muted purple-gray
-    'text_glow': '#00ff41',       # Glowing green text
+    # Text - High contrast, warm tones
+    'text_primary': '#2d2520',    # Rich espresso (primary text)
+    'text_secondary': '#6b5d54',  # Warm gray-brown (secondary)
+    'text_muted': '#9a8b7f',      # Muted brown (tertiary)
+    'text_light': '#f5f1e8',      # Cream (for dark backgrounds)
 
-    # Status colors
-    'status_low': '#00ff41',      # Neon green - optimal
-    'status_medium': '#ffbe0b',   # Amber - warning
-    'status_high': '#ff006e',     # Hot pink - critical
+    # Status colors - Organic, readable
+    'status_low': '#6b8e6f',      # Sage green - optimal
+    'status_medium': '#d4a843',   # Mustard - warning
+    'status_high': '#c1614a',     # Terracotta - critical
 
     # UI elements
-    'border': '#2a2a3e',
-    'border_glow': '#00ff41',
-    'hover': '#1e1e2e',
-    'shadow': '#000000',
+    'border': '#d4c4a8',          # Warm tan border
+    'border_dark': '#8b7355',     # Clay border for emphasis
+    'hover': '#e8dcc8',           # Light sand hover
+    'shadow': '#2d252020',        # Subtle espresso shadow
+    'accent_line': '#2d2520',     # Bold black lines (brutalist)
 }
 
 
 def get_main_stylesheet() -> str:
     """
-    Get the main application stylesheet with cyberpunk terminal design.
+    Get the main application stylesheet with neo-brutalist earth design.
 
     Returns:
         QStyleSheet string
     """
     return f"""
-    /* Main Application Window - Dark terminal background */
+    /* Main Application Window - Warm earth gradient */
     QMainWindow {{
         background: qlineargradient(
             x1: 0, y1: 0, x2: 1, y2: 1,
             stop: 0 {COLORS['bg_primary']},
-            stop: 0.5 {COLORS['bg_secondary']},
+            stop: 0.6 {COLORS['bg_secondary']},
             stop: 1 {COLORS['bg_tertiary']}
         );
     }}
@@ -67,119 +71,113 @@ def get_main_stylesheet() -> str:
     QWidget {{
         background: transparent;
         color: {COLORS['text_primary']};
-        font-family: "Chakra Petch", "Rajdhani", "Helvetica Neue", sans-serif;
+        font-family: "Sora", "DM Sans", "Helvetica Neue", sans-serif;
         font-size: 14px;
         font-weight: 400;
     }}
 
-    /* Tab Widget - Futuristic tabs with glow effect */
+    /* Tab Widget - Bold brutalist tabs */
     QTabWidget::pane {{
         border: none;
         background: transparent;
     }}
 
     QTabBar::tab {{
-        background: rgba(18, 18, 26, 0.6);
+        background: {COLORS['bg_card']};
         color: {COLORS['text_secondary']};
         padding: 18px 40px;
-        margin-right: 2px;
-        border: none;
-        border-top: 2px solid transparent;
-        font-size: 16px;
+        margin-right: 4px;
+        border: 3px solid {COLORS['border']};
+        border-bottom: none;
+        border-top: 4px solid transparent;
+        font-size: 15px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 2px;
+        letter-spacing: 1.5px;
     }}
 
     QTabBar::tab:selected {{
-        background: qlineargradient(
-            x1: 0, y1: 0, x2: 0, y2: 1,
-            stop: 0 rgba(0, 255, 65, 0.2),
-            stop: 1 rgba(0, 255, 65, 0.05)
-        );
-        color: {COLORS['neon_green']};
+        background: {COLORS['bg_card']};
+        color: {COLORS['terracotta']};
         font-weight: 700;
-        border-top: 2px solid {COLORS['neon_green']};
+        border: 3px solid {COLORS['border_dark']};
+        border-bottom: none;
+        border-top: 4px solid {COLORS['terracotta']};
     }}
 
     QTabBar::tab:hover:!selected {{
-        background: rgba(26, 26, 46, 0.8);
-        color: {COLORS['neon_cyan']};
-        border-top: 2px solid {COLORS['neon_cyan']};
+        background: {COLORS['hover']};
+        color: {COLORS['text_primary']};
+        border-top: 4px solid {COLORS['clay']};
     }}
 
-    /* Table Widget - Terminal-style data display */
+    /* Table Widget - Clean, readable data display */
     QTableWidget {{
-        background: rgba(21, 21, 31, 0.4);
-        border: 1px solid {COLORS['border']};
-        border-radius: 12px;
-        gridline-color: rgba(0, 255, 65, 0.1);
-        selection-background-color: {COLORS['neon_green']};
-        selection-color: {COLORS['bg_primary']};
-        font-family: "JetBrains Mono", "Fira Code", "Menlo", monospace;
+        background: {COLORS['bg_card']};
+        border: 3px solid {COLORS['border']};
+        border-radius: 0px;
+        gridline-color: {COLORS['border']};
+        selection-background-color: {COLORS['terracotta']};
+        selection-color: {COLORS['text_light']};
+        font-family: "IBM Plex Mono", "Menlo", "Courier New", monospace;
         font-size: 13px;
         font-weight: 400;
     }}
 
     QTableWidget::item {{
-        padding: 10px;
+        padding: 12px;
         border: none;
         color: {COLORS['text_primary']};
     }}
 
     QTableWidget::item:selected {{
-        background: {COLORS['neon_green']};
-        color: {COLORS['bg_primary']};
-        font-weight: 600;
+        background: {COLORS['terracotta']};
+        color: {COLORS['text_light']};
+        font-weight: 500;
     }}
 
     QTableWidget::item:hover {{
-        background: rgba(0, 255, 65, 0.15);
-        color: {COLORS['neon_green']};
+        background: {COLORS['hover']};
+        color: {COLORS['text_primary']};
     }}
 
     QHeaderView::section {{
-        background: qlineargradient(
-            x1: 0, y1: 0, x2: 1, y2: 0,
-            stop: 0 rgba(0, 255, 65, 0.3),
-            stop: 0.5 rgba(0, 245, 255, 0.3),
-            stop: 1 rgba(191, 0, 255, 0.3)
-        );
-        color: {COLORS['text_primary']};
+        background: {COLORS['bg_dark']};
+        color: {COLORS['text_light']};
         padding: 14px 10px;
         border: none;
-        border-bottom: 2px solid {COLORS['neon_green']};
+        border-right: 1px solid {COLORS['clay']};
+        border-bottom: 3px solid {COLORS['terracotta']};
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 2px;
+        letter-spacing: 1.5px;
     }}
 
     QHeaderView::section:hover {{
-        background: rgba(0, 255, 65, 0.4);
-        color: {COLORS['neon_green']};
+        background: {COLORS['clay']};
+        color: {COLORS['text_light']};
     }}
 
-    /* Scroll Bars - Glowing neon style */
+    /* Scroll Bars - Minimalist geometric style */
     QScrollBar:vertical {{
-        background: rgba(18, 18, 26, 0.5);
-        width: 10px;
+        background: {COLORS['bg_secondary']};
+        width: 12px;
         margin: 0px;
-        border-radius: 5px;
+        border-radius: 0px;
+        border-left: 2px solid {COLORS['border']};
     }}
 
     QScrollBar::handle:vertical {{
-        background: qlineargradient(
-            x1: 0, y1: 0, x2: 0, y2: 1,
-            stop: 0 {COLORS['neon_green']},
-            stop: 1 {COLORS['neon_cyan']}
-        );
-        border-radius: 5px;
+        background: {COLORS['clay']};
+        border-radius: 0px;
+        border: 2px solid {COLORS['border_dark']};
         min-height: 30px;
     }}
 
     QScrollBar::handle:vertical:hover {{
-        background: {COLORS['neon_green']};
+        background: {COLORS['terracotta']};
+        border: 2px solid {COLORS['burnt_sienna']};
     }}
 
     QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
@@ -187,83 +185,76 @@ def get_main_stylesheet() -> str:
     }}
 
     QScrollBar:horizontal {{
-        background: rgba(18, 18, 26, 0.5);
-        height: 10px;
+        background: {COLORS['bg_secondary']};
+        height: 12px;
         margin: 0px;
-        border-radius: 5px;
+        border-radius: 0px;
+        border-top: 2px solid {COLORS['border']};
     }}
 
     QScrollBar::handle:horizontal {{
-        background: qlineargradient(
-            x1: 0, y1: 0, x2: 1, y2: 0,
-            stop: 0 {COLORS['neon_green']},
-            stop: 1 {COLORS['neon_cyan']}
-        );
-        border-radius: 5px;
+        background: {COLORS['clay']};
+        border-radius: 0px;
+        border: 2px solid {COLORS['border_dark']};
         min-width: 30px;
     }}
 
     QScrollBar::handle:horizontal:hover {{
-        background: {COLORS['neon_green']};
+        background: {COLORS['terracotta']};
+        border: 2px solid {COLORS['burnt_sienna']};
     }}
 
     QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
         width: 0px;
     }}
 
-    /* Push Buttons - Neon glow effect */
+    /* Push Buttons - Bold brutalist style */
     QPushButton {{
-        background: qlineargradient(
-            x1: 0, y1: 0, x2: 1, y2: 0,
-            stop: 0 rgba(0, 255, 65, 0.8),
-            stop: 1 rgba(0, 245, 255, 0.8)
-        );
-        color: {COLORS['bg_primary']};
-        border: 2px solid {COLORS['neon_green']};
-        border-radius: 6px;
+        background: {COLORS['terracotta']};
+        color: {COLORS['text_light']};
+        border: 3px solid {COLORS['accent_line']};
+        border-radius: 0px;
         padding: 14px 28px;
         font-size: 14px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 1.2px;
     }}
 
     QPushButton:hover {{
-        background: {COLORS['neon_green']};
-        border: 2px solid {COLORS['neon_cyan']};
+        background: {COLORS['burnt_sienna']};
+        border: 3px solid {COLORS['bg_dark']};
+        color: {COLORS['text_light']};
     }}
 
     QPushButton:pressed {{
-        background: rgba(0, 255, 65, 0.6);
+        background: {COLORS['clay']};
+        border: 3px solid {COLORS['accent_line']};
     }}
 
     QPushButton:disabled {{
-        background: rgba(138, 138, 158, 0.2);
-        color: {COLORS['text_secondary']};
-        border: 2px solid {COLORS['border']};
+        background: {COLORS['border']};
+        color: {COLORS['text_muted']};
+        border: 3px solid {COLORS['border']};
     }}
 
-    /* Danger Button - Hot pink accent */
+    /* Danger Button - Burnt sienna accent */
     QPushButton[danger="true"] {{
-        background: qlineargradient(
-            x1: 0, y1: 0, x2: 1, y2: 0,
-            stop: 0 rgba(255, 0, 110, 0.8),
-            stop: 1 rgba(255, 190, 11, 0.8)
-        );
-        color: {COLORS['text_primary']};
-        border: 2px solid {COLORS['neon_pink']};
+        background: {COLORS['burnt_sienna']};
+        color: {COLORS['text_light']};
+        border: 3px solid {COLORS['accent_line']};
     }}
 
     QPushButton[danger="true"]:hover {{
-        background: {COLORS['neon_pink']};
-        border: 2px solid {COLORS['neon_amber']};
+        background: {COLORS['terracotta']};
+        border: 3px solid {COLORS['bg_dark']};
     }}
 
-    /* Line Edit (Search/Input) - Terminal input style */
+    /* Line Edit (Search/Input) - Clean input style */
     QLineEdit {{
-        background: rgba(21, 21, 31, 0.6);
-        border: 2px solid {COLORS['border']};
-        border-radius: 8px;
+        background: {COLORS['bg_card']};
+        border: 3px solid {COLORS['border']};
+        border-radius: 0px;
         padding: 12px 16px;
         color: {COLORS['text_primary']};
         font-size: 14px;
@@ -271,16 +262,16 @@ def get_main_stylesheet() -> str:
     }}
 
     QLineEdit:focus {{
-        border: 2px solid {COLORS['neon_green']};
-        background: rgba(21, 21, 31, 0.9);
-        color: {COLORS['neon_green']};
+        border: 3px solid {COLORS['terracotta']};
+        background: {COLORS['bg_card']};
+        color: {COLORS['text_primary']};
     }}
 
     QLineEdit::placeholder {{
-        color: {COLORS['text_secondary']};
+        color: {COLORS['text_muted']};
     }}
 
-    /* Labels - Glowing text effects */
+    /* Labels - Clear, bold typography */
     QLabel {{
         color: {COLORS['text_primary']};
         background: transparent;
@@ -288,49 +279,45 @@ def get_main_stylesheet() -> str:
     }}
 
     QLabel[heading="h1"] {{
-        font-size: 56px;
-        font-weight: 700;
-        color: {COLORS['neon_green']};
-        letter-spacing: 2px;
+        font-size: 52px;
+        font-weight: 800;
+        color: {COLORS['bg_dark']};
+        letter-spacing: -0.5px;
     }}
 
     QLabel[heading="h2"] {{
-        font-size: 36px;
+        font-size: 34px;
         font-weight: 700;
-        color: {COLORS['neon_cyan']};
-        letter-spacing: 1px;
+        color: {COLORS['terracotta']};
+        letter-spacing: 0px;
     }}
 
     QLabel[heading="h3"] {{
-        font-size: 22px;
-        font-weight: 600;
-        color: {COLORS['neon_green']};
+        font-size: 20px;
+        font-weight: 700;
+        color: {COLORS['bg_dark']};
         text-transform: uppercase;
-        letter-spacing: 2px;
+        letter-spacing: 1.5px;
     }}
 
     QLabel[mono="true"] {{
-        font-family: "JetBrains Mono", "Fira Code", "Menlo", monospace;
+        font-family: "IBM Plex Mono", "Menlo", "Courier New", monospace;
         font-weight: 400;
     }}
 
-    /* Glassmorphic Panel - Cyberpunk card style */
+    /* Brutalist Panel - Bold card style */
     QFrame[panel="true"] {{
-        background: qlineargradient(
-            x1: 0, y1: 0, x2: 0, y2: 1,
-            stop: 0 rgba(21, 21, 31, 0.6),
-            stop: 1 rgba(18, 18, 26, 0.4)
-        );
-        border: 2px solid rgba(0, 255, 65, 0.3);
-        border-radius: 16px;
+        background: {COLORS['bg_card']};
+        border: 4px solid {COLORS['accent_line']};
+        border-radius: 0px;
         padding: 24px;
     }}
 
     QFrame[panel="true"]:hover {{
-        border: 2px solid rgba(0, 255, 65, 0.5);
+        border: 4px solid {COLORS['terracotta']};
     }}
 
-    /* Status Indicators - Neon colors */
+    /* Status Indicators - Earth tone colors */
     QLabel[status="low"] {{
         color: {COLORS['status_low']};
         font-weight: 700;
@@ -346,7 +333,7 @@ def get_main_stylesheet() -> str:
         font-weight: 700;
     }}
 
-    /* Checkboxes - Cyberpunk style */
+    /* Checkboxes - Bold geometric style */
     QCheckBox {{
         color: {COLORS['text_primary']};
         spacing: 10px;
@@ -356,32 +343,32 @@ def get_main_stylesheet() -> str:
     QCheckBox::indicator {{
         width: 22px;
         height: 22px;
-        border: 2px solid {COLORS['border']};
-        border-radius: 4px;
-        background: rgba(21, 21, 31, 0.6);
+        border: 3px solid {COLORS['border_dark']};
+        border-radius: 0px;
+        background: {COLORS['bg_card']};
     }}
 
     QCheckBox::indicator:checked {{
-        background: {COLORS['neon_green']};
-        border: 2px solid {COLORS['neon_green']};
+        background: {COLORS['terracotta']};
+        border: 3px solid {COLORS['accent_line']};
     }}
 
     QCheckBox::indicator:hover {{
-        border: 2px solid {COLORS['neon_cyan']};
+        border: 3px solid {COLORS['terracotta']};
     }}
 
-    /* Combo Box - Terminal dropdown */
+    /* Combo Box - Clean dropdown */
     QComboBox {{
-        background: rgba(21, 21, 31, 0.6);
-        border: 2px solid {COLORS['border']};
-        border-radius: 8px;
+        background: {COLORS['bg_card']};
+        border: 3px solid {COLORS['border']};
+        border-radius: 0px;
         padding: 12px 16px;
         color: {COLORS['text_primary']};
         font-size: 14px;
     }}
 
     QComboBox:hover {{
-        border: 2px solid {COLORS['neon_green']};
+        border: 3px solid {COLORS['terracotta']};
     }}
 
     QComboBox::drop-down {{
@@ -393,54 +380,50 @@ def get_main_stylesheet() -> str:
         image: none;
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
-        border-top: 6px solid {COLORS['neon_green']};
+        border-top: 6px solid {COLORS['terracotta']};
     }}
 
     QComboBox QAbstractItemView {{
-        background: {COLORS['bg_secondary']};
-        border: 2px solid {COLORS['neon_green']};
-        selection-background-color: {COLORS['neon_green']};
-        selection-color: {COLORS['bg_primary']};
+        background: {COLORS['bg_card']};
+        border: 3px solid {COLORS['terracotta']};
+        selection-background-color: {COLORS['terracotta']};
+        selection-color: {COLORS['text_light']};
     }}
 
     /* Message Box */
     QMessageBox {{
-        background: {COLORS['bg_secondary']};
+        background: {COLORS['bg_primary']};
     }}
 
     QMessageBox QPushButton {{
         min-width: 100px;
     }}
 
-    /* Progress Bar - Neon loading bar */
+    /* Progress Bar - Bold geometric bar */
     QProgressBar {{
-        background: rgba(21, 21, 31, 0.6);
-        border: 2px solid {COLORS['border']};
-        border-radius: 10px;
+        background: {COLORS['bg_secondary']};
+        border: 3px solid {COLORS['border_dark']};
+        border-radius: 0px;
         text-align: center;
         color: {COLORS['text_primary']};
         font-weight: 700;
-        height: 24px;
+        height: 28px;
     }}
 
     QProgressBar::chunk {{
-        background: qlineargradient(
-            x1: 0, y1: 0, x2: 1, y2: 0,
-            stop: 0 {COLORS['neon_green']},
-            stop: 0.5 {COLORS['neon_cyan']},
-            stop: 1 {COLORS['neon_purple']}
-        );
-        border-radius: 8px;
+        background: {COLORS['terracotta']};
+        border-radius: 0px;
     }}
 
-    /* Tooltip - Terminal popup */
+    /* Tooltip - Clean popup */
     QToolTip {{
-        background: {COLORS['bg_card']};
-        color: {COLORS['neon_green']};
-        border: 2px solid {COLORS['neon_green']};
-        border-radius: 6px;
-        padding: 8px;
-        font-family: "JetBrains Mono", monospace;
+        background: {COLORS['bg_dark']};
+        color: {COLORS['text_light']};
+        border: 3px solid {COLORS['terracotta']};
+        border-radius: 0px;
+        padding: 10px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
     }}
     """
 
@@ -477,19 +460,19 @@ def get_palette() -> QPalette:
     palette.setColor(QPalette.ColorRole.WindowText, QColor(COLORS['text_primary']))
 
     # Base
-    palette.setColor(QPalette.ColorRole.Base, QColor(COLORS['bg_secondary']))
-    palette.setColor(QPalette.ColorRole.AlternateBase, QColor(COLORS['bg_tertiary']))
+    palette.setColor(QPalette.ColorRole.Base, QColor(COLORS['bg_card']))
+    palette.setColor(QPalette.ColorRole.AlternateBase, QColor(COLORS['bg_secondary']))
 
     # Text
     palette.setColor(QPalette.ColorRole.Text, QColor(COLORS['text_primary']))
-    palette.setColor(QPalette.ColorRole.BrightText, QColor(COLORS['neon_green']))
+    palette.setColor(QPalette.ColorRole.BrightText, QColor(COLORS['terracotta']))
 
     # Button
-    palette.setColor(QPalette.ColorRole.Button, QColor(COLORS['bg_secondary']))
-    palette.setColor(QPalette.ColorRole.ButtonText, QColor(COLORS['text_primary']))
+    palette.setColor(QPalette.ColorRole.Button, QColor(COLORS['terracotta']))
+    palette.setColor(QPalette.ColorRole.ButtonText, QColor(COLORS['text_light']))
 
     # Highlight
-    palette.setColor(QPalette.ColorRole.Highlight, QColor(COLORS['neon_green']))
-    palette.setColor(QPalette.ColorRole.HighlightedText, QColor(COLORS['bg_primary']))
+    palette.setColor(QPalette.ColorRole.Highlight, QColor(COLORS['terracotta']))
+    palette.setColor(QPalette.ColorRole.HighlightedText, QColor(COLORS['text_light']))
 
     return palette
