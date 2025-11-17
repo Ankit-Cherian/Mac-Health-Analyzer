@@ -32,6 +32,8 @@ class Dashboard(QWidget):
         self.startup_manager = startup_manager
         self.process_monitor = process_monitor
         self._last_overview_refresh = 0.0
+        self._cached_top_memory = []  # Cache for top memory processes
+        self._cached_top_cpu = []  # Cache for top CPU processes
 
         self.setup_ui()
         self.setup_timers()
@@ -168,11 +170,13 @@ class Dashboard(QWidget):
         # Memory bar chart
         self.memory_bar_chart = BarChart("Top Memory")
         self.memory_bar_chart.setMinimumHeight(300)
+        self.memory_bar_chart.clicked.connect(self.on_memory_bar_clicked)
         bars_layout.addWidget(self.memory_bar_chart)
 
         # CPU bar chart
         self.cpu_bar_chart = BarChart("Top CPU")
         self.cpu_bar_chart.setMinimumHeight(300)
+        self.cpu_bar_chart.clicked.connect(self.on_cpu_bar_clicked)
         bars_layout.addWidget(self.cpu_bar_chart)
 
         resources_layout.addLayout(bars_layout)
@@ -180,21 +184,47 @@ class Dashboard(QWidget):
 
         # ==== SYSTEM INFO CARDS ====
         info_panel = GlassmorphicPanel()
-        info_layout = QGridLayout(info_panel)
+        info_layout = QVBoxLayout(info_panel)
         info_layout.setSpacing(15)
+        info_layout.setContentsMargins(20, 20, 20, 20)
 
+        # Title with hint
+        title_layout = QHBoxLayout()
         info_title = QLabel("▸ SYSTEM INFORMATION")
         info_title.setProperty("heading", "h3")
-        info_layout.addWidget(info_title, 0, 0, 1, 3)
+        title_layout.addWidget(info_title)
+        title_layout.addStretch()
+
+        # Hint text
+        from ui.styles import COLORS
+        hint_label = QLabel("Click cards for details")
+        hint_label.setStyleSheet(f"color: {COLORS['text_secondary']}; font-size: 12px;")
+        title_layout.addWidget(hint_label)
+
+        info_layout.addLayout(title_layout)
+
+        # Cards grid
+        cards_grid = QGridLayout()
+        cards_grid.setSpacing(15)
 
         # Info metric cards
         self.total_memory_card = MetricCard("TOTAL RAM", "Loading...", "low")
-        self.cpu_cores_card = MetricCard("CPU CORES", "Loading...", "low")
-        self.startup_items_card = MetricCard("STARTUP ITEMS", "Loading...", "medium")
+        self.total_memory_card.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.total_memory_card.mouseReleaseEvent = lambda e: self._show_memory_info()
 
-        info_layout.addWidget(self.total_memory_card, 1, 0)
-        info_layout.addWidget(self.cpu_cores_card, 1, 1)
-        info_layout.addWidget(self.startup_items_card, 1, 2)
+        self.cpu_cores_card = MetricCard("CPU CORES", "Loading...", "low")
+        self.cpu_cores_card.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.cpu_cores_card.mouseReleaseEvent = lambda e: self._show_cpu_info()
+
+        self.startup_items_card = MetricCard("STARTUP ITEMS", "Loading...", "medium")
+        self.startup_items_card.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.startup_items_card.mouseReleaseEvent = lambda e: self._show_startup_info()
+
+        cards_grid.addWidget(self.total_memory_card, 0, 0)
+        cards_grid.addWidget(self.cpu_cores_card, 0, 1)
+        cards_grid.addWidget(self.startup_items_card, 0, 2)
+
+        info_layout.addLayout(cards_grid)
 
         scroll_layout.addWidget(info_panel)
         scroll_layout.addStretch()
@@ -286,8 +316,9 @@ class Dashboard(QWidget):
                 startup_status
             )
 
-            # Update bar charts
+            # Update bar charts and cache process data
             top_memory = self.process_monitor.get_top_memory_processes(8)
+            self._cached_top_memory = top_memory  # Cache for click handler
             memory_data = []
             for proc in top_memory:
                 label = proc['name'][:10]  # Truncate name
@@ -297,6 +328,7 @@ class Dashboard(QWidget):
             self.memory_bar_chart.set_data(memory_data)
 
             top_cpu = self.process_monitor.get_top_cpu_processes(8)
+            self._cached_top_cpu = top_cpu  # Cache for click handler
             cpu_data = []
             for proc in top_cpu:
                 label = proc['name'][:10]
@@ -311,6 +343,136 @@ class Dashboard(QWidget):
         except Exception as e:
             print(f"Error refreshing overview: {e}")
             self.status_label.setText("● ERROR")
+
+    def on_memory_bar_clicked(self, label: str, value: float):
+        """
+        Handle double-click on memory bar chart.
+
+        Args:
+            label: Process name (truncated)
+            value: Memory percentage
+        """
+        # Find the full process data
+        for proc in self._cached_top_memory:
+            if proc['name'].startswith(label):
+                self._show_process_detail(proc)
+                return
+
+    def on_cpu_bar_clicked(self, label: str, value: float):
+        """
+        Handle double-click on CPU bar chart.
+
+        Args:
+            label: Process name (truncated)
+            value: CPU percentage
+        """
+        # Find the full process data
+        for proc in self._cached_top_cpu:
+            if proc['name'].startswith(label):
+                self._show_process_detail(proc)
+                return
+
+    def _show_process_detail(self, process_data: dict):
+        """
+        Show process detail dialog.
+
+        Args:
+            process_data: Process information dictionary
+        """
+        from ui.process_detail_dialog import ProcessDetailDialog
+        dialog = ProcessDetailDialog(process_data, self)
+        dialog.exec()
+
+    def _show_memory_info(self):
+        """Show detailed memory information dialog."""
+        from PyQt6.QtWidgets import QMessageBox
+        mem_info = self.process_monitor.get_memory_info()
+
+        total = mem_info.get('total_human', 'N/A')
+        used = mem_info.get('used_human', 'N/A')
+        available = mem_info.get('available_human', 'N/A')
+        percent = mem_info.get('percent', 0)
+
+        message = (
+            f"<h3>Memory Information</h3>"
+            f"<p><b>Total RAM:</b> {total}<br>"
+            f"<b>Used:</b> {used} ({percent:.1f}%)<br>"
+            f"<b>Available:</b> {available}</p>"
+            f"<hr>"
+            f"<p><i>What does this mean?</i><br>"
+            f"Your Mac has {total} of total memory (RAM). "
+            f"You're currently using {used}, which is {percent:.1f}% of your total memory. "
+            f"The remaining {available} is available for other programs.</p>"
+            f"<p><b>Tip:</b> If your memory usage is consistently above 80%, "
+            f"consider closing unused applications or upgrading your RAM.</p>"
+        )
+
+        QMessageBox.information(self, "System Memory", message)
+
+    def _show_cpu_info(self):
+        """Show detailed CPU information dialog."""
+        from PyQt6.QtWidgets import QMessageBox
+        cpu_info = self.process_monitor.get_cpu_info()
+
+        logical_cores = cpu_info.get('count_logical', 0)
+        physical_cores = cpu_info.get('count_physical', 0)
+        percent = cpu_info.get('percent', 0)
+
+        message = (
+            f"<h3>CPU Information</h3>"
+            f"<p><b>Physical Cores:</b> {physical_cores}<br>"
+            f"<b>Logical Cores:</b> {logical_cores}<br>"
+            f"<b>Current Usage:</b> {percent:.1f}%</p>"
+            f"<hr>"
+            f"<p><i>What does this mean?</i><br>"
+            f"Your Mac has {physical_cores} physical CPU cores and {logical_cores} logical cores. "
+            f"Cores are like workers that can handle different tasks simultaneously. "
+            f"More cores mean your Mac can handle more tasks at once.</p>"
+            f"<p><b>Current Usage:</b> Your CPU is currently running at {percent:.1f}% capacity. "
+            f"If this is consistently above 80%, your Mac might feel slow.</p>"
+            f"<p><b>Tip:</b> Close applications you're not using to reduce CPU usage.</p>"
+        )
+
+        QMessageBox.information(self, "CPU Information", message)
+
+    def _show_startup_info(self):
+        """Show detailed startup items information dialog."""
+        from PyQt6.QtWidgets import QMessageBox
+        summary = self.startup_manager.get_summary()
+
+        total = summary['total']
+        enabled = summary['enabled']
+        disabled = summary['disabled']
+
+        message = (
+            f"<h3>Startup Items</h3>"
+            f"<p><b>Total Items:</b> {total}<br>"
+            f"<b>Enabled:</b> {enabled}<br>"
+            f"<b>Disabled:</b> {disabled}</p>"
+            f"<hr>"
+            f"<p><i>What are startup items?</i><br>"
+            f"Startup items are programs that automatically start when you log in to your Mac. "
+            f"While some are essential (like system services), others might not be necessary.</p>"
+            f"<p><b>Current Status:</b> You have {enabled} enabled startup items. "
+        )
+
+        if enabled > 20:
+            message += (
+                f"This is quite high and might slow down your Mac's startup time.</p>"
+                f"<p><b>Recommendation:</b> Consider disabling items you don't need. "
+                f"Go to the STARTUP tab and double-click items to see if they're safe to disable.</p>"
+            )
+        elif enabled > 10:
+            message += (
+                f"This is a moderate amount. Your Mac should start reasonably quickly.</p>"
+                f"<p><b>Tip:</b> Review your startup items occasionally and disable any you don't use.</p>"
+            )
+        else:
+            message += (
+                f"This is a healthy amount. Your Mac should start quickly!</p>"
+            )
+
+        QMessageBox.information(self, "Startup Items", message)
 
     def cleanup(self):
         """Clean up resources."""

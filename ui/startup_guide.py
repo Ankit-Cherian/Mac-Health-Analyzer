@@ -30,8 +30,8 @@ class StartupGuide(QDialog):
 
         self.setWindowTitle("Welcome to Mac Health Analyzer")
         self.setModal(True)
-        self.setMinimumWidth(700)
-        self.setMinimumHeight(550)
+        self.setMinimumWidth(800)
+        self.setMinimumHeight(700)
 
         # Apply styling
         self.setStyleSheet(f"""
@@ -141,11 +141,12 @@ class StartupGuide(QDialog):
             "• Recommendations to improve performance"
         )
         description.setWordWrap(True)
+        description.setMinimumHeight(200)
         description.setStyleSheet(f"""
             color: {COLORS['text_primary']};
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.8;
-            padding: 16px;
+            padding: 20px;
             background-color: {COLORS['bg_secondary']};
             border-left: 4px solid {COLORS['terracotta']};
         """)
@@ -188,11 +189,12 @@ class StartupGuide(QDialog):
         )
         description.setWordWrap(True)
         description.setTextFormat(Qt.TextFormat.RichText)
+        description.setMinimumHeight(200)
         description.setStyleSheet(f"""
             color: {COLORS['text_primary']};
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.8;
-            padding: 16px;
+            padding: 20px;
             background-color: {COLORS['bg_secondary']};
             border-left: 4px solid {COLORS['sage']};
         """)
@@ -236,11 +238,12 @@ class StartupGuide(QDialog):
         )
         description.setWordWrap(True)
         description.setTextFormat(Qt.TextFormat.RichText)
+        description.setMinimumHeight(200)
         description.setStyleSheet(f"""
             color: {COLORS['text_primary']};
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.8;
-            padding: 16px;
+            padding: 20px;
             background-color: {COLORS['bg_secondary']};
             border-left: 4px solid {COLORS['mustard']};
         """)
@@ -284,11 +287,12 @@ class StartupGuide(QDialog):
         )
         tips.setWordWrap(True)
         tips.setTextFormat(Qt.TextFormat.RichText)
+        tips.setMinimumHeight(200)
         tips.setStyleSheet(f"""
             color: {COLORS['text_primary']};
-            font-size: 14px;
+            font-size: 15px;
             line-height: 2.0;
-            padding: 16px;
+            padding: 20px;
             background-color: {COLORS['bg_secondary']};
             border-left: 4px solid {COLORS['terracotta']};
         """)
