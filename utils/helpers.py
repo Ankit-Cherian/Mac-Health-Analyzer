@@ -82,16 +82,20 @@ def get_process_list(include_system: bool = False) -> List[Dict[str, any]]:
         try:
             pinfo = proc.info
             
+            memory_info = pinfo.get('memory_info')
+
             # Skip if memory info is not available
-            if not pinfo['memory_info']:
+            if not memory_info:
                 continue
-            
+
+            username = pinfo.get('username') or ''
+
             # Skip system processes if requested
-            if not include_system and pinfo['username'] in ['root', '_windowserver', 'nobody']:
+            if not include_system and username in ['root', '_windowserver', 'nobody']:
                 continue
-            
-            memory_mb = pinfo['memory_info'].rss / (1024 * 1024)  # Convert to MB
-            memory_percent = (pinfo['memory_info'].rss / total_ram) * 100
+
+            memory_mb = memory_info.rss / (1024 * 1024)  # Convert to MB
+            memory_percent = (memory_info.rss / total_ram) * 100
 
             # Capture both last reported CPU and a fresh sample
             last_cpu_percent = pinfo.get('cpu_percent') or 0.0
@@ -100,10 +104,10 @@ def get_process_list(include_system: bool = False) -> List[Dict[str, any]]:
             processes.append({
                 'pid': pinfo['pid'],
                 'name': pinfo['name'],
-                'username': pinfo['username'],
+                'username': username,
                 'memory_mb': memory_mb,
                 'memory_percent': memory_percent,
-                'memory_human': bytes_to_human_readable(pinfo['memory_info'].rss),
+                'memory_human': bytes_to_human_readable(memory_info.rss),
                 'cpu_percent': sampled_cpu_percent,
                 'cpu_percent_last': last_cpu_percent,
             })

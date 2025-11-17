@@ -5,6 +5,7 @@ This module contains pytest configuration, fixtures, and test utilities
 that are shared across all test modules.
 """
 
+import importlib.util
 import json
 import os
 import sys
@@ -14,7 +15,6 @@ from unittest.mock import MagicMock, Mock
 
 import psutil
 import pytest
-from PyQt6.QtWidgets import QApplication
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -22,9 +22,42 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # ========== Application Fixtures ==========
 
+
+def _plugin_available(module_name: str) -> bool:
+    """Check whether an optional pytest plugin is importable."""
+
+    return importlib.util.find_spec(module_name) is not None
+
+
+def pytest_addoption(parser):
+    """Register placeholder options when optional plugins are missing."""
+
+    if not _plugin_available("pytest_cov"):
+        parser.addoption("--cov", action="store", default=None, help="(placeholder)")
+        parser.addoption(
+            "--cov-report", action="append", default=[], help="(placeholder)"
+        )
+        parser.addoption(
+            "--cov-fail-under", action="store", default=None, help="(placeholder)"
+        )
+
+    if not _plugin_available("pytest_html"):
+        parser.addoption("--html", action="store", default=None, help="(placeholder)")
+        parser.addoption(
+            "--self-contained-html",
+            action="store_true",
+            default=False,
+            help="(placeholder)",
+        )
+
 @pytest.fixture(scope="session")
 def qapp():
     """Create a QApplication instance for Qt tests."""
+    QtWidgets = pytest.importorskip(
+        "PyQt6.QtWidgets", reason="PyQt6 not installed or missing GUI dependencies"
+    )
+    QApplication = QtWidgets.QApplication
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     app = QApplication.instance()
     if app is None:
         app = QApplication([])
