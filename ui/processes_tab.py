@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal
 from ui.widgets import SearchBar, MetricCard, StyledButton
 from ui.styles import COLORS, get_status_color
+from ui.process_detail_dialog import ProcessDetailDialog
 from utils.helpers import format_percentage
 
 
@@ -77,11 +78,22 @@ class ProcessesTab(QWidget):
         
         layout.addLayout(metrics_layout)
         
-        # Search bar
+        # Search bar with hint
         search_layout = QHBoxLayout()
         self.search_bar = SearchBar("Search processes...")
         self.search_bar.search_changed.connect(self.on_search)
         search_layout.addWidget(self.search_bar)
+
+        # Hint label
+        hint_label = QLabel("💡 Double-click any process to see detailed information")
+        hint_label.setStyleSheet(f"""
+            color: {COLORS['text_secondary']};
+            font-size: 12px;
+            font-style: italic;
+            padding: 4px 8px;
+        """)
+        search_layout.addWidget(hint_label)
+
         layout.addLayout(search_layout)
         
         # Table
@@ -126,7 +138,10 @@ class ProcessesTab(QWidget):
         
         # Enable sorting
         table.setSortingEnabled(True)
-        
+
+        # Connect double-click to show details
+        table.cellDoubleClicked.connect(self.on_process_double_clicked)
+
         return table
     
     def update_data(self):
@@ -330,4 +345,45 @@ class ProcessesTab(QWidget):
             
             # Refresh after a short delay
             self.on_refresh()
+
+    def on_process_double_clicked(self, row: int, column: int):
+        """
+        Handle double-click on process row to show details.
+
+        Args:
+            row: Row index that was clicked
+            column: Column index that was clicked
+        """
+        try:
+            # Get process data from the row
+            proc_data = self.table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+            if not proc_data:
+                return
+
+            # Get detailed process information
+            pid = proc_data['pid']
+            detailed_data = self.process_monitor.get_process_details(pid)
+
+            if not detailed_data:
+                QMessageBox.warning(
+                    self,
+                    "Process Not Found",
+                    f"Could not retrieve details for process {proc_data['name']} (PID: {pid}). "
+                    "It may have terminated."
+                )
+                return
+
+            # Merge basic and detailed data
+            full_data = {**proc_data, **detailed_data}
+
+            # Show detail dialog
+            dialog = ProcessDetailDialog(full_data, self)
+            dialog.exec()
+
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"Failed to show process details: {str(e)}"
+            )
 
