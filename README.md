@@ -8,11 +8,11 @@ A simple macOS app I built to see what's running on my Mac and manage startup it
 
 <img src="docs/screenshots/start up step 1.png" width="700">
 
-*First-time setup guide explaining what the app does*
+_First-time setup guide explaining what the app does_
 
 <img src="docs/screenshots/startupsetup4.png" width="700">
 
-*Helpful tips for using the app safely*
+_Helpful tips for using the app safely_
 
 ### Main Interface
 
@@ -20,13 +20,13 @@ A simple macOS app I built to see what's running on my Mac and manage startup it
 
 <img src="docs/screenshots/MainStartupPage.png" width="700">
 
-*View all your startup items with stats on enabled/disabled items*
+_View all your startup items with stats on enabled/disabled items_
 
 **Processes Tab** - Monitor what's running
 
 <img src="docs/screenshots/ProcessesTab.png" width="700">
 
-*Real-time CPU and memory monitoring for all running processes*
+_Real-time CPU and memory monitoring for all running processes_
 
 ### Detail Views
 
@@ -34,40 +34,42 @@ A simple macOS app I built to see what's running on my Mac and manage startup it
 
 <img src="docs/screenshots/StartupItemDetails.png" width="700">
 
-*Simple explanations for what each startup item does*
+_Simple explanations for what each startup item does_
 
 <img src="docs/screenshots/StartupItemDetails2.png" width="700">
 
-*Smart recommendations based on the item type*
+_Smart recommendations based on the item type_
 
 **Process Details**
 
 <img src="docs/screenshots/ProcessDetails.png" width="700">
 
-*Detailed info for recognized processes*
+_Detailed info for recognized processes_
 
 <img src="docs/screenshots/ProcessDetails2.png" width="700">
 
-*Safety warnings for critical system processes*
+_Safety warnings for critical system processes_
 
 ## How to Run
 
 1. Clone or download this repo
-2. Install dependencies:
-   ```bash
-   pip3 install -r requirements.txt
-   ```
-3. Run the app:
+2. Run the app:
+
    ```bash
    ./scripts/run.sh
    ```
 
-   Or directly with Python:
+   The script will automatically check for and install any missing dependencies.
+
+   Or run directly with Python (if dependencies are already installed):
+
    ```bash
+   pip3 install -r requirements.txt
    PYTHONPATH=src python3 -m main
    ```
 
 That's it. If you want to see system-level processes, run with `sudo`:
+
 ```bash
 sudo PYTHONPATH=src python3 -m main
 ```
@@ -80,11 +82,13 @@ sudo PYTHONPATH=src python3 -m main
 ## Tests
 
 There's a test suite if you want to run it:
+
 ```bash
 ./scripts/run_tests.sh
 ```
 
 Or use the Python test runner:
+
 ```bash
 python3 scripts/run_tests.py
 ```
