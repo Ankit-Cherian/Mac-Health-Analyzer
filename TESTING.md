@@ -241,31 +241,6 @@ def test_system_call(mock_run):
     mock_run.assert_called_once()
 ```
 
-## 🔧 Continuous Integration
-
-### GitHub Actions
-
-Tests run automatically on:
-- ✅ Every push to `main`, `develop`, or `claude/*` branches
-- ✅ Every pull request
-- ✅ Manual trigger
-
-### CI Pipeline
-
-1. **Setup**: Install Python, dependencies
-2. **Lint**: Check code style with flake8
-3. **Test**: Run unit and integration tests
-4. **Coverage**: Generate and upload coverage reports
-5. **Quality**: Run black, isort, mypy checks
-6. **Artifacts**: Store test results and coverage
-
-### Viewing CI Results
-
-1. Go to GitHub repository
-2. Click "Actions" tab
-3. Select workflow run
-4. View test results and coverage
-
 ## 🐛 Troubleshooting
 
 ### Common Issues
@@ -459,8 +434,7 @@ pytest --fixtures
 
 1. Check `tests/README.md` for detailed documentation
 2. Review example tests in `tests/unit/`
-3. Check GitHub Actions logs for CI failures
-4. Open an issue on GitHub
+3. Open an issue on GitHub
 
 ---
 
