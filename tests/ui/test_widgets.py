@@ -127,6 +127,13 @@ class TestGlassmorphicPanel:
         panel = GlassmorphicPanel()
 
         assert panel.property("panel") == "true"
+        assert panel.property("panelVariant") == "primary"
+
+    def test_minimal_variant(self, qapp):
+        """Ensure alternate variants set the proper style hints."""
+        panel = GlassmorphicPanel(variant="minimal")
+
+        assert panel.property("panelVariant") == "minimal"
 
 
 class TestMetricCard:

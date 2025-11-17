@@ -128,19 +128,19 @@ class StyledButton(QPushButton):
 
 
 class GlassmorphicPanel(QFrame):
-    """
-    Panel with glassmorphic effect.
-    """
-    
-    def __init__(self, parent=None):
+    """Panel with glassmorphic effect and optional style variants."""
+
+    def __init__(self, parent=None, variant: str = "primary"):
         """
         Initialize glassmorphic panel.
-        
+
         Args:
             parent: Parent widget
+            variant: Visual style variant ("primary", "minimal", etc.)
         """
         super().__init__(parent)
         self.setProperty("panel", "true")
+        self.setProperty("panelVariant", variant)
         self.setFrameShape(QFrame.Shape.StyledPanel)
 
 

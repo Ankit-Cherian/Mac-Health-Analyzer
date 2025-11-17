@@ -5,7 +5,8 @@ Enhanced with real-time charts, gauges, and cyberpunk visualizations.
 
 import time
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
-                             QLabel, QGridLayout, QScrollArea, QSplitter)
+                             QLabel, QGridLayout, QScrollArea, QSplitter,
+                             QSizePolicy)
 from PyQt6.QtCore import QTimer, Qt
 from ui.startup_tab import StartupTab
 from ui.processes_tab import ProcessesTab
@@ -138,19 +139,43 @@ class Dashboard(QWidget):
         charts_title.setProperty("heading", "h3")
         charts_layout.addWidget(charts_title)
 
-        # Charts grid
+        # Charts grid with card-style panels to keep visuals consistent
         charts_grid = QGridLayout()
-        charts_grid.setSpacing(15)
+        charts_grid.setSpacing(20)
+        charts_grid.setColumnStretch(0, 1)
+        charts_grid.setColumnStretch(1, 1)
+
+        chart_card_height = 280
 
         # CPU Chart
+        cpu_chart_card = GlassmorphicPanel(variant="minimal")
+        cpu_chart_card.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        cpu_chart_card.setMinimumHeight(chart_card_height)
+        cpu_chart_card.setMaximumHeight(chart_card_height)
+        cpu_chart_layout = QVBoxLayout(cpu_chart_card)
+        cpu_chart_layout.setContentsMargins(20, 20, 20, 20)
+        cpu_chart_layout.setSpacing(12)
+
         self.cpu_chart = RealtimeLineChart("CPU Usage (%)", max_points=60)
-        self.cpu_chart.setMinimumHeight(200)
-        charts_grid.addWidget(self.cpu_chart, 0, 0)
+        self.cpu_chart.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.cpu_chart.setFixedHeight(chart_card_height - 40)
+        cpu_chart_layout.addWidget(self.cpu_chart)
+        charts_grid.addWidget(cpu_chart_card, 0, 0)
 
         # Memory Chart
+        memory_chart_card = GlassmorphicPanel(variant="minimal")
+        memory_chart_card.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        memory_chart_card.setMinimumHeight(chart_card_height)
+        memory_chart_card.setMaximumHeight(chart_card_height)
+        memory_chart_layout = QVBoxLayout(memory_chart_card)
+        memory_chart_layout.setContentsMargins(20, 20, 20, 20)
+        memory_chart_layout.setSpacing(12)
+
         self.memory_chart = RealtimeLineChart("Memory Usage (%)", max_points=60)
-        self.memory_chart.setMinimumHeight(200)
-        charts_grid.addWidget(self.memory_chart, 0, 1)
+        self.memory_chart.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.memory_chart.setFixedHeight(chart_card_height - 40)
+        memory_chart_layout.addWidget(self.memory_chart)
+        charts_grid.addWidget(memory_chart_card, 0, 1)
 
         charts_layout.addLayout(charts_grid)
         scroll_layout.addWidget(charts_panel)

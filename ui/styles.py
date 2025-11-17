@@ -73,7 +73,7 @@ def get_main_stylesheet() -> str:
     QWidget {{
         background: transparent;
         color: {COLORS['text_primary']};
-        font-family: "Sora", "DM Sans", "Helvetica Neue", sans-serif;
+        font-family: "Sora", "Helvetica Neue";
         font-size: 14px;
         font-weight: 400;
     }}
@@ -337,7 +337,6 @@ def get_main_stylesheet() -> str:
 
     QFrame[search="true"]:focus-within {{
         border-color: {COLORS['terracotta']};
-        box-shadow: 4px 4px 0 {COLORS['accent_line']};
     }}
 
     QFrame[search="true"] QLabel {{
@@ -356,15 +355,23 @@ def get_main_stylesheet() -> str:
     }}
 
     /* Brutalist Panel - Bold card style */
-    QFrame[panel="true"] {{
+    QFrame[panel="true"][panelVariant="primary"] {{
         background: {COLORS['bg_card']};
         border: 4px solid {COLORS['accent_line']};
         border-radius: 0px;
         padding: 24px;
     }}
 
-    QFrame[panel="true"]:hover {{
+    QFrame[panel="true"][panelVariant="primary"]:hover {{
         border: 4px solid {COLORS['terracotta']};
+    }}
+
+    /* Minimal panel variant for nested content (no heavy border) */
+    QFrame[panel="true"][panelVariant="minimal"] {{
+        background: {COLORS['bg_card']};
+        border: none;
+        border-radius: 0px;
+        padding: 0px;
     }}
 
     /* Status Indicators - Earth tone colors */

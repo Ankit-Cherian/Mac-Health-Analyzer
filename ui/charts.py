@@ -56,7 +56,8 @@ class RealtimeLineChart(QWidget):
         # Create plot widget
         self.plot_widget = pg.PlotWidget()
         self.plot_widget.setBackground(COLORS['bg_card'])
-        self.plot_widget.showGrid(x=True, y=True, alpha=0.2)
+        # Use very light grid lines to avoid overwhelming the nested card layout
+        self.plot_widget.showGrid(x=True, y=True, alpha=0.08)
         self.plot_widget.setMouseEnabled(x=False, y=False)
         self.plot_widget.setMenuEnabled(False)
         self.plot_widget.hideButtons()
@@ -68,7 +69,7 @@ class RealtimeLineChart(QWidget):
                                   **{'font-size': '12pt', 'font-weight': 'bold'})
 
         # Set axis color and styling
-        axis_pen = pg.mkPen(color=COLORS['border_dark'], width=2)
+        axis_pen = pg.mkPen(color=COLORS['border'], width=1)
         left_axis = self.plot_widget.getAxis('left')
         bottom_axis = self.plot_widget.getAxis('bottom')
 

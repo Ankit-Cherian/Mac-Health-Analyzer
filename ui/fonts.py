@@ -1,6 +1,6 @@
 """
 Font management for the Mac Health Analyzer - Neo-Brutalist Earth Edition.
-Downloads and loads distinctive Google Fonts (Sora, DM Sans, IBM Plex Mono).
+Downloads and loads distinctive Google Fonts (Sora, IBM Plex Mono).
 """
 
 import os
@@ -28,13 +28,6 @@ FONTS = {
             [300, 400, 600, 700, 800],
             'https://github.com/google/fonts/raw/main/ofl/sora/Sora%5Bwght%5D.ttf',
             'Sora_Variable.ttf'
-        )
-    },
-    'DM Sans': {
-        'weights': _variable_entries(
-            [300, 400, 500, 600, 700],
-            'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans%5Bwght%5D.ttf',
-            'DMSans_Variable.ttf'
         )
     },
     'IBM Plex Mono': {
