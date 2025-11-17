@@ -53,16 +53,19 @@ def pytest_addoption(parser):
 @pytest.fixture(scope="session")
 def qapp():
     """Create a QApplication instance for Qt tests."""
-    QtWidgets = pytest.importorskip(
-        "PyQt6.QtWidgets", reason="PyQt6 not installed or missing GUI dependencies"
-    )
-    QApplication = QtWidgets.QApplication
-    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-    app = QApplication.instance()
-    if app is None:
-        app = QApplication([])
-    yield app
-    # Don't quit - let Qt handle cleanup
+    # Skip if we're not in a proper GUI environment
+    try:
+        import PyQt6.QtCore
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        app = QApplication.instance()
+        if app is None:
+            app = QApplication([])
+        yield app
+        # Don't quit - let Qt handle cleanup
+    except Exception as e:
+        pytest.skip(f"PyQt6 not available in this environment: {e}")
 
 
 @pytest.fixture
