@@ -1,21 +1,60 @@
-# Mac Health Analyzer
+# Mac Health Analyzer - Neon Terminal Edition
 
-A macOS system monitoring and startup management tool with a modern interface.
+A stunning macOS system monitoring and startup management tool with a **cyberpunk-inspired interface**, real-time visualizations, and advanced analytics.
 
-## Features
+![Version](https://img.shields.io/badge/version-2.0-neon)
+![Python](https://img.shields.io/badge/python-3.9+-green)
+![Platform](https://img.shields.io/badge/platform-macOS-blue)
 
-- View and manage startup items (login items, launch agents, launch daemons)
-- Monitor running processes with real-time CPU and memory usage
-- Force quit unresponsive applications
-- System overview with resource metrics
-- Search and filter functionality
+## ✨ Features
 
-## Requirements
+### 🎨 Stunning Neon UI
+- **Cyberpunk Terminal Aesthetic** - Unique neon green, electric cyan, and hot pink color scheme
+- **Custom Typography** - Chakra Petch, Rajdhani, Orbitron, and JetBrains Mono fonts
+- **Glassmorphic Panels** - Modern card-based design with transparency effects
+- **Smooth Animations** - Buttery 60fps animations and transitions
 
-- macOS 10.14 or later
-- Python 3.9+
+### 📊 Real-Time Visualizations
+- **Live CPU & Memory Graphs** - Real-time line charts showing system resource usage
+- **Circular Gauges** - Beautiful animated gauges for at-a-glance metrics
+- **Bar Charts** - Top resource consumers displayed with neon-styled horizontal bars
+- **Sparklines** - Mini charts for inline metrics (coming soon)
 
-## Installation
+### ⚡ System Monitoring
+- **Startup Items Management** - View and disable items that launch at startup
+  - Login items
+  - Launch agents
+  - Launch daemons
+  - Quick toggle switches with smooth animations
+
+- **Process Monitoring** - Monitor active processes with detailed metrics
+  - Real-time CPU and memory usage
+  - Search and filter processes
+  - Force quit unresponsive applications
+  - Color-coded status indicators
+
+- **System Overview Dashboard** - Comprehensive system health at a glance
+  - Real-time CPU usage monitoring with trend charts
+  - Memory usage tracking with visual gauges
+  - Process count and system information
+  - Top resource consumers with interactive bar charts
+
+## 🖼️ Screenshots
+
+The interface features:
+- **Dark cyberpunk theme** with neon accents
+- **3 enhanced tabs**: ⚡ STARTUP, ⚙ PROCESSES, ◉ SYSTEM
+- **Real-time charts** updating every 2 seconds
+- **Circular gauges** with color-coded status
+- **Horizontal bar charts** showing top processes
+
+## 🚀 Requirements
+
+- **macOS** 10.14 or later
+- **Python** 3.9+
+- **Screen resolution**: 1280x800 minimum (optimized for Retina displays)
+
+## 📦 Installation
 
 Clone the repository:
 
@@ -30,7 +69,13 @@ Install dependencies:
 pip3 install -r requirements.txt
 ```
 
-## Usage
+Dependencies include:
+- `PyQt6` - Modern GUI framework
+- `psutil` - System and process utilities
+- `pyqtgraph` - High-performance scientific graphics
+- `numpy` - Numerical computing for charts
+
+## 💻 Usage
 
 Run the application:
 
@@ -50,23 +95,107 @@ For system-level access (viewing launch daemons, managing system processes):
 sudo python3 main.py
 ```
 
-## Interface
+## 🎯 Interface Guide
 
-The application provides three main tabs:
+### ⚡ STARTUP Tab
+- View all startup items in a searchable table
+- Filter by type (Login Items, Launch Agents, Launch Daemons)
+- Toggle items on/off with smooth animated switches
+- Search functionality for quick filtering
 
-- **Startup Items** - View and disable items that launch at startup
-- **Running Processes** - Monitor active processes and resource usage
-- **System Overview** - View overall system health metrics
+### ⚙ PROCESSES Tab
+- Monitor all running processes
+- View CPU and memory usage in real-time
+- Search processes by name
+- Filter system processes
+- Force quit processes with one click
+- Color-coded resource usage (green = low, amber = medium, pink = high)
 
-## Notes
+### ◉ SYSTEM Tab (NEW!)
+- **Circular Gauges** - CPU, Memory, and Process count with animated needles
+- **Real-Time Charts** - Live graphs showing CPU and memory trends over the last 60 data points
+- **Resource Bar Charts** - Top 8 processes by CPU and memory usage
+- **System Information Cards** - Total RAM, CPU cores, startup items count
+- **Status Indicator** - Online/error status in the top right
 
-- Custom fonts (Bricolage Grotesque, JetBrains Mono) will download automatically on first run
+## 🎨 Design System
+
+### Color Palette
+- **Primary**: Neon Green `#00ff41` - Matrix-inspired accent
+- **Secondary**: Electric Cyan `#00f5ff` - Futuristic highlights
+- **Tertiary**: Hot Pink `#ff006e` - Critical alerts
+- **Warning**: Amber `#ffbe0b` - Medium priority
+- **Background**: Deep Black `#0a0a0f` - Terminal darkness
+
+### Typography
+- **Display Font**: Chakra Petch (Thai-inspired geometric)
+- **Secondary**: Rajdhani (Indo-Arabic inspired)
+- **Special**: Orbitron (Futuristic headers)
+- **Monospace**: JetBrains Mono (Code and metrics)
+
+### Charts & Visualizations
+- **Real-time Line Charts** - Smooth 60-point scrolling graphs with neon glow
+- **Circular Gauges** - 360° animated gauges with gradient fills
+- **Horizontal Bar Charts** - Gradient-filled bars with percentage display
+- **Color Coding**:
+  - 0-50% = Neon Green (optimal)
+  - 50-80% = Amber (warning)
+  - 80-100% = Hot Pink (critical)
+
+## ⚙️ Performance
+
+- **Chart Update Rate**: 2 seconds (configurable)
+- **Process Limit**: 100 processes displayed for optimal performance
+- **Animation Frame Rate**: 60 FPS
+- **Memory Efficient**: Charts use rolling buffers with 60-point maximum
+
+## 🔧 Advanced Configuration
+
+The application automatically:
+- Downloads custom fonts on first run
+- Caches launchctl results for faster startup
+- Uses signal blocking during updates to prevent UI freezing
+- Refreshes only the active tab to conserve resources
+
+## 📝 Notes
+
+- Custom fonts (Chakra Petch, Rajdhani, Orbitron, JetBrains Mono) download automatically on first run
 - Some operations require administrator privileges
-- The application auto-refreshes active tab every 10 seconds
+- Charts update every 2 seconds when System tab is active
 - Process table displays up to 100 processes for optimal performance
+- All visualizations use hardware acceleration when available
 
-## Built With
+## 🛠️ Built With
 
-- PyQt6 - GUI framework
-- psutil - System and process utilities
-- Python 3.9+
+- **PyQt6** - Modern cross-platform GUI framework
+- **PyQtGraph** - Scientific graphics and GUI library for real-time visualization
+- **psutil** - Cross-platform library for system and process monitoring
+- **NumPy** - Fundamental package for numerical computing
+- **Python 3.9+** - Programming language
+
+## 🎯 Future Enhancements
+
+- [ ] Export system reports to PDF/CSV
+- [ ] Historical data tracking and trends
+- [ ] Custom alert thresholds
+- [ ] Network monitoring tab
+- [ ] Disk usage visualization
+- [ ] Temperature monitoring
+- [ ] Battery health stats
+- [ ] Dark/Light theme toggle
+- [ ] Customizable color schemes
+
+## 📄 License
+
+This project is part of the mac-health-analyzer repository.
+
+## 🙏 Acknowledgments
+
+- Inspired by cyberpunk and terminal aesthetics
+- Font families from Google Fonts and JetBrains
+- Icons and symbols from Unicode character set
+- PyQtGraph for exceptional visualization capabilities
+
+---
+
+**Made with neon dreams and terminal vibes** ✨
