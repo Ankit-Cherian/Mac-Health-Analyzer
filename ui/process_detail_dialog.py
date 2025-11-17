@@ -6,7 +6,7 @@ from datetime import datetime
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QScrollArea, QWidget, QFrame
+    QScrollArea, QWidget, QFrame, QSizePolicy
 )
 from ui.widgets import GlassmorphicPanel, StatRow, ToggleSwitch, StyledButton
 from ui.styles import COLORS
@@ -101,6 +101,8 @@ class ProcessDetailDialog(QDialog):
         name_label = QLabel(self.process_data.get('name', 'Unknown Process'))
         name_label.setProperty("heading", "h1")
         name_label.setStyleSheet(f"color: {COLORS['terracotta']};")
+        name_label.setWordWrap(True)
+        name_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         header_layout.addWidget(name_label)
 
         # PID

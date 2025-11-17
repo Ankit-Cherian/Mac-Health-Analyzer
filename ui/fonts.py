@@ -9,25 +9,33 @@ from pathlib import Path
 from PyQt6.QtGui import QFontDatabase, QFont
 
 
+def _variable_entries(weights: list[int], url: str, filename: str) -> dict:
+    """
+    Helper to generate entries for variable fonts that share a single file.
+    """
+    return {
+        weight: {
+            'url': url,
+            'filename': filename
+        } for weight in weights
+    }
+
+
 # Font URLs from Google Fonts - Distinctive, readable fonts
 FONTS = {
     'Sora': {
-        'weights': {
-            300: 'https://github.com/google/fonts/raw/main/ofl/sora/Sora-Light.ttf',
-            400: 'https://github.com/google/fonts/raw/main/ofl/sora/Sora-Regular.ttf',
-            600: 'https://github.com/google/fonts/raw/main/ofl/sora/Sora-SemiBold.ttf',
-            700: 'https://github.com/google/fonts/raw/main/ofl/sora/Sora-Bold.ttf',
-            800: 'https://github.com/google/fonts/raw/main/ofl/sora/Sora-ExtraBold.ttf',
-        }
+        'weights': _variable_entries(
+            [300, 400, 600, 700, 800],
+            'https://github.com/google/fonts/raw/main/ofl/sora/Sora%5Bwght%5D.ttf',
+            'Sora_Variable.ttf'
+        )
     },
     'DM Sans': {
-        'weights': {
-            300: 'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans-Light.ttf',
-            400: 'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans-Regular.ttf',
-            500: 'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans-Medium.ttf',
-            600: 'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans-SemiBold.ttf',
-            700: 'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans-Bold.ttf',
-        }
+        'weights': _variable_entries(
+            [300, 400, 500, 600, 700],
+            'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans%5Bwght%5D.ttf',
+            'DMSans_Variable.ttf'
+        )
     },
     'IBM Plex Mono': {
         'weights': {
@@ -62,8 +70,9 @@ class FontManager:
         self.assets_dir.mkdir(parents=True, exist_ok=True)
 
         self.loaded_fonts = {}
+        self._file_family_cache = {}
 
-    def download_font(self, font_name: str, weight: int, url: str) -> str:
+    def download_font(self, font_name: str, weight: int, url: str, filename: str = None) -> str:
         """
         Download a font file from URL.
 
@@ -71,13 +80,15 @@ class FontManager:
             font_name: Name of the font
             weight: Font weight
             url: URL to download from
+            filename: Override filename when sharing a single file
 
         Returns:
             Path to downloaded font file
         """
         # Create safe filename
         safe_name = font_name.replace(' ', '_')
-        filename = f"{safe_name}_{weight}.ttf"
+        if filename is None:
+            filename = f"{safe_name}_{weight}.ttf"
         filepath = self.assets_dir / filename
 
         # Skip if already downloaded
@@ -107,19 +118,33 @@ class FontManager:
             print(f"\nLoading {font_name}...")
 
             for weight, url in font_data['weights'].items():
-                filepath = self.download_font(font_name, weight, url)
+                filename_override = None
+                if isinstance(url, dict):
+                    filename_override = url.get('filename')
+                    url = url['url']
+
+                filepath = self.download_font(font_name, weight, url, filename_override)
 
                 if filepath and os.path.exists(filepath):
-                    font_id = QFontDatabase.addApplicationFont(filepath)
-
-                    if font_id != -1:
-                        families = QFontDatabase.applicationFontFamilies(font_id)
-                        if families:
-                            family_name = families[0]
-                            self.loaded_fonts[f"{font_name}_{weight}"] = family_name
-                            print(f"Loaded {family_name} (weight {weight})")
+                    if filepath in self._file_family_cache:
+                        family_name = self._file_family_cache[filepath]
                     else:
-                        print(f"Failed to load {filepath}")
+                        font_id = QFontDatabase.addApplicationFont(filepath)
+
+                        if font_id != -1:
+                            families = QFontDatabase.applicationFontFamilies(font_id)
+                            if families:
+                                family_name = families[0]
+                                self._file_family_cache[filepath] = family_name
+                                print(f"Loaded {family_name} (weight {weight})")
+                            else:
+                                family_name = None
+                        else:
+                            print(f"Failed to load {filepath}")
+                            family_name = None
+
+                    if family_name:
+                        self.loaded_fonts[f"{font_name}_{weight}"] = family_name
 
         print("\nFont loading complete!")
 

@@ -223,6 +223,9 @@ class Dashboard(QWidget):
         cards_grid.addWidget(self.total_memory_card, 0, 0)
         cards_grid.addWidget(self.cpu_cores_card, 0, 1)
         cards_grid.addWidget(self.startup_items_card, 0, 2)
+        cards_grid.setColumnStretch(0, 1)
+        cards_grid.setColumnStretch(1, 1)
+        cards_grid.setColumnStretch(2, 1)
 
         info_layout.addLayout(cards_grid)
 
@@ -318,22 +321,28 @@ class Dashboard(QWidget):
 
             # Update bar charts and cache process data
             top_memory = self.process_monitor.get_top_memory_processes(8)
-            self._cached_top_memory = top_memory  # Cache for click handler
+            self._cached_top_memory = top_memory  # Cache retained for potential reuse
             memory_data = []
             for proc in top_memory:
-                label = proc['name'][:10]  # Truncate name
-                value = proc.get('memory_percent', 0.0)
-                memory_data.append((label, value, 100))
+                memory_data.append({
+                    'label': proc['name'],
+                    'value': proc.get('memory_percent', 0.0),
+                    'max': 100,
+                    'payload': proc
+                })
 
             self.memory_bar_chart.set_data(memory_data)
 
             top_cpu = self.process_monitor.get_top_cpu_processes(8)
-            self._cached_top_cpu = top_cpu  # Cache for click handler
+            self._cached_top_cpu = top_cpu  # Cache retained for potential reuse
             cpu_data = []
             for proc in top_cpu:
-                label = proc['name'][:10]
-                value = proc.get('cpu_percent', 0.0)
-                cpu_data.append((label, value, 100))
+                cpu_data.append({
+                    'label': proc['name'],
+                    'value': proc.get('cpu_percent', 0.0),
+                    'max': 100,
+                    'payload': proc
+                })
 
             self.cpu_bar_chart.set_data(cpu_data)
 
@@ -344,33 +353,27 @@ class Dashboard(QWidget):
             print(f"Error refreshing overview: {e}")
             self.status_label.setText("● ERROR")
 
-    def on_memory_bar_clicked(self, label: str, value: float):
+    def on_memory_bar_clicked(self, entry: dict):
         """
         Handle double-click on memory bar chart.
 
         Args:
-            label: Process name (truncated)
-            value: Memory percentage
+            entry: Data dictionary emitted by the chart
         """
-        # Find the full process data
-        for proc in self._cached_top_memory:
-            if proc['name'].startswith(label):
-                self._show_process_detail(proc)
-                return
+        process_data = entry.get('payload')
+        if process_data:
+            self._show_process_detail(process_data)
 
-    def on_cpu_bar_clicked(self, label: str, value: float):
+    def on_cpu_bar_clicked(self, entry: dict):
         """
         Handle double-click on CPU bar chart.
 
         Args:
-            label: Process name (truncated)
-            value: CPU percentage
+            entry: Data dictionary emitted by the chart
         """
-        # Find the full process data
-        for proc in self._cached_top_cpu:
-            if proc['name'].startswith(label):
-                self._show_process_detail(proc)
-                return
+        process_data = entry.get('payload')
+        if process_data:
+            self._show_process_detail(process_data)
 
     def _show_process_detail(self, process_data: dict):
         """
