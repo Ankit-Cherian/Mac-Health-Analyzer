@@ -6,7 +6,7 @@ Clean, readable visualizations with bold geometric design.
 from collections import deque
 import pyqtgraph as pg
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QSize
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QLinearGradient, QConicalGradient
 from .styles import COLORS
 
@@ -36,6 +36,11 @@ class RealtimeLineChart(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
+        self.title_label = QLabel(self.title.upper())
+        self.title_label.setProperty("chartTitle", "true")
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.title_label)
+
         # Add current value label at the top
         self.current_value_label = QLabel("--")
         self.current_value_label.setStyleSheet(f"""
@@ -52,6 +57,9 @@ class RealtimeLineChart(QWidget):
         self.plot_widget = pg.PlotWidget()
         self.plot_widget.setBackground(COLORS['bg_card'])
         self.plot_widget.showGrid(x=True, y=True, alpha=0.2)
+        self.plot_widget.setMouseEnabled(x=False, y=False)
+        self.plot_widget.setMenuEnabled(False)
+        self.plot_widget.hideButtons()
 
         # Style the plot with clearer labels
         self.plot_widget.setLabel('left', self.title, color=COLORS['terracotta'],
@@ -71,8 +79,10 @@ class RealtimeLineChart(QWidget):
         left_axis.setStyle(tickTextOffset=10)
         bottom_axis.setStyle(tickTextOffset=10)
 
-        # Set Y axis range with better ticks
+        # Set fixed ranges to keep the chart scale stable
         self.plot_widget.setYRange(0, 100)
+        self.plot_widget.enableAutoRange(axis='xy', enable=False)
+        self.plot_widget.setLimits(xMin=0, xMax=self.max_points, yMin=0, yMax=100)
 
         # Add percentage symbols to Y-axis if this is a percentage chart
         if '%' in self.title:
@@ -114,6 +124,9 @@ class RealtimeLineChart(QWidget):
 
         self.data_line.setData(x_data, y_data)
         self.fill_curve.setData(x_data, y_data)
+        if self.max_points > 1:
+            self.plot_widget.setXRange(0, self.max_points - 1, padding=0)
+        self.plot_widget.setYRange(0, 100, padding=0)
 
     def clear(self):
         """Clear all data points."""
@@ -302,12 +315,12 @@ class BarChart(QWidget):
     Horizontal bar chart for process resources.
     """
 
-    clicked = pyqtSignal(str, float)  # Signal emitted when a bar is clicked (label, value)
+    clicked = pyqtSignal(dict)  # Emit the data entry for the double-clicked bar
 
     def __init__(self, title: str = "Processes", parent=None):
         super().__init__(parent)
         self.title = title
-        self.data = []  # List of (label, value, max_value) tuples
+        self.data = []  # Normalized list of dict entries
         self.bar_rects = []  # Store bar rectangles for click detection
 
         self.setMinimumSize(300, 200)
@@ -318,9 +331,33 @@ class BarChart(QWidget):
         Set bar chart data.
 
         Args:
-            data: List of (label, value, max_value) tuples
+            data: Iterable of dicts or tuples describing each bar.
+                  Supported formats:
+                    - {'label': str, 'value': float, 'max': float, 'payload': Any}
+                    - (label, value, max[, payload])
         """
-        self.data = data[:10]  # Limit to top 10
+        normalized = []
+        for item in data[:10]:
+            if isinstance(item, dict):
+                normalized.append({
+                    'label': item.get('label', ''),
+                    'value': item.get('value', 0),
+                    'max': item.get('max', 100),
+                    'payload': item.get('payload')
+                })
+            elif isinstance(item, (list, tuple)):
+                label = item[0] if len(item) > 0 else ''
+                value = item[1] if len(item) > 1 else 0
+                max_value = item[2] if len(item) > 2 else 100
+                payload = item[3] if len(item) > 3 else None
+                normalized.append({
+                    'label': label,
+                    'value': value,
+                    'max': max_value,
+                    'payload': payload
+                })
+
+        self.data = normalized
         self.update()
 
     def paintEvent(self, event):
@@ -360,7 +397,12 @@ class BarChart(QWidget):
         # Clear previous bar rectangles
         self.bar_rects = []
 
-        for i, (label, value, max_value) in enumerate(self.data):
+        metrics = painter.fontMetrics()
+
+        for i, entry in enumerate(self.data):
+            label = entry.get('label', '')
+            value = entry.get('value', 0)
+            max_value = entry.get('max', 100)
             y = start_y + i * (bar_height + bar_spacing)
 
             # Calculate bar width
@@ -392,11 +434,12 @@ class BarChart(QWidget):
             # Store bar rectangle for click detection
             from PyQt6.QtCore import QRect
             bar_rect = QRect(10, y, max_bar_width + 80, bar_height)
-            self.bar_rects.append((bar_rect, label, value))
+            self.bar_rects.append((bar_rect, entry))
 
             # Draw label
             painter.setPen(QColor(COLORS['text_primary']))
-            painter.drawText(10, y + 17, label[:8])  # Truncate long labels
+            display_label = metrics.elidedText(label, Qt.TextElideMode.ElideRight, 70)
+            painter.drawText(10, y + 17, display_label)
 
             # Draw value with unit
             painter.setPen(QColor(color))
@@ -409,10 +452,10 @@ class BarChart(QWidget):
         click_pos = event.pos()
 
         # Check if click is on any bar
-        for bar_rect, label, value in self.bar_rects:
+        for bar_rect, entry in self.bar_rects:
             if bar_rect.contains(click_pos):
-                # Emit signal with label and value
-                self.clicked.emit(label, value)
+                # Emit signal with the entire entry (label, value, payload)
+                self.clicked.emit(entry)
                 return
 
         super().mouseDoubleClickEvent(event)
@@ -424,4 +467,4 @@ class BarChart(QWidget):
         title_height = 40
 
         height = title_height + len(self.data) * (bar_height + bar_spacing)
-        return self.minimumSize().expandedTo((300, height))
+        return self.minimumSize().expandedTo(QSize(300, height))

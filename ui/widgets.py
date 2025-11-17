@@ -4,7 +4,16 @@ Includes toggle switches, styled buttons, and animated panels.
 """
 
 from PyQt6.QtCore import Qt, pyqtSignal, QRect, QPropertyAnimation, QEasingCurve, pyqtProperty
-from PyQt6.QtWidgets import QWidget, QPushButton, QFrame, QLabel, QHBoxLayout, QVBoxLayout
+from PyQt6.QtWidgets import (
+    QWidget,
+    QPushButton,
+    QFrame,
+    QLabel,
+    QHBoxLayout,
+    QVBoxLayout,
+    QSizePolicy,
+    QLineEdit
+)
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
 from ui.styles import COLORS
 
@@ -154,32 +163,40 @@ class MetricCard(QWidget):
 
         # Create panel
         self.panel = GlassmorphicPanel(self)
+        self.panel.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         layout = QVBoxLayout(self.panel)
         layout.setSpacing(12)
         layout.setContentsMargins(24, 24, 24, 24)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         # Title with icon
         title_layout = QHBoxLayout()
+        title_layout.setSpacing(8)
+        title_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         # Status indicator dot
         self.status_indicator = QLabel("●")
         self.status_indicator.setProperty("status", status)
+        self.status_indicator.setAlignment(Qt.AlignmentFlag.AlignLeft)
         title_layout.addWidget(self.status_indicator)
 
         self.title_label = QLabel(title.upper())
         self.title_label.setProperty("heading", "h3")
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         title_layout.addWidget(self.title_label)
-        title_layout.addStretch()
 
         layout.addLayout(title_layout)
 
         # Value with glow effect
         self.value_label = QLabel(value)
-        self.value_label.setProperty("heading", "h1")
+        self.value_label.setProperty("metricValue", "true")
         self.value_label.setProperty("status", status)
         self.value_label.setProperty("mono", "true")
         self.value_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.value_label.setWordWrap(True)
+        self.value_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.value_label.setMinimumHeight(48)
         layout.addWidget(self.value_label)
 
         # Main layout
@@ -266,16 +283,16 @@ class SearchBar(QWidget):
             parent: Parent widget
         """
         super().__init__(parent)
-        
-        from PyQt6.QtWidgets import QLineEdit
-        
+        self.setMinimumHeight(44)
+
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        
+
         self.line_edit = QLineEdit()
-        self.line_edit.setPlaceholderText(placeholder)
+        self.line_edit.setPlaceholderText(f"🔍 {placeholder}")
+        self.line_edit.setObjectName("searchField")
+        self.line_edit.setClearButtonEnabled(True)
         self.line_edit.textChanged.connect(self.search_changed.emit)
-        
         layout.addWidget(self.line_edit)
     
     def text(self) -> str:
@@ -285,4 +302,3 @@ class SearchBar(QWidget):
     def clear(self):
         """Clear search text."""
         self.line_edit.clear()
-

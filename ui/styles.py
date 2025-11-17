@@ -39,6 +39,8 @@ COLORS = {
     'status_low': '#6b8e6f',      # Sage green - optimal
     'status_medium': '#d4a843',   # Mustard - warning
     'status_high': '#c1614a',     # Terracotta - critical
+    'warning': '#d4a843',         # Alias for warning accents
+    'critical': '#a0522d',        # Alias for high severity accents
 
     # UI elements
     'border': '#d4c4a8',          # Warm tan border
@@ -261,6 +263,13 @@ def get_main_stylesheet() -> str:
         font-weight: 400;
     }}
 
+    QLineEdit#searchField {{
+        border: 3px solid {COLORS['border_dark']};
+        padding-left: 32px;
+        background-color: {COLORS['bg_card']};
+        background-position: 10px center;
+    }}
+
     QLineEdit:focus {{
         border: 3px solid {COLORS['terracotta']};
         background: {COLORS['bg_card']};
@@ -300,9 +309,50 @@ def get_main_stylesheet() -> str:
         letter-spacing: 1.5px;
     }}
 
+    QLabel[metricValue="true"] {{
+        font-size: 30px;
+        font-weight: 700;
+        color: {COLORS['text_primary']};
+        letter-spacing: 0.5px;
+    }}
+
+    QLabel[chartTitle="true"] {{
+        font-size: 16px;
+        font-weight: 700;
+        color: {COLORS['terracotta']};
+        letter-spacing: 1px;
+    }}
+
     QLabel[mono="true"] {{
         font-family: "IBM Plex Mono", "Menlo", "Courier New", monospace;
         font-weight: 400;
+    }}
+
+    /* Search field - matches brutalist cards */
+    QFrame[search="true"] {{
+        background: {COLORS['bg_card']};
+        border: 3px solid {COLORS['border']};
+        border-radius: 0px;
+    }}
+
+    QFrame[search="true"]:focus-within {{
+        border-color: {COLORS['terracotta']};
+        box-shadow: 4px 4px 0 {COLORS['accent_line']};
+    }}
+
+    QFrame[search="true"] QLabel {{
+        color: {COLORS['text_secondary']};
+    }}
+
+    QFrame[search="true"] QLineEdit {{
+        border: none;
+        background: transparent;
+        color: {COLORS['text_primary']};
+        font-size: 14px;
+    }}
+
+    QFrame[search="true"] QLineEdit::placeholder {{
+        color: {COLORS['text_muted']};
     }}
 
     /* Brutalist Panel - Bold card style */

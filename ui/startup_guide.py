@@ -6,7 +6,7 @@ Provides a friendly introduction to the Mac Health Analyzer app.
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-    QWidget, QStackedWidget, QCheckBox
+    QWidget, QStackedWidget, QCheckBox, QSizePolicy, QScrollArea
 )
 from ui.widgets import GlassmorphicPanel, StyledButton
 from ui.styles import COLORS
@@ -108,203 +108,128 @@ class StartupGuide(QDialog):
 
         layout.addLayout(button_layout)
 
-    def _create_step_1(self) -> QWidget:
-        """Create step 1: Overview."""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(16)
-
+    def _create_step_panel(self, icon_text: str, title_text: str,
+                           body_html: str, accent_color: str) -> QWidget:
+        """Create a reusable info panel used by each step."""
         panel = GlassmorphicPanel()
         panel_layout = QVBoxLayout(panel)
-        panel_layout.setContentsMargins(30, 30, 30, 30)
-        panel_layout.setSpacing(20)
+        panel_layout.setContentsMargins(24, 18, 24, 24)
+        panel_layout.setSpacing(12)
 
-        # Icon and title
-        icon = QLabel("🖥️")
-        icon.setStyleSheet("font-size: 64px;")
+        icon = QLabel(icon_text)
         icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        icon.setStyleSheet("font-size: 48px; margin-bottom: 4px;")
         panel_layout.addWidget(icon)
 
-        title = QLabel("What is Mac Health Analyzer?")
+        title = QLabel(title_text)
         title.setProperty("heading", "h2")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title.setWordWrap(True)
         panel_layout.addWidget(title)
 
-        # Description
-        description = QLabel(
-            "Mac Health Analyzer helps you understand what's running on your Mac and "
-            "keep it running smoothly. Think of it as a health checkup for your computer!\n\n"
-            "This app shows you:\n"
-            "• What programs start automatically when you log in\n"
-            "• What programs are running right now\n"
-            "• How much memory and CPU they're using\n"
-            "• Recommendations to improve performance"
-        )
-        description.setWordWrap(True)
-        description.setMinimumHeight(200)
-        description.setStyleSheet(f"""
+        body = QLabel(body_html)
+        body.setWordWrap(True)
+        body.setTextFormat(Qt.TextFormat.RichText)
+        body.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        body.setStyleSheet(f"""
             color: {COLORS['text_primary']};
             font-size: 15px;
-            line-height: 1.8;
-            padding: 20px;
+            line-height: 1.7;
+            padding: 16px;
             background-color: {COLORS['bg_secondary']};
-            border-left: 4px solid {COLORS['terracotta']};
+            border-left: 4px solid {accent_color};
         """)
-        panel_layout.addWidget(description)
+        body.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        panel_layout.addWidget(body)
+        panel_layout.addStretch()
 
-        layout.addWidget(panel)
-        return widget
+        scroll_content = QWidget()
+        scroll_layout = QVBoxLayout(scroll_content)
+        scroll_layout.setContentsMargins(0, 0, 0, 0)
+        scroll_layout.addWidget(panel)
+        scroll_layout.addStretch()
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll.setWidget(scroll_content)
+
+        wrapper = QWidget()
+        wrapper_layout = QVBoxLayout(wrapper)
+        wrapper_layout.setContentsMargins(0, 0, 0, 0)
+        wrapper_layout.addWidget(scroll)
+        return wrapper
+
+    def _create_step_1(self) -> QWidget:
+        """Create step 1: Overview."""
+        description_html = (
+            "<p>Mac Health Analyzer helps you understand what's running on your Mac and "
+            "keep it running smoothly. Think of it as a health checkup for your computer!</p>"
+            "<ul style='margin-left: 18px; padding-left: 6px;'>"
+            "<li>See what programs start automatically when you log in.</li>"
+            "<li>Watch the apps and processes currently running.</li>"
+            "<li>Monitor how much memory and CPU they're using.</li>"
+            "<li>Get simple recommendations to improve performance.</li>"
+            "</ul>"
+        )
+        return self._create_step_panel("🖥️", "What is Mac Health Analyzer?",
+                                       description_html, COLORS['terracotta'])
 
     def _create_step_2(self) -> QWidget:
         """Create step 2: Startup Items tab."""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(16)
-
-        panel = GlassmorphicPanel()
-        panel_layout = QVBoxLayout(panel)
-        panel_layout.setContentsMargins(30, 30, 30, 30)
-        panel_layout.setSpacing(20)
-
-        # Icon and title
-        icon = QLabel("🚀")
-        icon.setStyleSheet("font-size: 64px;")
-        icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        panel_layout.addWidget(icon)
-
-        title = QLabel("Startup Items Tab")
-        title.setProperty("heading", "h2")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        panel_layout.addWidget(title)
-
-        # Description
-        description = QLabel(
-            "The Startup Items tab shows programs that start automatically when you log in.\n\n"
-            "✨ <b>Double-click any item</b> to see:\n"
-            "• What it does (in plain English!)\n"
-            "• Whether you should keep it enabled\n"
-            "• Personalized recommendations\n\n"
-            "<b>Tip:</b> Having too many startup items can slow down your Mac when you log in. "
-            "Disable items you don't need to start automatically!"
+        description_html = (
+            "<p>The Startup Items tab shows programs that start automatically when you log in.</p>"
+            "<p><b>Double-click any item</b> to quickly see:</p>"
+            "<ul style='margin-left: 18px; padding-left: 6px;'>"
+            "<li>What it does (in plain English).</li>"
+            "<li>If you should keep it enabled.</li>"
+            "<li>Friendly tips for speeding up your login.</li>"
+            "</ul>"
+            "<p><b>Tip:</b> Disable startup items you don't need to launch automatically.</p>"
         )
-        description.setWordWrap(True)
-        description.setTextFormat(Qt.TextFormat.RichText)
-        description.setMinimumHeight(200)
-        description.setStyleSheet(f"""
-            color: {COLORS['text_primary']};
-            font-size: 15px;
-            line-height: 1.8;
-            padding: 20px;
-            background-color: {COLORS['bg_secondary']};
-            border-left: 4px solid {COLORS['sage']};
-        """)
-        panel_layout.addWidget(description)
-
-        layout.addWidget(panel)
-        return widget
+        return self._create_step_panel("🚀", "Startup Items Tab",
+                                       description_html, COLORS['sage'])
 
     def _create_step_3(self) -> QWidget:
         """Create step 3: Processes tab."""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(16)
-
-        panel = GlassmorphicPanel()
-        panel_layout = QVBoxLayout(panel)
-        panel_layout.setContentsMargins(30, 30, 30, 30)
-        panel_layout.setSpacing(20)
-
-        # Icon and title
-        icon = QLabel("⚙️")
-        icon.setStyleSheet("font-size: 64px;")
-        icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        panel_layout.addWidget(icon)
-
-        title = QLabel("Processes Tab")
-        title.setProperty("heading", "h2")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        panel_layout.addWidget(title)
-
-        # Description
-        description = QLabel(
-            "The Processes tab shows all programs currently running on your Mac.\n\n"
-            "✨ <b>Double-click any process</b> to see:\n"
-            "• What the program does\n"
-            "• How long it's been running\n"
-            "• How much memory and CPU it's using\n"
-            "• <b>Smart recommendations</b> (e.g., \"This process has been running for a long time, "
-            "consider closing it if you're not using it\")\n\n"
-            "<b>Tip:</b> If your Mac feels slow, look for processes using a lot of memory or CPU!"
+        description_html = (
+            "<p>The Processes tab shows everything currently running on your Mac.</p>"
+            "<p><b>Double-click a process</b> to learn:</p>"
+            "<ul style='margin-left: 18px; padding-left: 6px;'>"
+            "<li>What the program does and how long it's been active.</li>"
+            "<li>How much memory and CPU it uses.</li>"
+            "<li>Smart suggestions (like closing unused apps).</li>"
+            "</ul>"
+            "<p><b>Tip:</b> If your Mac feels slow, look for processes using lots of memory or CPU.</p>"
         )
-        description.setWordWrap(True)
-        description.setTextFormat(Qt.TextFormat.RichText)
-        description.setMinimumHeight(200)
-        description.setStyleSheet(f"""
-            color: {COLORS['text_primary']};
-            font-size: 15px;
-            line-height: 1.8;
-            padding: 20px;
-            background-color: {COLORS['bg_secondary']};
-            border-left: 4px solid {COLORS['mustard']};
-        """)
-        panel_layout.addWidget(description)
-
-        layout.addWidget(panel)
-        return widget
+        return self._create_step_panel("⚙️", "Processes Tab",
+                                       description_html, COLORS['mustard'])
 
     def _create_step_4(self) -> QWidget:
         """Create step 4: Tips and tricks."""
+        tips_html = (
+            "<ul style='margin-left: 18px; padding-left: 6px;'>"
+            "<li><b>🔒 Be Careful:</b> Avoid disabling Apple system processes unless you know what they do.</li>"
+            "<li><b>⚡ Speed Up:</b> Disable startup items you don't need and close unused apps.</li>"
+            "<li><b>🔄 Refresh:</b> Click the Refresh button for the latest data.</li>"
+            "<li><b>📊 Monitor:</b> Use the System tab to keep an eye on CPU and memory.</li>"
+            "<li><b>❓ Need Help?</b> Toggle Simple Explanations inside detail dialogs.</li>"
+            "</ul>"
+        )
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        layout.setSpacing(16)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(12)
 
-        panel = GlassmorphicPanel()
-        panel_layout = QVBoxLayout(panel)
-        panel_layout.setContentsMargins(30, 30, 30, 30)
-        panel_layout.setSpacing(20)
+        panel = self._create_step_panel("💡", "Tips for Success",
+                                        tips_html, COLORS['terracotta'])
+        layout.addWidget(panel, alignment=Qt.AlignmentFlag.AlignTop)
 
-        # Icon and title
-        icon = QLabel("💡")
-        icon.setStyleSheet("font-size: 64px;")
-        icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        panel_layout.addWidget(icon)
-
-        title = QLabel("Tips for Success")
-        title.setProperty("heading", "h2")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        panel_layout.addWidget(title)
-
-        # Tips
-        tips = QLabel(
-            "<b>🔒 Be Careful:</b> Don't disable system processes (especially Apple ones) "
-            "unless you're sure about what they do.\n\n"
-            "<b>⚡ Speed Up Your Mac:</b> Disable startup items you don't need and close "
-            "apps you're not using.\n\n"
-            "<b>🔄 Refresh Data:</b> Click the Refresh button to see the latest information.\n\n"
-            "<b>📊 Monitor Resources:</b> Check the System tab to see overall CPU and memory usage.\n\n"
-            "<b>❓ Need Help?</b> Use the Simple Explanations toggle in detail dialogs "
-            "for easier-to-understand descriptions!"
-        )
-        tips.setWordWrap(True)
-        tips.setTextFormat(Qt.TextFormat.RichText)
-        tips.setMinimumHeight(200)
-        tips.setStyleSheet(f"""
-            color: {COLORS['text_primary']};
-            font-size: 15px;
-            line-height: 2.0;
-            padding: 20px;
-            background-color: {COLORS['bg_secondary']};
-            border-left: 4px solid {COLORS['terracotta']};
-        """)
-        panel_layout.addWidget(tips)
-
-        # Ready message
-        ready = QLabel("You're all set! Click 'Finish' to start using Mac Health Analyzer.")
+        ready = QLabel("You're all set! Click \"Finish\" to start using Mac Health Analyzer.")
         ready.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        ready.setStyleSheet(f"color: {COLORS['sage']}; font-size: 13px; font-weight: bold; margin-top: 10px;")
-        panel_layout.addWidget(ready)
-
-        layout.addWidget(panel)
+        ready.setStyleSheet(f"color: {COLORS['sage']}; font-size: 13px; font-weight: bold;")
+        layout.addWidget(ready)
+        layout.addStretch()
         return widget
 
     def _on_next(self):
