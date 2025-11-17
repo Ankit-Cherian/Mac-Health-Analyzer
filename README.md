@@ -56,8 +56,6 @@ The interface features:
 
 ## 📦 Installation
 
-### Option 1: Native macOS (Recommended)
-
 Clone the repository:
 
 ```bash
@@ -77,20 +75,7 @@ Dependencies include:
 - `pyqtgraph` - High-performance scientific graphics
 - `numpy` - Numerical computing for charts
 
-### Option 2: Docker (Cross-Platform)
-
-**Quick Start:**
-```bash
-./docker-run.sh start
-```
-
-Connect via VNC to `localhost:5900` (password: `healthpulse`)
-
-See [DOCKER.md](DOCKER.md) for detailed Docker setup instructions.
-
 ## 💻 Usage
-
-### Native macOS
 
 Run the application:
 
@@ -109,21 +94,6 @@ For system-level access (viewing launch daemons, managing system processes):
 ```bash
 sudo python3 main.py
 ```
-
-### Docker
-
-```bash
-# Start the application
-./docker-run.sh start
-
-# View logs
-./docker-run.sh logs
-
-# Stop the application
-./docker-run.sh stop
-```
-
-See [DOCKER.md](DOCKER.md) for VNC client setup and troubleshooting.
 
 ## 🎯 Interface Guide
 
@@ -203,47 +173,17 @@ The application automatically:
 - **NumPy** - Fundamental package for numerical computing
 - **Python 3.9+** - Programming language
 
-## 🐳 Docker & Deployment
-
-Mac Health Pulse can be deployed in multiple ways:
-
-1. **Native macOS** - Best for personal use and full feature access
-2. **Docker (VNC)** - Cross-platform demo and development
-3. **Web-based** - Scalable, multi-user architecture (in development)
-
-### Documentation
-
-- **[DOCKER.md](DOCKER.md)** - Docker setup and VNC access
-- **[SCALING.md](SCALING.md)** - Production deployment and scaling strategies
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Web-based refactor technical design
-
-### Quick Docker Deployment
-
-```bash
-# One-command start
-./docker-run.sh start
-
-# Access via VNC: localhost:5900
-```
-
 ## 🎯 Future Enhancements
 
-### Near-term
 - [ ] Export system reports to PDF/CSV
-- [ ] Custom alert thresholds
 - [ ] Historical data tracking and trends
+- [ ] Custom alert thresholds
 - [ ] Network monitoring tab
 - [ ] Disk usage visualization
-
-### Long-term (Web Version)
-- [ ] Cross-platform support (Linux, Windows)
-- [ ] Web-based interface
-- [ ] Multi-user support
-- [ ] REST API for integrations
-- [ ] Mobile app (React Native)
-- [ ] Cloud deployment options
-
-See [SCALING.md](SCALING.md) for the complete roadmap.
+- [ ] Temperature monitoring
+- [ ] Battery health stats
+- [ ] Dark/Light theme toggle
+- [ ] Customizable color schemes
 
 ## 📄 License
 
