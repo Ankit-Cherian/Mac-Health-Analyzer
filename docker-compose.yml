@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  mac-health-pulse:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mac-health-pulse
+    ports:
+      - "5900:5900"  # VNC port
+    environment:
+      - VNC_PASSWORD=healthpulse  # Change this to a secure password
+      - RESOLUTION=1920x1080x24
+      - DISPLAY=:1
+    # Mount host's /proc to read system metrics (limited in Docker)
+    volumes:
+      - /proc:/host/proc:ro
+      - ./config:/root/.mac-health-analyzer
+    restart: unless-stopped
+    # Note: System monitoring will show container stats, not host stats
+    # For host monitoring, consider using privileged mode (security risk)
+    # privileged: true
+    # pid: "host"
+
+# For scaling with multiple instances (requires load balancer)
+# Use: docker-compose up --scale mac-health-pulse=3
+# Note: You'll need different ports for each instance
