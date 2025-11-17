@@ -27,6 +27,7 @@ class RealtimeLineChart(QWidget):
         self.title = title
         self.max_points = max_points
         self.data_points = deque(maxlen=max_points)
+        self.current_value_label = None
 
         self.setup_ui()
 
@@ -35,24 +36,47 @@ class RealtimeLineChart(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
+        # Add current value label at the top
+        self.current_value_label = QLabel("--")
+        self.current_value_label.setStyleSheet(f"""
+            color: {COLORS['terracotta']};
+            font-size: 24px;
+            font-weight: bold;
+            padding: 8px;
+            background-color: {COLORS['bg_card']};
+        """)
+        self.current_value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.current_value_label)
+
         # Create plot widget
         self.plot_widget = pg.PlotWidget()
         self.plot_widget.setBackground(COLORS['bg_card'])
         self.plot_widget.showGrid(x=True, y=True, alpha=0.2)
 
-        # Style the plot
+        # Style the plot with clearer labels
         self.plot_widget.setLabel('left', self.title, color=COLORS['terracotta'],
+                                  **{'font-size': '14pt', 'font-weight': 'bold'})
+        self.plot_widget.setLabel('bottom', 'Time (seconds ago)', color=COLORS['text_secondary'],
                                   **{'font-size': '12pt', 'font-weight': 'bold'})
-        self.plot_widget.setLabel('bottom', 'Time', color=COLORS['text_secondary'],
-                                  **{'font-size': '10pt'})
 
-        # Set axis color
+        # Set axis color and styling
         axis_pen = pg.mkPen(color=COLORS['border_dark'], width=2)
-        self.plot_widget.getAxis('left').setPen(axis_pen)
-        self.plot_widget.getAxis('bottom').setPen(axis_pen)
+        left_axis = self.plot_widget.getAxis('left')
+        bottom_axis = self.plot_widget.getAxis('bottom')
 
-        # Set Y axis range
+        left_axis.setPen(axis_pen)
+        bottom_axis.setPen(axis_pen)
+
+        # Make axis labels more visible
+        left_axis.setStyle(tickTextOffset=10)
+        bottom_axis.setStyle(tickTextOffset=10)
+
+        # Set Y axis range with better ticks
         self.plot_widget.setYRange(0, 100)
+
+        # Add percentage symbols to Y-axis if this is a percentage chart
+        if '%' in self.title:
+            left_axis.setLabel(units='%')
 
         # Create the line with bold style
         line_pen = pg.mkPen(color=COLORS['terracotta'], width=3)
@@ -79,6 +103,10 @@ class RealtimeLineChart(QWidget):
             value: New value to add (0-100)
         """
         self.data_points.append(value)
+
+        # Update current value label
+        if self.current_value_label:
+            self.current_value_label.setText(f"{value:.1f}%")
 
         # Update the line
         x_data = list(range(len(self.data_points)))
@@ -274,12 +302,16 @@ class BarChart(QWidget):
     Horizontal bar chart for process resources.
     """
 
+    clicked = pyqtSignal(str, float)  # Signal emitted when a bar is clicked (label, value)
+
     def __init__(self, title: str = "Processes", parent=None):
         super().__init__(parent)
         self.title = title
-        self.data = []  # List of (label, value) tuples
+        self.data = []  # List of (label, value, max_value) tuples
+        self.bar_rects = []  # Store bar rectangles for click detection
 
         self.setMinimumSize(300, 200)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
     def set_data(self, data: list):
         """
@@ -310,6 +342,13 @@ class BarChart(QWidget):
         painter.setFont(title_font)
         painter.drawText(10, 20, self.title)
 
+        # Hint text
+        hint_font = painter.font()
+        hint_font.setPointSize(10)
+        painter.setFont(hint_font)
+        painter.setPen(QColor(COLORS['text_secondary']))
+        painter.drawText(width - 280, 20, "Double-click to learn more")
+
         # Draw bars
         bar_height = 25
         bar_spacing = 8
@@ -317,6 +356,9 @@ class BarChart(QWidget):
         max_bar_width = width - 120
 
         painter.setFont(self.font())
+
+        # Clear previous bar rectangles
+        self.bar_rects = []
 
         for i, (label, value, max_value) in enumerate(self.data):
             y = start_y + i * (bar_height + bar_spacing)
@@ -347,14 +389,33 @@ class BarChart(QWidget):
                 painter.setBrush(gradient)
                 painter.drawRoundedRect(80, y, bar_width, bar_height, 4, 4)
 
+            # Store bar rectangle for click detection
+            from PyQt6.QtCore import QRect
+            bar_rect = QRect(10, y, max_bar_width + 80, bar_height)
+            self.bar_rects.append((bar_rect, label, value))
+
             # Draw label
             painter.setPen(QColor(COLORS['text_primary']))
             painter.drawText(10, y + 17, label[:8])  # Truncate long labels
 
-            # Draw value
+            # Draw value with unit
             painter.setPen(QColor(color))
             value_text = f"{value:.1f}%" if isinstance(value, float) else str(value)
             painter.drawText(max_bar_width + 90, y + 17, value_text)
+
+    def mouseDoubleClickEvent(self, event):
+        """Handle double-click on bars."""
+        from PyQt6.QtCore import QPoint
+        click_pos = event.pos()
+
+        # Check if click is on any bar
+        for bar_rect, label, value in self.bar_rects:
+            if bar_rect.contains(click_pos):
+                # Emit signal with label and value
+                self.clicked.emit(label, value)
+                return
+
+        super().mouseDoubleClickEvent(event)
 
     def sizeHint(self):
         """Suggest size based on data."""

@@ -317,11 +317,23 @@ class StartupTab(QWidget):
             row: Row number that was double-clicked
             column: Column number that was double-clicked
         """
-        # Get item data from the first column
-        item_data = self.table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+        try:
+            # Get item data from the first column
+            table_item = self.table.item(row, 0)
+            if table_item is None:
+                return
 
-        if item_data:
-            # Show detail dialog
-            dialog = StartupDetailDialog(item_data, self)
-            dialog.exec()
+            item_data = table_item.data(Qt.ItemDataRole.UserRole)
+
+            if item_data:
+                # Show detail dialog
+                dialog = StartupDetailDialog(item_data, self)
+                dialog.exec()
+        except Exception as e:
+            print(f"Error opening startup item details: {e}")
+            QMessageBox.warning(
+                self,
+                "Error",
+                f"Failed to open item details: {str(e)}"
+            )
 
