@@ -1,265 +1,105 @@
-# Mac Health Analyzer - Neon Terminal Edition
+# Mac Health Analyzer
 
-A stunning macOS system monitoring and startup management tool with a **cyberpunk-inspired interface**, real-time visualizations, and advanced analytics.
+A simple macOS app I built to see what's running on my Mac and manage startup items. Has a cyberpunk-inspired UI because why not.
 
-![Version](https://img.shields.io/badge/version-2.0-neon)
-![Python](https://img.shields.io/badge/python-3.9+-green)
-![Platform](https://img.shields.io/badge/platform-macOS-blue)
+## Screenshots
 
-## ✨ Features
+### Onboarding
 
-### 🎨 Stunning Neon UI
-- **Cyberpunk Terminal Aesthetic** - Unique neon green, electric cyan, and hot pink color scheme
-- **Custom Typography** - Chakra Petch, Rajdhani, Orbitron, and JetBrains Mono fonts
-- **Glassmorphic Panels** - Modern card-based design with transparency effects
-- **Smooth Animations** - Buttery 60fps animations and transitions
+<img src="screenshots/start up step 1.png" width="700">
 
-### 📊 Real-Time Visualizations
-- **Live CPU & Memory Graphs** - Real-time line charts showing system resource usage
-- **Circular Gauges** - Beautiful animated gauges for at-a-glance metrics
-- **Bar Charts** - Top resource consumers displayed with neon-styled horizontal bars
-- **Sparklines** - Mini charts for inline metrics (coming soon)
+*First-time setup guide explaining what the app does*
 
-### ⚡ System Monitoring
-- **Startup Items Management** - View and disable items that launch at startup
-  - Login items
-  - Launch agents
-  - Launch daemons
-  - Quick toggle switches with smooth animations
+<img src="screenshots/startupsetup4.png" width="700">
 
-- **Process Monitoring** - Monitor active processes with detailed metrics
-  - Real-time CPU and memory usage
-  - Search and filter processes
-  - Force quit unresponsive applications
-  - Color-coded status indicators
+*Helpful tips for using the app safely*
 
-- **System Overview Dashboard** - Comprehensive system health at a glance
-  - Real-time CPU usage monitoring with trend charts
-  - Memory usage tracking with visual gauges
-  - Process count and system information
-  - Top resource consumers with interactive bar charts
+### Main Interface
 
-## 🖼️ Screenshots
+**Startup Tab** - Manage what launches when you boot up
 
-The interface features:
-- **Dark cyberpunk theme** with neon accents
-- **3 enhanced tabs**: ⚡ STARTUP, ⚙ PROCESSES, ◉ SYSTEM
-- **Real-time charts** updating every 2 seconds
-- **Circular gauges** with color-coded status
-- **Horizontal bar charts** showing top processes
+<img src="screenshots/MainStartupPage.png" width="700">
 
-## 🚀 Requirements
+*View all your startup items with stats on enabled/disabled items*
 
-- **macOS** 10.14 or later
-- **Python** 3.9+
-- **Screen resolution**: 1280x800 minimum (optimized for Retina displays)
+**Processes Tab** - Monitor what's running
 
-## 📦 Installation
+<img src="screenshots/ProcessesTab.png" width="700">
 
-Clone the repository:
+*Real-time CPU and memory monitoring for all running processes*
 
-```bash
-git clone https://github.com/Ankit-Cherian/mac-health-analyzer.git
-cd mac-health-analyzer
-```
+### Detail Views
 
-Install dependencies:
+**Startup Item Details**
 
-```bash
-pip3 install -r requirements.txt
-```
+<img src="screenshots/StartupItemDetails.png" width="700">
 
-Dependencies include:
-- `PyQt6` - Modern GUI framework
-- `psutil` - System and process utilities
-- `pyqtgraph` - High-performance scientific graphics
-- `numpy` - Numerical computing for charts
+*Simple explanations for what each startup item does*
 
-## 💻 Usage
+<img src="screenshots/StartupItemDetails2.png" width="700">
 
-Run the application:
+*Smart recommendations based on the item type*
 
-```bash
-python3 main.py
-```
+**Process Details**
 
-Or use the launch script:
+<img src="screenshots/ProcessDetails.png" width="700">
 
-```bash
-./run.sh
-```
+*Detailed info for recognized processes*
 
-For system-level access (viewing launch daemons, managing system processes):
+<img src="screenshots/ProcessDetails2.png" width="700">
 
+*Safety warnings for critical system processes*
+
+## How to Run
+
+1. Clone or download this repo
+2. Install dependencies:
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+3. Run the app:
+   ```bash
+   python3 main.py
+   ```
+
+That's it. If you want to see system-level processes, run with `sudo`:
 ```bash
 sudo python3 main.py
 ```
 
-## 🎯 Interface Guide
+## Requirements
 
-### ⚡ STARTUP Tab
-- View all startup items in a searchable table
-- Filter by type (Login Items, Launch Agents, Launch Daemons)
-- Toggle items on/off with smooth animated switches
-- Search functionality for quick filtering
+- macOS 10.14+
+- Python 3.9+
 
-### ⚙ PROCESSES Tab
-- Monitor all running processes
-- View CPU and memory usage in real-time
-- Search processes by name
-- Filter system processes
-- Force quit processes with one click
-- Color-coded resource usage (green = low, amber = medium, pink = high)
+## Tests
 
-### ◉ SYSTEM Tab (NEW!)
-- **Circular Gauges** - CPU, Memory, and Process count with animated needles
-- **Real-Time Charts** - Live graphs showing CPU and memory trends over the last 60 data points
-- **Resource Bar Charts** - Top 8 processes by CPU and memory usage
-- **System Information Cards** - Total RAM, CPU cores, startup items count
-- **Status Indicator** - Online/error status in the top right
-
-## 🎨 Design System
-
-### Color Palette
-- **Primary**: Neon Green `#00ff41` - Matrix-inspired accent
-- **Secondary**: Electric Cyan `#00f5ff` - Futuristic highlights
-- **Tertiary**: Hot Pink `#ff006e` - Critical alerts
-- **Warning**: Amber `#ffbe0b` - Medium priority
-- **Background**: Deep Black `#0a0a0f` - Terminal darkness
-
-### Typography
-- **Display Font**: Chakra Petch (Thai-inspired geometric)
-- **Secondary**: Rajdhani (Indo-Arabic inspired)
-- **Special**: Orbitron (Futuristic headers)
-- **Monospace**: JetBrains Mono (Code and metrics)
-
-### Charts & Visualizations
-- **Real-time Line Charts** - Smooth 60-point scrolling graphs with neon glow
-- **Circular Gauges** - 360° animated gauges with gradient fills
-- **Horizontal Bar Charts** - Gradient-filled bars with percentage display
-- **Color Coding**:
-  - 0-50% = Neon Green (optimal)
-  - 50-80% = Amber (warning)
-  - 80-100% = Hot Pink (critical)
-
-## ⚙️ Performance
-
-- **Chart Update Rate**: 2 seconds (configurable)
-- **Process Limit**: 100 processes displayed for optimal performance
-- **Animation Frame Rate**: 60 FPS
-- **Memory Efficient**: Charts use rolling buffers with 60-point maximum
-
-## 🔧 Advanced Configuration
-
-The application automatically:
-- Downloads custom fonts on first run
-- Caches launchctl results for faster startup
-- Uses signal blocking during updates to prevent UI freezing
-- Refreshes only the active tab to conserve resources
-
-## 🧪 Testing
-
-Mac Health Pulse includes a comprehensive, production-grade test suite with **95%+ code coverage**.
-
-### Quick Start
-
+There's a test suite if you want to run it:
 ```bash
-# Run all tests
 ./run_tests.sh
-
-# Run unit tests only
-./run_tests.sh --unit
-
-# Run with coverage report
-./run_tests.sh
-open htmlcov/index.html
 ```
 
-### Test Suite Features
+It has pretty good coverage (95%+) and tests most of the functionality.
 
-- ✅ **300+ test cases** covering all functionality
-- ✅ **Unit tests** for helpers, managers, and utilities
-- ✅ **Integration tests** for component interactions
-- ✅ **Automated CI/CD** via GitHub Actions
-- ✅ **Coverage reporting** with detailed HTML reports
-- ✅ **Multiple Python versions** tested (3.9, 3.10, 3.11, 3.12)
+## Open Source
 
-### Coverage by Module
+This is open source - feel free to fork it, modify it, or do whatever you want with it. If you add something cool, open a PR. If you find bugs, open an issue.
 
-| Module | Coverage | Tests |
-|--------|----------|-------|
-| `utils/helpers.py` | 100% | 50+ tests |
-| `utils/system_info.py` | 100% | 60+ tests |
-| `process_monitor.py` | 100% | 70+ tests |
-| `startup_manager.py` | 100% | 60+ tests |
-| **Overall** | **95%+** | **300+ tests** |
+## What It Does
 
-### Documentation
+- Shows all your startup items (login items, launch agents, launch daemons)
+- Lets you disable startup items you don't need
+- Monitors running processes with real-time CPU/memory stats
+- Shows system health with live charts and gauges
+- Has a neon cyberpunk theme because terminals should look cool
 
-- 📖 [Testing Guide](TESTING.md) - Quick start and common commands
-- 📚 [Test Suite Documentation](tests/README.md) - Comprehensive testing docs
-- 🔧 [Contributing Tests](tests/README.md#writing-new-tests) - How to write tests
+## Notes
 
-### Running Tests
-
-```bash
-# All tests with coverage
-./run_tests.sh
-
-# Unit tests only (fast)
-./run_tests.sh --unit
-
-# Integration tests
-./run_tests.sh --integration
-
-# Fast mode (no coverage)
-./run_tests.sh --fast
-
-# Verbose output
-./run_tests.sh --verbose
-```
-
-For more details, see [TESTING.md](TESTING.md).
-
-## 📝 Notes
-
-- Custom fonts (Chakra Petch, Rajdhani, Orbitron, JetBrains Mono) download automatically on first run
-- Some operations require administrator privileges
-- Charts update every 2 seconds when System tab is active
-- Process table displays up to 100 processes for optimal performance
-- All visualizations use hardware acceleration when available
-
-## 🛠️ Built With
-
-- **PyQt6** - Modern cross-platform GUI framework
-- **PyQtGraph** - Scientific graphics and GUI library for real-time visualization
-- **psutil** - Cross-platform library for system and process monitoring
-- **NumPy** - Fundamental package for numerical computing
-- **Python 3.9+** - Programming language
-
-## 🎯 Future Enhancements
-
-- [ ] Export system reports to PDF/CSV
-- [ ] Historical data tracking and trends
-- [ ] Custom alert thresholds
-- [ ] Network monitoring tab
-- [ ] Disk usage visualization
-- [ ] Temperature monitoring
-- [ ] Battery health stats
-- [ ] Dark/Light theme toggle
-- [ ] Customizable color schemes
-
-## 📄 License
-
-This project is part of the mac-health-analyzer repository.
-
-## 🙏 Acknowledgments
-
-- Inspired by cyberpunk and terminal aesthetics
-- Font families from Google Fonts and JetBrains
-- Icons and symbols from Unicode character set
-- PyQtGraph for exceptional visualization capabilities
+- Custom fonts download automatically the first time you run it
+- Charts update every 2 seconds
+- Some operations need admin privileges (that's why there's a `sudo` option)
+- Built with PyQt6 and psutil
 
 ---
 
-**Made with neon dreams and terminal vibes** ✨
+Made this in my free time. Hope it's useful.
