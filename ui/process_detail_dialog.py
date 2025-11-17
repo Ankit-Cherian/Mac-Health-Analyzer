@@ -99,7 +99,7 @@ class ProcessDetailDialog(QDialog):
         # Process name
         name_label = QLabel(self.process_data.get('name', 'Unknown Process'))
         name_label.setProperty("heading", "h1")
-        name_label.setStyleSheet(f"color: {COLORS['neon_cyan']};")
+        name_label.setStyleSheet(f"color: {COLORS['terracotta']};")
         header_layout.addWidget(name_label)
 
         # PID
@@ -143,7 +143,7 @@ class ProcessDetailDialog(QDialog):
         # Title
         title = QLabel("WHAT IS THIS?")
         title.setProperty("heading", "h3")
-        title.setStyleSheet(f"color: {COLORS['neon_green']};")
+        title.setStyleSheet(f"color: {COLORS['text_primary']};")
         panel_layout.addWidget(title)
 
         # Description label (will be updated based on toggle)
@@ -154,9 +154,9 @@ class ProcessDetailDialog(QDialog):
             font-size: 14px;
             line-height: 1.6;
             padding: 12px;
-            background-color: rgba(0, 255, 255, 0.05);
-            border-left: 3px solid {COLORS['neon_cyan']};
-            border-radius: 4px;
+            background-color: {COLORS['bg_secondary']};
+            border-left: 4px solid {COLORS['terracotta']};
+            border-radius: 0px;
         """)
         self._update_description()
         panel_layout.addWidget(self.description_label)
@@ -166,7 +166,7 @@ class ProcessDetailDialog(QDialog):
         if ProcessDescriber.is_known_process(process_name):
             known_badge = QLabel("✓ Recognized Process")
             known_badge.setStyleSheet(f"""
-                color: {COLORS['neon_green']};
+                color: {COLORS['sage']};
                 font-size: 12px;
                 font-weight: bold;
                 padding: 4px 8px;
@@ -198,7 +198,7 @@ class ProcessDetailDialog(QDialog):
         # Title
         title = QLabel("PROCESS INFORMATION")
         title.setProperty("heading", "h3")
-        title.setStyleSheet(f"color: {COLORS['neon_green']};")
+        title.setStyleSheet(f"color: {COLORS['sage']};")
         panel_layout.addWidget(title)
 
         # Add separator
@@ -246,7 +246,7 @@ class ProcessDetailDialog(QDialog):
         # Title
         title = QLabel("RESOURCE USAGE")
         title.setProperty("heading", "h3")
-        title.setStyleSheet(f"color: {COLORS['neon_green']};")
+        title.setStyleSheet(f"color: {COLORS['sage']};")
         panel_layout.addWidget(title)
 
         # Add separator
@@ -292,7 +292,7 @@ class ProcessDetailDialog(QDialog):
         # Title
         title = QLabel("COMMAND LINE")
         title.setProperty("heading", "h3")
-        title.setStyleSheet(f"color: {COLORS['neon_green']};")
+        title.setStyleSheet(f"color: {COLORS['sage']};")
         panel_layout.addWidget(title)
 
         # Add separator
