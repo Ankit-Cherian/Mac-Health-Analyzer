@@ -1,6 +1,6 @@
 # Contributing to Mac Health Pulse
 
-Hey! Thanks for checking out Mac Health Pulse. I appreciate any contributions, whether it's a bug fix, new feature, or just fixing a typo in the docs.
+Hello! Thanks for checking out Mac Health Pulse. I appreciate any contributions, whether it's a bug fix, new feature, or just fixing a typo in the docs.
 
 ## Getting Started
 
