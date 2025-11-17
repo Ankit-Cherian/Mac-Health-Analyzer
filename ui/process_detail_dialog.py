@@ -77,6 +77,7 @@ class ProcessDetailDialog(QDialog):
 
         # Add all content sections
         self._add_description_section()
+        self._add_recommendation_section()
         self._add_process_info_section()
         self._add_resource_usage_section()
         self._add_command_line_section()
@@ -187,6 +188,173 @@ class ProcessDetailDialog(QDialog):
             panel_layout.addWidget(unknown_badge)
 
         self.content_layout.addWidget(panel)
+
+    def _add_recommendation_section(self):
+        """Add the recommendation section based on process metrics."""
+        panel = GlassmorphicPanel()
+        panel_layout = QVBoxLayout(panel)
+        panel_layout.setContentsMargins(24, 20, 24, 20)
+        panel_layout.setSpacing(12)
+
+        # Title
+        title = QLabel("SMART RECOMMENDATIONS")
+        title.setProperty("heading", "h3")
+        title.setStyleSheet(f"color: {COLORS['mustard']};")
+        panel_layout.addWidget(title)
+
+        # Generate recommendations
+        recommendations = self._generate_recommendations()
+
+        if recommendations:
+            for rec in recommendations:
+                # Recommendation item
+                rec_widget = QWidget()
+                rec_layout = QHBoxLayout(rec_widget)
+                rec_layout.setContentsMargins(0, 0, 0, 0)
+                rec_layout.setSpacing(12)
+
+                # Icon
+                icon_label = QLabel(rec['icon'])
+                icon_label.setStyleSheet("font-size: 20px;")
+                icon_label.setFixedWidth(30)
+                rec_layout.addWidget(icon_label)
+
+                # Text
+                text_label = QLabel(rec['text'])
+                text_label.setWordWrap(True)
+                text_label.setStyleSheet(f"""
+                    color: {COLORS['text_primary']};
+                    font-size: 13px;
+                    line-height: 1.6;
+                    padding: 8px;
+                    background-color: {COLORS['bg_secondary']};
+                    border-left: 4px solid {rec['color']};
+                    border-radius: 0px;
+                """)
+                rec_layout.addWidget(text_label, 1)
+
+                panel_layout.addWidget(rec_widget)
+        else:
+            # No recommendations
+            no_rec = QLabel("✓ No issues detected. This process appears to be running normally.")
+            no_rec.setStyleSheet(f"""
+                color: {COLORS['sage']};
+                font-size: 13px;
+                padding: 12px;
+                background-color: rgba(0, 255, 0, 0.05);
+                border-radius: 4px;
+            """)
+            panel_layout.addWidget(no_rec)
+
+        self.content_layout.addWidget(panel)
+
+    def _generate_recommendations(self) -> list:
+        """
+        Generate smart recommendations based on process metrics.
+
+        Returns:
+            List of recommendation dicts with 'icon', 'text', and 'color'
+        """
+        recommendations = []
+        process_name = self.process_data.get('name', '').lower()
+
+        # Check if it's a critical system process
+        critical_processes = [
+            'kernel_task', 'launchd', 'windowserver', 'finder', 'dock',
+            'systemuiserver', 'loginwindow', 'coreaudiod', 'hidd'
+        ]
+        is_critical = any(proc in process_name for proc in critical_processes)
+
+        # Get metrics
+        memory_percent = self.process_data.get('memory_percent', 0)
+        cpu_percent = self.process_data.get('cpu_percent', 0)
+        create_time = self.process_data.get('create_time')
+
+        # Calculate uptime
+        uptime_days = 0
+        if create_time:
+            from datetime import datetime
+            uptime_seconds = (datetime.now() - datetime.fromtimestamp(create_time)).total_seconds()
+            uptime_days = uptime_seconds / 86400  # Convert to days
+
+        # Recommendation 1: High memory usage
+        if memory_percent > 5.0 and not is_critical:
+            recommendations.append({
+                'icon': '⚠️',
+                'text': f'This process is using {memory_percent:.1f}% of your total memory, which is quite high. '
+                        f'If you\'re not actively using this app, consider closing it to free up memory.',
+                'color': COLORS['warning']
+            })
+        elif memory_percent > 10.0:
+            recommendations.append({
+                'icon': '🔴',
+                'text': f'This process is using {memory_percent:.1f}% of your total memory! '
+                        f'This is very high. Consider closing it if possible to improve performance.',
+                'color': COLORS['critical']
+            })
+
+        # Recommendation 2: High CPU usage
+        if cpu_percent > 50.0 and not is_critical:
+            recommendations.append({
+                'icon': '🔥',
+                'text': f'This process is using {cpu_percent:.1f}% CPU, which may slow down your Mac. '
+                        f'If you\'re not actively using it, try closing and reopening the app.',
+                'color': COLORS['critical']
+            })
+        elif cpu_percent > 20.0 and not is_critical:
+            recommendations.append({
+                'icon': '⚡',
+                'text': f'This process is using {cpu_percent:.1f}% CPU. '
+                        f'This is normal if you\'re actively using the app, but consider closing it if not.',
+                'color': COLORS['warning']
+            })
+
+        # Recommendation 3: Long running time
+        if uptime_days > 7 and not is_critical:
+            recommendations.append({
+                'icon': '⏰',
+                'text': f'This process has been running for over {int(uptime_days)} days. '
+                        f'Apps that run for a long time can accumulate memory leaks. '
+                        f'Try closing and reopening it to free up resources.',
+                'color': COLORS['mustard']
+            })
+        elif uptime_days > 3 and memory_percent > 2.0 and not is_critical:
+            recommendations.append({
+                'icon': '🔄',
+                'text': f'This process has been running for {int(uptime_days)} days and is using significant memory. '
+                        f'Restarting it might improve performance.',
+                'color': COLORS['warning']
+            })
+
+        # Recommendation 4: Browser helper processes
+        if 'helper' in process_name and ('chrome' in process_name or 'firefox' in process_name or 'safari' in process_name):
+            if memory_percent > 3.0:
+                recommendations.append({
+                    'icon': '🌐',
+                    'text': 'This is a browser helper process using significant memory. '
+                            'Try closing unused browser tabs or extensions to reduce resource usage.',
+                    'color': COLORS['mustard']
+                })
+
+        # Recommendation 5: System process warning
+        if is_critical:
+            recommendations.append({
+                'icon': '🔒',
+                'text': 'This is a critical system process. Do NOT force quit it - doing so could cause your Mac to crash or behave unexpectedly.',
+                'color': COLORS['sage']
+            })
+
+        # Recommendation 6: Electron/resource-heavy apps
+        electron_apps = ['electron', 'slack', 'discord', 'teams', 'spotify', 'atom', 'vscode']
+        if any(app in process_name for app in electron_apps) and memory_percent > 4.0:
+            recommendations.append({
+                'icon': '💡',
+                'text': 'This app is known to use significant resources. '
+                        'Consider using a web browser version or lighter alternative if performance is an issue.',
+                'color': COLORS['mustard']
+            })
+
+        return recommendations
 
     def _add_process_info_section(self):
         """Add basic process information section."""
