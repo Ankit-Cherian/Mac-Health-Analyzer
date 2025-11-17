@@ -27,46 +27,45 @@ class MainWindow(QMainWindow):
     """
     Main application window.
     """
-    
+
     def __init__(self):
         """Initialize main window."""
         super().__init__()
-        
+
         # Initialize managers
         self.startup_manager = StartupManager()
         self.process_monitor = ProcessMonitor()
-        
+
         # Set up window
         self.setup_window()
-        
+
         # Load fonts
         self.load_fonts()
-        
+
         # Apply styles
         self.apply_styles()
-        
+
         # Create dashboard
         self.dashboard = Dashboard(self.startup_manager, self.process_monitor)
         self.setCentralWidget(self.dashboard)
-    
+
     def setup_window(self):
         """Configure main window properties."""
         self.setWindowTitle("Mac Health Analyzer")
         self.setMinimumSize(1200, 800)
         self.resize(1400, 900)
-        
+
         # Center window on screen
         self.center_on_screen()
-    
+
     def center_on_screen(self):
         """Center the window on the screen."""
         screen = QApplication.primaryScreen().geometry()
         size = self.geometry()
         self.move(
-            (screen.width() - size.width()) // 2,
-            (screen.height() - size.height()) // 2
+            (screen.width() - size.width()) // 2, (screen.height() - size.height()) // 2
         )
-    
+
     def load_fonts(self):
         """Load custom fonts."""
         try:
@@ -75,15 +74,15 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"Warning: Could not load custom fonts: {e}")
             print("Falling back to system fonts.")
-    
+
     def apply_styles(self):
         """Apply application stylesheet and palette."""
         # Set palette
         self.setPalette(get_palette())
-        
+
         # Set stylesheet
         self.setStyleSheet(get_main_stylesheet())
-    
+
     def closeEvent(self, event):
         """Handle window close event."""
         # Clean up dashboard timers
@@ -107,9 +106,9 @@ class MainWindow(QMainWindow):
             return False
 
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path, "r") as f:
                 config = json.load(f)
-                return config.get('startup_guide_shown', False)
+                return config.get("startup_guide_shown", False)
         except Exception:
             return False
 
@@ -124,14 +123,14 @@ class MainWindow(QMainWindow):
             # Load existing config or create new one
             config = {}
             if config_path.exists():
-                with open(config_path, 'r') as f:
+                with open(config_path, "r") as f:
                     config = json.load(f)
 
             # Update config
-            config['startup_guide_shown'] = True
+            config["startup_guide_shown"] = True
 
             # Save config
-            with open(config_path, 'w') as f:
+            with open(config_path, "w") as f:
                 json.dump(config, f, indent=2)
         except Exception as e:
             print(f"Warning: Could not save guide preference: {e}")
@@ -140,8 +139,8 @@ class MainWindow(QMainWindow):
         """Get path to config file."""
         # Use user's home directory
         home = Path.home()
-        config_dir = home / '.mac-health-analyzer'
-        return config_dir / 'config.json'
+        config_dir = home / ".mac-health-analyzer"
+        return config_dir / "config.json"
 
 
 def main():
@@ -150,21 +149,22 @@ def main():
     QApplication.setHighDpiScaleFactorRoundingPolicy(
         Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
     )
-    
+
     # Create application
     app = QApplication(sys.argv)
     app.setApplicationName("Mac Health Analyzer")
     app.setOrganizationName("Mac Health Analyzer")
-    
+
     # Set application-wide font
     try:
         from ui.fonts import get_font_manager
+
         font_manager = get_font_manager()
         default_font = font_manager.get_display_font(size=13, weight=300)
         app.setFont(default_font)
     except Exception as e:
         print(f"Could not set application font: {e}")
-    
+
     # Create and show main window
     try:
         window = MainWindow()
@@ -177,10 +177,10 @@ def main():
     except Exception as e:
         print(f"Error starting application: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
 
 if __name__ == "__main__":
     main()
-

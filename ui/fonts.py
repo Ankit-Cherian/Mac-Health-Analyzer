@@ -13,39 +13,34 @@ def _variable_entries(weights: list[int], url: str, filename: str) -> dict:
     """
     Helper to generate entries for variable fonts that share a single file.
     """
-    return {
-        weight: {
-            'url': url,
-            'filename': filename
-        } for weight in weights
-    }
+    return {weight: {"url": url, "filename": filename} for weight in weights}
 
 
 # Font URLs from Google Fonts - Distinctive, readable fonts
 FONTS = {
-    'Sora': {
-        'weights': _variable_entries(
+    "Sora": {
+        "weights": _variable_entries(
             [300, 400, 600, 700, 800],
-            'https://github.com/google/fonts/raw/main/ofl/sora/Sora%5Bwght%5D.ttf',
-            'Sora_Variable.ttf'
+            "https://github.com/google/fonts/raw/main/ofl/sora/Sora%5Bwght%5D.ttf",
+            "Sora_Variable.ttf",
         )
     },
-    'DM Sans': {
-        'weights': _variable_entries(
+    "DM Sans": {
+        "weights": _variable_entries(
             [300, 400, 500, 600, 700],
-            'https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans%5Bwght%5D.ttf',
-            'DMSans_Variable.ttf'
+            "https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans%5Bwght%5D.ttf",
+            "DMSans_Variable.ttf",
         )
     },
-    'IBM Plex Mono': {
-        'weights': {
-            300: 'https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-Light.ttf',
-            400: 'https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-Regular.ttf',
-            500: 'https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-Medium.ttf',
-            600: 'https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-SemiBold.ttf',
-            700: 'https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-Bold.ttf',
+    "IBM Plex Mono": {
+        "weights": {
+            300: "https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-Light.ttf",
+            400: "https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-Regular.ttf",
+            500: "https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-Medium.ttf",
+            600: "https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-SemiBold.ttf",
+            700: "https://github.com/google/fonts/raw/main/ofl/ibmplexmono/IBMPlexMono-Bold.ttf",
         }
-    }
+    },
 }
 
 
@@ -64,7 +59,7 @@ class FontManager:
         if assets_dir is None:
             # Use assets/fonts in project directory
             project_dir = Path(__file__).parent.parent
-            assets_dir = project_dir / 'assets' / 'fonts'
+            assets_dir = project_dir / "assets" / "fonts"
 
         self.assets_dir = Path(assets_dir)
         self.assets_dir.mkdir(parents=True, exist_ok=True)
@@ -72,7 +67,9 @@ class FontManager:
         self.loaded_fonts = {}
         self._file_family_cache = {}
 
-    def download_font(self, font_name: str, weight: int, url: str, filename: str = None) -> str:
+    def download_font(
+        self, font_name: str, weight: int, url: str, filename: str = None
+    ) -> str:
         """
         Download a font file from URL.
 
@@ -86,7 +83,7 @@ class FontManager:
             Path to downloaded font file
         """
         # Create safe filename
-        safe_name = font_name.replace(' ', '_')
+        safe_name = font_name.replace(" ", "_")
         if filename is None:
             filename = f"{safe_name}_{weight}.ttf"
         filepath = self.assets_dir / filename
@@ -100,7 +97,7 @@ class FontManager:
             response = requests.get(url, timeout=30)
             response.raise_for_status()
 
-            with open(filepath, 'wb') as f:
+            with open(filepath, "wb") as f:
                 f.write(response.content)
 
             print(f"Downloaded {filename}")
@@ -117,11 +114,11 @@ class FontManager:
         for font_name, font_data in FONTS.items():
             print(f"\nLoading {font_name}...")
 
-            for weight, url in font_data['weights'].items():
+            for weight, url in font_data["weights"].items():
                 filename_override = None
                 if isinstance(url, dict):
-                    filename_override = url.get('filename')
-                    url = url['url']
+                    filename_override = url.get("filename")
+                    url = url["url"]
 
                 filepath = self.download_font(font_name, weight, url, filename_override)
 

@@ -10,44 +10,39 @@ from PyQt6.QtGui import QColor, QPalette
 # Neo-Brutalist Earth Tone Palette
 COLORS = {
     # Backgrounds - Warm, layered earth tones
-    'bg_primary': '#f5f1e8',      # Warm cream (main background)
-    'bg_secondary': '#e8dcc8',    # Light sand
-    'bg_tertiary': '#d4c4a8',     # Warm tan
-    'bg_card': '#ffffff',         # Pure white for cards
-    'bg_dark': '#2d2520',         # Rich espresso for contrast
-
+    "bg_primary": "#f5f1e8",  # Warm cream (main background)
+    "bg_secondary": "#e8dcc8",  # Light sand
+    "bg_tertiary": "#d4c4a8",  # Warm tan
+    "bg_card": "#ffffff",  # Pure white for cards
+    "bg_dark": "#2d2520",  # Rich espresso for contrast
     # Earth Accent Colors - Muted, sophisticated tones
-    'terracotta': '#c1614a',      # Warm terracotta (primary accent)
-    'sage': '#6b8e6f',            # Sage green (success/low status)
-    'mustard': '#d4a843',         # Warm mustard (warning)
-    'burnt_sienna': '#a0522d',    # Burnt orange/sienna (critical)
-    'clay': '#8b7355',            # Clay brown (secondary accent)
-    'olive': '#6c6c3d',           # Olive green (tertiary)
-
+    "terracotta": "#c1614a",  # Warm terracotta (primary accent)
+    "sage": "#6b8e6f",  # Sage green (success/low status)
+    "mustard": "#d4a843",  # Warm mustard (warning)
+    "burnt_sienna": "#a0522d",  # Burnt orange/sienna (critical)
+    "clay": "#8b7355",  # Clay brown (secondary accent)
+    "olive": "#6c6c3d",  # Olive green (tertiary)
     # Gradients - Warm earth transitions
-    'gradient_start': '#c1614a',   # Terracotta
-    'gradient_mid': '#d4a843',     # Mustard
-    'gradient_end': '#6b8e6f',     # Sage
-
+    "gradient_start": "#c1614a",  # Terracotta
+    "gradient_mid": "#d4a843",  # Mustard
+    "gradient_end": "#6b8e6f",  # Sage
     # Text - High contrast, warm tones
-    'text_primary': '#2d2520',    # Rich espresso (primary text)
-    'text_secondary': '#6b5d54',  # Warm gray-brown (secondary)
-    'text_muted': '#9a8b7f',      # Muted brown (tertiary)
-    'text_light': '#f5f1e8',      # Cream (for dark backgrounds)
-
+    "text_primary": "#2d2520",  # Rich espresso (primary text)
+    "text_secondary": "#6b5d54",  # Warm gray-brown (secondary)
+    "text_muted": "#9a8b7f",  # Muted brown (tertiary)
+    "text_light": "#f5f1e8",  # Cream (for dark backgrounds)
     # Status colors - Organic, readable
-    'status_low': '#6b8e6f',      # Sage green - optimal
-    'status_medium': '#d4a843',   # Mustard - warning
-    'status_high': '#c1614a',     # Terracotta - critical
-    'warning': '#d4a843',         # Alias for warning accents
-    'critical': '#a0522d',        # Alias for high severity accents
-
+    "status_low": "#6b8e6f",  # Sage green - optimal
+    "status_medium": "#d4a843",  # Mustard - warning
+    "status_high": "#c1614a",  # Terracotta - critical
+    "warning": "#d4a843",  # Alias for warning accents
+    "critical": "#a0522d",  # Alias for high severity accents
     # UI elements
-    'border': '#d4c4a8',          # Warm tan border
-    'border_dark': '#8b7355',     # Clay border for emphasis
-    'hover': '#e8dcc8',           # Light sand hover
-    'shadow': '#2d252020',        # Subtle espresso shadow
-    'accent_line': '#2d2520',     # Bold black lines (brutalist)
+    "border": "#d4c4a8",  # Warm tan border
+    "border_dark": "#8b7355",  # Clay border for emphasis
+    "hover": "#e8dcc8",  # Light sand hover
+    "shadow": "#2d252020",  # Subtle espresso shadow
+    "accent_line": "#2d2520",  # Bold black lines (brutalist)
 }
 
 
@@ -489,11 +484,11 @@ def get_status_color(percent: float) -> str:
         Color hex code
     """
     if percent < 50:
-        return COLORS['status_low']
+        return COLORS["status_low"]
     elif percent < 80:
-        return COLORS['status_medium']
+        return COLORS["status_medium"]
     else:
-        return COLORS['status_high']
+        return COLORS["status_high"]
 
 
 def get_palette() -> QPalette:
@@ -506,23 +501,23 @@ def get_palette() -> QPalette:
     palette = QPalette()
 
     # Window
-    palette.setColor(QPalette.ColorRole.Window, QColor(COLORS['bg_primary']))
-    palette.setColor(QPalette.ColorRole.WindowText, QColor(COLORS['text_primary']))
+    palette.setColor(QPalette.ColorRole.Window, QColor(COLORS["bg_primary"]))
+    palette.setColor(QPalette.ColorRole.WindowText, QColor(COLORS["text_primary"]))
 
     # Base
-    palette.setColor(QPalette.ColorRole.Base, QColor(COLORS['bg_card']))
-    palette.setColor(QPalette.ColorRole.AlternateBase, QColor(COLORS['bg_secondary']))
+    palette.setColor(QPalette.ColorRole.Base, QColor(COLORS["bg_card"]))
+    palette.setColor(QPalette.ColorRole.AlternateBase, QColor(COLORS["bg_secondary"]))
 
     # Text
-    palette.setColor(QPalette.ColorRole.Text, QColor(COLORS['text_primary']))
-    palette.setColor(QPalette.ColorRole.BrightText, QColor(COLORS['terracotta']))
+    palette.setColor(QPalette.ColorRole.Text, QColor(COLORS["text_primary"]))
+    palette.setColor(QPalette.ColorRole.BrightText, QColor(COLORS["terracotta"]))
 
     # Button
-    palette.setColor(QPalette.ColorRole.Button, QColor(COLORS['terracotta']))
-    palette.setColor(QPalette.ColorRole.ButtonText, QColor(COLORS['text_light']))
+    palette.setColor(QPalette.ColorRole.Button, QColor(COLORS["terracotta"]))
+    palette.setColor(QPalette.ColorRole.ButtonText, QColor(COLORS["text_light"]))
 
     # Highlight
-    palette.setColor(QPalette.ColorRole.Highlight, QColor(COLORS['terracotta']))
-    palette.setColor(QPalette.ColorRole.HighlightedText, QColor(COLORS['text_light']))
+    palette.setColor(QPalette.ColorRole.Highlight, QColor(COLORS["terracotta"]))
+    palette.setColor(QPalette.ColorRole.HighlightedText, QColor(COLORS["text_light"]))
 
     return palette

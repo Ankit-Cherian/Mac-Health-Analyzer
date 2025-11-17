@@ -7,14 +7,21 @@ from collections import deque
 import pyqtgraph as pg
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QSize
-from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QLinearGradient, QConicalGradient
+from PyQt6.QtGui import (
+    QPainter,
+    QColor,
+    QPen,
+    QBrush,
+    QLinearGradient,
+    QConicalGradient,
+)
 from .styles import COLORS
 
 
 # Configure PyQtGraph for light theme
-pg.setConfigOption('background', COLORS['bg_primary'])
-pg.setConfigOption('foreground', COLORS['text_primary'])
-pg.setConfigOption('antialias', True)
+pg.setConfigOption("background", COLORS["bg_primary"])
+pg.setConfigOption("foreground", COLORS["text_primary"])
+pg.setConfigOption("antialias", True)
 
 
 class RealtimeLineChart(QWidget):
@@ -43,34 +50,44 @@ class RealtimeLineChart(QWidget):
 
         # Add current value label at the top
         self.current_value_label = QLabel("--")
-        self.current_value_label.setStyleSheet(f"""
+        self.current_value_label.setStyleSheet(
+            f"""
             color: {COLORS['terracotta']};
             font-size: 24px;
             font-weight: bold;
             padding: 8px;
             background-color: {COLORS['bg_card']};
-        """)
+        """
+        )
         self.current_value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.current_value_label)
 
         # Create plot widget
         self.plot_widget = pg.PlotWidget()
-        self.plot_widget.setBackground(COLORS['bg_card'])
+        self.plot_widget.setBackground(COLORS["bg_card"])
         self.plot_widget.showGrid(x=True, y=True, alpha=0.2)
         self.plot_widget.setMouseEnabled(x=False, y=False)
         self.plot_widget.setMenuEnabled(False)
         self.plot_widget.hideButtons()
 
         # Style the plot with clearer labels
-        self.plot_widget.setLabel('left', self.title, color=COLORS['terracotta'],
-                                  **{'font-size': '14pt', 'font-weight': 'bold'})
-        self.plot_widget.setLabel('bottom', 'Time (seconds ago)', color=COLORS['text_secondary'],
-                                  **{'font-size': '12pt', 'font-weight': 'bold'})
+        self.plot_widget.setLabel(
+            "left",
+            self.title,
+            color=COLORS["terracotta"],
+            **{"font-size": "14pt", "font-weight": "bold"},
+        )
+        self.plot_widget.setLabel(
+            "bottom",
+            "Time (seconds ago)",
+            color=COLORS["text_secondary"],
+            **{"font-size": "12pt", "font-weight": "bold"},
+        )
 
         # Set axis color and styling
-        axis_pen = pg.mkPen(color=COLORS['border_dark'], width=2)
-        left_axis = self.plot_widget.getAxis('left')
-        bottom_axis = self.plot_widget.getAxis('bottom')
+        axis_pen = pg.mkPen(color=COLORS["border_dark"], width=2)
+        left_axis = self.plot_widget.getAxis("left")
+        bottom_axis = self.plot_widget.getAxis("bottom")
 
         left_axis.setPen(axis_pen)
         bottom_axis.setPen(axis_pen)
@@ -81,26 +98,29 @@ class RealtimeLineChart(QWidget):
 
         # Set fixed ranges to keep the chart scale stable
         self.plot_widget.setYRange(0, 100)
-        self.plot_widget.enableAutoRange(axis='xy', enable=False)
+        self.plot_widget.enableAutoRange(axis="xy", enable=False)
         self.plot_widget.setLimits(xMin=0, xMax=self.max_points, yMin=0, yMax=100)
 
         # Add percentage symbols to Y-axis if this is a percentage chart
-        if '%' in self.title:
-            left_axis.setLabel(units='%')
+        if "%" in self.title:
+            left_axis.setLabel(units="%")
 
         # Create the line with bold style
-        line_pen = pg.mkPen(color=COLORS['terracotta'], width=3)
-        self.data_line = self.plot_widget.plot(
-            pen=line_pen,
-            name=self.title
-        )
+        line_pen = pg.mkPen(color=COLORS["terracotta"], width=3)
+        self.data_line = self.plot_widget.plot(pen=line_pen, name=self.title)
 
         # Create fill area under the curve
-        terracotta_rgb = QColor(COLORS['terracotta'])
-        self.fill_curve = pg.PlotCurveItem(pen=None,
-                                           brush=(terracotta_rgb.red(), terracotta_rgb.green(),
-                                                 terracotta_rgb.blue(), 40),  # Semi-transparent
-                                           fillLevel=0)
+        terracotta_rgb = QColor(COLORS["terracotta"])
+        self.fill_curve = pg.PlotCurveItem(
+            pen=None,
+            brush=(
+                terracotta_rgb.red(),
+                terracotta_rgb.green(),
+                terracotta_rgb.blue(),
+                40,
+            ),  # Semi-transparent
+            fillLevel=0,
+        )
         self.plot_widget.addItem(self.fill_curve)
 
         layout.addWidget(self.plot_widget)
@@ -166,11 +186,11 @@ class CircularGauge(QWidget):
         percent = (self.value / self.max_value) * 100 if self.max_value > 0 else 0
 
         if percent < 50:
-            return COLORS['sage']
+            return COLORS["sage"]
         elif percent < 80:
-            return COLORS['mustard']
+            return COLORS["mustard"]
         else:
-            return COLORS['terracotta']
+            return COLORS["terracotta"]
 
     def paintEvent(self, event):
         """Paint the circular gauge."""
@@ -187,12 +207,12 @@ class CircularGauge(QWidget):
         radius = (size // 2) - 20
 
         # Draw background circle
-        bg_pen = QPen(QColor(COLORS['border']), 12, Qt.PenStyle.SolidLine)
+        bg_pen = QPen(QColor(COLORS["border"]), 12, Qt.PenStyle.SolidLine)
         bg_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         painter.setPen(bg_pen)
-        painter.drawArc(center_x - radius, center_y - radius,
-                       radius * 2, radius * 2,
-                       0, 360 * 16)
+        painter.drawArc(
+            center_x - radius, center_y - radius, radius * 2, radius * 2, 0, 360 * 16
+        )
 
         # Draw value arc with gradient
         value_percent = (self.value / self.max_value) if self.max_value > 0 else 0
@@ -205,20 +225,29 @@ class CircularGauge(QWidget):
 
         # Start from top (90 degrees)
         start_angle = 90 * 16
-        painter.drawArc(center_x - radius, center_y - radius,
-                       radius * 2, radius * 2,
-                       start_angle, -span_angle)
+        painter.drawArc(
+            center_x - radius,
+            center_y - radius,
+            radius * 2,
+            radius * 2,
+            start_angle,
+            -span_angle,
+        )
 
         # Draw center circle
         center_radius = radius - 30
         gradient = QConicalGradient(center_x, center_y, 0)
-        gradient.setColorAt(0, QColor(COLORS['bg_card']))
-        gradient.setColorAt(1, QColor(COLORS['bg_secondary']))
+        gradient.setColorAt(0, QColor(COLORS["bg_card"]))
+        gradient.setColorAt(1, QColor(COLORS["bg_secondary"]))
 
         painter.setBrush(QBrush(gradient))
         painter.setPen(QPen(QColor(color), 2))
-        painter.drawEllipse(center_x - center_radius, center_y - center_radius,
-                           center_radius * 2, center_radius * 2)
+        painter.drawEllipse(
+            center_x - center_radius,
+            center_y - center_radius,
+            center_radius * 2,
+            center_radius * 2,
+        )
 
         # Draw value text
         painter.setPen(QColor(color))
@@ -230,30 +259,36 @@ class CircularGauge(QWidget):
         value_font.setBold(True)
         painter.setFont(value_font)
 
-        value_text = f"{self.value:.1f}" if isinstance(self.value, float) else str(self.value)
+        value_text = (
+            f"{self.value:.1f}" if isinstance(self.value, float) else str(self.value)
+        )
         value_rect = painter.fontMetrics().boundingRect(value_text)
-        painter.drawText(center_x - value_rect.width() // 2,
-                        center_y + value_rect.height() // 4,
-                        value_text)
+        painter.drawText(
+            center_x - value_rect.width() // 2,
+            center_y + value_rect.height() // 4,
+            value_text,
+        )
 
         # Unit
         unit_font = painter.font()
         unit_font.setPointSize(12)
         unit_font.setBold(False)
         painter.setFont(unit_font)
-        painter.setPen(QColor(COLORS['text_secondary']))
+        painter.setPen(QColor(COLORS["text_secondary"]))
 
         unit_rect = painter.fontMetrics().boundingRect(self.unit)
-        painter.drawText(center_x - unit_rect.width() // 2,
-                        center_y + value_rect.height() + 10,
-                        self.unit)
+        painter.drawText(
+            center_x - unit_rect.width() // 2,
+            center_y + value_rect.height() + 10,
+            self.unit,
+        )
 
         # Draw title at top
         title_font = painter.font()
         title_font.setPointSize(14)
         title_font.setBold(True)
         painter.setFont(title_font)
-        painter.setPen(QColor(COLORS['text_primary']))
+        painter.setPen(QColor(COLORS["text_primary"]))
 
         title_rect = painter.fontMetrics().boundingRect(self.title)
         painter.drawText(center_x - title_rect.width() // 2, 18, self.title)
@@ -302,12 +337,16 @@ class SparkLine(QWidget):
             points.append((x, y))
 
         # Draw line
-        pen = QPen(QColor(COLORS['clay']), 2)
+        pen = QPen(QColor(COLORS["clay"]), 2)
         painter.setPen(pen)
 
         for i in range(len(points) - 1):
-            painter.drawLine(int(points[i][0]), int(points[i][1]),
-                           int(points[i + 1][0]), int(points[i + 1][1]))
+            painter.drawLine(
+                int(points[i][0]),
+                int(points[i][1]),
+                int(points[i + 1][0]),
+                int(points[i + 1][1]),
+            )
 
 
 class BarChart(QWidget):
@@ -339,23 +378,27 @@ class BarChart(QWidget):
         normalized = []
         for item in data[:10]:
             if isinstance(item, dict):
-                normalized.append({
-                    'label': item.get('label', ''),
-                    'value': item.get('value', 0),
-                    'max': item.get('max', 100),
-                    'payload': item.get('payload')
-                })
+                normalized.append(
+                    {
+                        "label": item.get("label", ""),
+                        "value": item.get("value", 0),
+                        "max": item.get("max", 100),
+                        "payload": item.get("payload"),
+                    }
+                )
             elif isinstance(item, (list, tuple)):
-                label = item[0] if len(item) > 0 else ''
+                label = item[0] if len(item) > 0 else ""
                 value = item[1] if len(item) > 1 else 0
                 max_value = item[2] if len(item) > 2 else 100
                 payload = item[3] if len(item) > 3 else None
-                normalized.append({
-                    'label': label,
-                    'value': value,
-                    'max': max_value,
-                    'payload': payload
-                })
+                normalized.append(
+                    {
+                        "label": label,
+                        "value": value,
+                        "max": max_value,
+                        "payload": payload,
+                    }
+                )
 
         self.data = normalized
         self.update()
@@ -372,7 +415,7 @@ class BarChart(QWidget):
         height = self.height()
 
         # Title
-        painter.setPen(QColor(COLORS['text_primary']))
+        painter.setPen(QColor(COLORS["text_primary"]))
         title_font = painter.font()
         title_font.setPointSize(14)
         title_font.setBold(True)
@@ -383,7 +426,7 @@ class BarChart(QWidget):
         hint_font = painter.font()
         hint_font.setPointSize(10)
         painter.setFont(hint_font)
-        painter.setPen(QColor(COLORS['text_secondary']))
+        painter.setPen(QColor(COLORS["text_secondary"]))
         painter.drawText(width - 280, 20, "Double-click to learn more")
 
         # Draw bars
@@ -400,9 +443,9 @@ class BarChart(QWidget):
         metrics = painter.fontMetrics()
 
         for i, entry in enumerate(self.data):
-            label = entry.get('label', '')
-            value = entry.get('value', 0)
-            max_value = entry.get('max', 100)
+            label = entry.get("label", "")
+            value = entry.get("value", 0)
+            max_value = entry.get("max", 100)
             y = start_y + i * (bar_height + bar_spacing)
 
             # Calculate bar width
@@ -411,15 +454,15 @@ class BarChart(QWidget):
 
             # Color based on percentage
             if percent < 0.5:
-                color = COLORS['sage']
+                color = COLORS["sage"]
             elif percent < 0.8:
-                color = COLORS['mustard']
+                color = COLORS["mustard"]
             else:
-                color = COLORS['terracotta']
+                color = COLORS["terracotta"]
 
             # Draw background bar
             painter.setPen(Qt.PenStyle.NoPen)
-            painter.setBrush(QColor(COLORS['border']))
+            painter.setBrush(QColor(COLORS["border"]))
             painter.drawRoundedRect(80, y, max_bar_width, bar_height, 4, 4)
 
             # Draw value bar with gradient
@@ -433,11 +476,12 @@ class BarChart(QWidget):
 
             # Store bar rectangle for click detection
             from PyQt6.QtCore import QRect
+
             bar_rect = QRect(10, y, max_bar_width + 80, bar_height)
             self.bar_rects.append((bar_rect, entry))
 
             # Draw label
-            painter.setPen(QColor(COLORS['text_primary']))
+            painter.setPen(QColor(COLORS["text_primary"]))
             display_label = metrics.elidedText(label, Qt.TextElideMode.ElideRight, 70)
             painter.drawText(10, y + 17, display_label)
 
@@ -449,6 +493,7 @@ class BarChart(QWidget):
     def mouseDoubleClickEvent(self, event):
         """Handle double-click on bars."""
         from PyQt6.QtCore import QPoint
+
         click_pos = event.pos()
 
         # Check if click is on any bar

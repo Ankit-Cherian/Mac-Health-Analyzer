@@ -5,8 +5,15 @@ Provides a friendly introduction to the Mac Health Analyzer app.
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-    QWidget, QStackedWidget, QCheckBox, QSizePolicy, QScrollArea
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QWidget,
+    QStackedWidget,
+    QCheckBox,
+    QSizePolicy,
+    QScrollArea,
 )
 from ui.widgets import GlassmorphicPanel, StyledButton
 from ui.styles import COLORS
@@ -34,12 +41,14 @@ class StartupGuide(QDialog):
         self.setMinimumHeight(700)
 
         # Apply styling
-        self.setStyleSheet(f"""
+        self.setStyleSheet(
+            f"""
             QDialog {{
                 background-color: {COLORS['bg_primary']};
                 color: {COLORS['text_primary']};
             }}
-        """)
+        """
+        )
 
         self.init_ui()
 
@@ -73,12 +82,15 @@ class StartupGuide(QDialog):
         # Step indicator
         self.step_indicator = QLabel("Step 1 of 4")
         self.step_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.step_indicator.setStyleSheet(f"color: {COLORS['text_secondary']}; font-size: 12px;")
+        self.step_indicator.setStyleSheet(
+            f"color: {COLORS['text_secondary']}; font-size: 12px;"
+        )
         layout.addWidget(self.step_indicator)
 
         # "Don't show again" checkbox
         self.dont_show_checkbox = QCheckBox("Don't show this guide again")
-        self.dont_show_checkbox.setStyleSheet(f"""
+        self.dont_show_checkbox.setStyleSheet(
+            f"""
             QCheckBox {{
                 color: {COLORS['text_secondary']};
                 font-size: 13px;
@@ -87,7 +99,8 @@ class StartupGuide(QDialog):
                 width: 18px;
                 height: 18px;
             }}
-        """)
+        """
+        )
         self.dont_show_checkbox.stateChanged.connect(self._on_checkbox_changed)
         layout.addWidget(self.dont_show_checkbox)
 
@@ -108,8 +121,9 @@ class StartupGuide(QDialog):
 
         layout.addLayout(button_layout)
 
-    def _create_step_panel(self, icon_text: str, title_text: str,
-                           body_html: str, accent_color: str) -> QWidget:
+    def _create_step_panel(
+        self, icon_text: str, title_text: str, body_html: str, accent_color: str
+    ) -> QWidget:
         """Create a reusable info panel used by each step."""
         panel = GlassmorphicPanel()
         panel_layout = QVBoxLayout(panel)
@@ -131,14 +145,16 @@ class StartupGuide(QDialog):
         body.setWordWrap(True)
         body.setTextFormat(Qt.TextFormat.RichText)
         body.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
-        body.setStyleSheet(f"""
+        body.setStyleSheet(
+            f"""
             color: {COLORS['text_primary']};
             font-size: 15px;
             line-height: 1.7;
             padding: 16px;
             background-color: {COLORS['bg_secondary']};
             border-left: 4px solid {accent_color};
-        """)
+        """
+        )
         body.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         panel_layout.addWidget(body)
         panel_layout.addStretch()
@@ -172,8 +188,9 @@ class StartupGuide(QDialog):
             "<li>Get simple recommendations to improve performance.</li>"
             "</ul>"
         )
-        return self._create_step_panel("🖥️", "What is Mac Health Analyzer?",
-                                       description_html, COLORS['terracotta'])
+        return self._create_step_panel(
+            "🖥️", "What is Mac Health Analyzer?", description_html, COLORS["terracotta"]
+        )
 
     def _create_step_2(self) -> QWidget:
         """Create step 2: Startup Items tab."""
@@ -187,8 +204,9 @@ class StartupGuide(QDialog):
             "</ul>"
             "<p><b>Tip:</b> Disable startup items you don't need to launch automatically.</p>"
         )
-        return self._create_step_panel("🚀", "Startup Items Tab",
-                                       description_html, COLORS['sage'])
+        return self._create_step_panel(
+            "🚀", "Startup Items Tab", description_html, COLORS["sage"]
+        )
 
     def _create_step_3(self) -> QWidget:
         """Create step 3: Processes tab."""
@@ -202,8 +220,9 @@ class StartupGuide(QDialog):
             "</ul>"
             "<p><b>Tip:</b> If your Mac feels slow, look for processes using lots of memory or CPU.</p>"
         )
-        return self._create_step_panel("⚙️", "Processes Tab",
-                                       description_html, COLORS['mustard'])
+        return self._create_step_panel(
+            "⚙️", "Processes Tab", description_html, COLORS["mustard"]
+        )
 
     def _create_step_4(self) -> QWidget:
         """Create step 4: Tips and tricks."""
@@ -221,13 +240,18 @@ class StartupGuide(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(12)
 
-        panel = self._create_step_panel("💡", "Tips for Success",
-                                        tips_html, COLORS['terracotta'])
+        panel = self._create_step_panel(
+            "💡", "Tips for Success", tips_html, COLORS["terracotta"]
+        )
         layout.addWidget(panel, alignment=Qt.AlignmentFlag.AlignTop)
 
-        ready = QLabel("You're all set! Click \"Finish\" to start using Mac Health Analyzer.")
+        ready = QLabel(
+            'You\'re all set! Click "Finish" to start using Mac Health Analyzer.'
+        )
         ready.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        ready.setStyleSheet(f"color: {COLORS['sage']}; font-size: 13px; font-weight: bold;")
+        ready.setStyleSheet(
+            f"color: {COLORS['sage']}; font-size: 13px; font-weight: bold;"
+        )
         layout.addWidget(ready)
         layout.addStretch()
         return widget
@@ -263,7 +287,7 @@ class StartupGuide(QDialog):
 
     def _on_checkbox_changed(self, state):
         """Handle checkbox state change."""
-        self.dont_show_again = (state == Qt.CheckState.Checked.value)
+        self.dont_show_again = state == Qt.CheckState.Checked.value
 
     def should_show_again(self) -> bool:
         """

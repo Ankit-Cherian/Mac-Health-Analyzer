@@ -4,8 +4,16 @@ Enhanced with real-time charts, gauges, and cyberpunk visualizations.
 """
 
 import time
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
-                             QLabel, QGridLayout, QScrollArea, QSplitter)
+from PyQt6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QTabWidget,
+    QLabel,
+    QGridLayout,
+    QScrollArea,
+    QSplitter,
+)
 from PyQt6.QtCore import QTimer, Qt
 from ui.startup_tab import StartupTab
 from ui.processes_tab import ProcessesTab
@@ -197,6 +205,7 @@ class Dashboard(QWidget):
 
         # Hint text
         from ui.styles import COLORS
+
         hint_label = QLabel("Click cards for details")
         hint_label.setStyleSheet(f"color: {COLORS['text_secondary']}; font-size: 12px;")
         title_layout.addWidget(hint_label)
@@ -266,7 +275,10 @@ class Dashboard(QWidget):
         """Refresh process data."""
         # Only refresh if processes tab is visible AND tab is visible to user
         try:
-            if self.tab_widget.currentWidget() == self.processes_tab and self.isVisible():
+            if (
+                self.tab_widget.currentWidget() == self.processes_tab
+                and self.isVisible()
+            ):
                 self.processes_tab.update_data()
         except Exception as e:
             print(f"Error refreshing processes: {e}")
@@ -288,10 +300,10 @@ class Dashboard(QWidget):
             cpu_info = self.process_monitor.get_cpu_info()
 
             # Update gauges
-            cpu_percent = cpu_info.get('percent', 0.0)
+            cpu_percent = cpu_info.get("percent", 0.0)
             self.cpu_gauge.set_value(cpu_percent, 100)
 
-            memory_percent = mem_info.get('percent', 0.0)
+            memory_percent = mem_info.get("percent", 0.0)
             self.memory_gauge.set_value(memory_percent, 100)
 
             process_count = self.process_monitor.get_process_count()
@@ -303,20 +315,21 @@ class Dashboard(QWidget):
 
             # Update info cards
             self.total_memory_card.update_value(
-                mem_info.get('total_human', 'N/A'),
-                "low"
+                mem_info.get("total_human", "N/A"), "low"
             )
 
             self.cpu_cores_card.update_value(
-                f"{cpu_info.get('count_logical', 0)}",
-                "low"
+                f"{cpu_info.get('count_logical', 0)}", "low"
             )
 
             startup_summary = self.startup_manager.get_summary()
-            startup_status = "high" if startup_summary['enabled'] > 20 else "medium" if startup_summary['enabled'] > 10 else "low"
+            startup_status = (
+                "high"
+                if startup_summary["enabled"] > 20
+                else "medium" if startup_summary["enabled"] > 10 else "low"
+            )
             self.startup_items_card.update_value(
-                str(startup_summary['total']),
-                startup_status
+                str(startup_summary["total"]), startup_status
             )
 
             # Update bar charts and cache process data
@@ -324,12 +337,14 @@ class Dashboard(QWidget):
             self._cached_top_memory = top_memory  # Cache retained for potential reuse
             memory_data = []
             for proc in top_memory:
-                memory_data.append({
-                    'label': proc['name'],
-                    'value': proc.get('memory_percent', 0.0),
-                    'max': 100,
-                    'payload': proc
-                })
+                memory_data.append(
+                    {
+                        "label": proc["name"],
+                        "value": proc.get("memory_percent", 0.0),
+                        "max": 100,
+                        "payload": proc,
+                    }
+                )
 
             self.memory_bar_chart.set_data(memory_data)
 
@@ -337,12 +352,14 @@ class Dashboard(QWidget):
             self._cached_top_cpu = top_cpu  # Cache retained for potential reuse
             cpu_data = []
             for proc in top_cpu:
-                cpu_data.append({
-                    'label': proc['name'],
-                    'value': proc.get('cpu_percent', 0.0),
-                    'max': 100,
-                    'payload': proc
-                })
+                cpu_data.append(
+                    {
+                        "label": proc["name"],
+                        "value": proc.get("cpu_percent", 0.0),
+                        "max": 100,
+                        "payload": proc,
+                    }
+                )
 
             self.cpu_bar_chart.set_data(cpu_data)
 
@@ -360,7 +377,7 @@ class Dashboard(QWidget):
         Args:
             entry: Data dictionary emitted by the chart
         """
-        process_data = entry.get('payload')
+        process_data = entry.get("payload")
         if process_data:
             self._show_process_detail(process_data)
 
@@ -371,7 +388,7 @@ class Dashboard(QWidget):
         Args:
             entry: Data dictionary emitted by the chart
         """
-        process_data = entry.get('payload')
+        process_data = entry.get("payload")
         if process_data:
             self._show_process_detail(process_data)
 
@@ -383,18 +400,20 @@ class Dashboard(QWidget):
             process_data: Process information dictionary
         """
         from ui.process_detail_dialog import ProcessDetailDialog
+
         dialog = ProcessDetailDialog(process_data, self)
         dialog.exec()
 
     def _show_memory_info(self):
         """Show detailed memory information dialog."""
         from PyQt6.QtWidgets import QMessageBox
+
         mem_info = self.process_monitor.get_memory_info()
 
-        total = mem_info.get('total_human', 'N/A')
-        used = mem_info.get('used_human', 'N/A')
-        available = mem_info.get('available_human', 'N/A')
-        percent = mem_info.get('percent', 0)
+        total = mem_info.get("total_human", "N/A")
+        used = mem_info.get("used_human", "N/A")
+        available = mem_info.get("available_human", "N/A")
+        percent = mem_info.get("percent", 0)
 
         message = (
             f"<h3>Memory Information</h3>"
@@ -415,11 +434,12 @@ class Dashboard(QWidget):
     def _show_cpu_info(self):
         """Show detailed CPU information dialog."""
         from PyQt6.QtWidgets import QMessageBox
+
         cpu_info = self.process_monitor.get_cpu_info()
 
-        logical_cores = cpu_info.get('count_logical', 0)
-        physical_cores = cpu_info.get('count_physical', 0)
-        percent = cpu_info.get('percent', 0)
+        logical_cores = cpu_info.get("count_logical", 0)
+        physical_cores = cpu_info.get("count_physical", 0)
+        percent = cpu_info.get("percent", 0)
 
         message = (
             f"<h3>CPU Information</h3>"
@@ -441,11 +461,12 @@ class Dashboard(QWidget):
     def _show_startup_info(self):
         """Show detailed startup items information dialog."""
         from PyQt6.QtWidgets import QMessageBox
+
         summary = self.startup_manager.get_summary()
 
-        total = summary['total']
-        enabled = summary['enabled']
-        disabled = summary['disabled']
+        total = summary["total"]
+        enabled = summary["enabled"]
+        disabled = summary["disabled"]
 
         message = (
             f"<h3>Startup Items</h3>"
@@ -471,9 +492,7 @@ class Dashboard(QWidget):
                 f"<p><b>Tip:</b> Review your startup items occasionally and disable any you don't use.</p>"
             )
         else:
-            message += (
-                f"This is a healthy amount. Your Mac should start quickly!</p>"
-            )
+            message += f"This is a healthy amount. Your Mac should start quickly!</p>"
 
         QMessageBox.information(self, "Startup Items", message)
 

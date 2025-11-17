@@ -5,8 +5,15 @@ Process detail dialog showing friendly explanations and detailed information.
 from datetime import datetime
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QScrollArea, QWidget, QFrame, QSizePolicy
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QWidget,
+    QFrame,
+    QSizePolicy,
 )
 from ui.widgets import GlassmorphicPanel, StatRow, ToggleSwitch, StyledButton
 from ui.styles import COLORS
@@ -36,12 +43,14 @@ class ProcessDetailDialog(QDialog):
         self.setMinimumHeight(500)
 
         # Apply the same styling as main window
-        self.setStyleSheet(f"""
+        self.setStyleSheet(
+            f"""
             QDialog {{
                 background-color: {COLORS['bg_primary']};
                 color: {COLORS['text_primary']};
             }}
-        """)
+        """
+        )
 
         self.init_ui()
 
@@ -63,12 +72,14 @@ class ProcessDetailDialog(QDialog):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
-        scroll.setStyleSheet("""
+        scroll.setStyleSheet(
+            """
             QScrollArea {
                 background: transparent;
                 border: none;
             }
-        """)
+        """
+        )
 
         # Content widget
         content_widget = QWidget()
@@ -98,11 +109,13 @@ class ProcessDetailDialog(QDialog):
         header_layout.setContentsMargins(24, 20, 24, 20)
 
         # Process name
-        name_label = QLabel(self.process_data.get('name', 'Unknown Process'))
+        name_label = QLabel(self.process_data.get("name", "Unknown Process"))
         name_label.setProperty("heading", "h1")
         name_label.setStyleSheet(f"color: {COLORS['terracotta']};")
         name_label.setWordWrap(True)
-        name_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        name_label.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
         header_layout.addWidget(name_label)
 
         # PID
@@ -152,7 +165,8 @@ class ProcessDetailDialog(QDialog):
         # Description label (will be updated based on toggle)
         self.description_label = QLabel()
         self.description_label.setWordWrap(True)
-        self.description_label.setStyleSheet(f"""
+        self.description_label.setStyleSheet(
+            f"""
             color: {COLORS['text_primary']};
             font-size: 14px;
             line-height: 1.6;
@@ -160,33 +174,38 @@ class ProcessDetailDialog(QDialog):
             background-color: {COLORS['bg_secondary']};
             border-left: 4px solid {COLORS['terracotta']};
             border-radius: 0px;
-        """)
+        """
+        )
         self._update_description()
         panel_layout.addWidget(self.description_label)
 
         # Add info badge if process is known
-        process_name = self.process_data.get('name', '')
+        process_name = self.process_data.get("name", "")
         if ProcessDescriber.is_known_process(process_name):
             known_badge = QLabel("✓ Recognized Process")
-            known_badge.setStyleSheet(f"""
+            known_badge.setStyleSheet(
+                f"""
                 color: {COLORS['sage']};
                 font-size: 12px;
                 font-weight: bold;
                 padding: 4px 8px;
                 background-color: rgba(0, 255, 0, 0.1);
                 border-radius: 4px;
-            """)
+            """
+            )
             panel_layout.addWidget(known_badge)
         else:
             unknown_badge = QLabel("? Custom or System Process")
-            unknown_badge.setStyleSheet(f"""
+            unknown_badge.setStyleSheet(
+                f"""
                 color: {COLORS['warning']};
                 font-size: 12px;
                 font-weight: bold;
                 padding: 4px 8px;
                 background-color: rgba(255, 136, 0, 0.1);
                 border-radius: 4px;
-            """)
+            """
+            )
             panel_layout.addWidget(unknown_badge)
 
         self.content_layout.addWidget(panel)
@@ -216,15 +235,16 @@ class ProcessDetailDialog(QDialog):
                 rec_layout.setSpacing(12)
 
                 # Icon
-                icon_label = QLabel(rec['icon'])
+                icon_label = QLabel(rec["icon"])
                 icon_label.setStyleSheet("font-size: 20px;")
                 icon_label.setFixedWidth(30)
                 rec_layout.addWidget(icon_label)
 
                 # Text
-                text_label = QLabel(rec['text'])
+                text_label = QLabel(rec["text"])
                 text_label.setWordWrap(True)
-                text_label.setStyleSheet(f"""
+                text_label.setStyleSheet(
+                    f"""
                     color: {COLORS['text_primary']};
                     font-size: 13px;
                     line-height: 1.6;
@@ -232,20 +252,25 @@ class ProcessDetailDialog(QDialog):
                     background-color: {COLORS['bg_secondary']};
                     border-left: 4px solid {rec['color']};
                     border-radius: 0px;
-                """)
+                """
+                )
                 rec_layout.addWidget(text_label, 1)
 
                 panel_layout.addWidget(rec_widget)
         else:
             # No recommendations
-            no_rec = QLabel("✓ No issues detected. This process appears to be running normally.")
-            no_rec.setStyleSheet(f"""
+            no_rec = QLabel(
+                "✓ No issues detected. This process appears to be running normally."
+            )
+            no_rec.setStyleSheet(
+                f"""
                 color: {COLORS['sage']};
                 font-size: 13px;
                 padding: 12px;
                 background-color: rgba(0, 255, 0, 0.05);
                 border-radius: 4px;
-            """)
+            """
+            )
             panel_layout.addWidget(no_rec)
 
         self.content_layout.addWidget(panel)
@@ -258,103 +283,143 @@ class ProcessDetailDialog(QDialog):
             List of recommendation dicts with 'icon', 'text', and 'color'
         """
         recommendations = []
-        process_name = self.process_data.get('name', '').lower()
+        process_name = self.process_data.get("name", "").lower()
 
         # Check if it's a critical system process
         critical_processes = [
-            'kernel_task', 'launchd', 'windowserver', 'finder', 'dock',
-            'systemuiserver', 'loginwindow', 'coreaudiod', 'hidd'
+            "kernel_task",
+            "launchd",
+            "windowserver",
+            "finder",
+            "dock",
+            "systemuiserver",
+            "loginwindow",
+            "coreaudiod",
+            "hidd",
         ]
         is_critical = any(proc in process_name for proc in critical_processes)
 
         # Get metrics
-        memory_percent = self.process_data.get('memory_percent', 0)
-        cpu_percent = self.process_data.get('cpu_percent', 0)
-        create_time = self.process_data.get('create_time')
+        memory_percent = self.process_data.get("memory_percent", 0)
+        cpu_percent = self.process_data.get("cpu_percent", 0)
+        create_time = self.process_data.get("create_time")
 
         # Calculate uptime
         uptime_days = 0
         if create_time:
             from datetime import datetime
-            uptime_seconds = (datetime.now() - datetime.fromtimestamp(create_time)).total_seconds()
+
+            uptime_seconds = (
+                datetime.now() - datetime.fromtimestamp(create_time)
+            ).total_seconds()
             uptime_days = uptime_seconds / 86400  # Convert to days
 
         # Recommendation 1: High memory usage
         if memory_percent > 5.0 and not is_critical:
-            recommendations.append({
-                'icon': '⚠️',
-                'text': f'This process is using {memory_percent:.1f}% of your total memory, which is quite high. '
-                        f'If you\'re not actively using this app, consider closing it to free up memory.',
-                'color': COLORS['warning']
-            })
+            recommendations.append(
+                {
+                    "icon": "⚠️",
+                    "text": f"This process is using {memory_percent:.1f}% of your total memory, which is quite high. "
+                    f"If you're not actively using this app, consider closing it to free up memory.",
+                    "color": COLORS["warning"],
+                }
+            )
         elif memory_percent > 10.0:
-            recommendations.append({
-                'icon': '🔴',
-                'text': f'This process is using {memory_percent:.1f}% of your total memory! '
-                        f'This is very high. Consider closing it if possible to improve performance.',
-                'color': COLORS['critical']
-            })
+            recommendations.append(
+                {
+                    "icon": "🔴",
+                    "text": f"This process is using {memory_percent:.1f}% of your total memory! "
+                    f"This is very high. Consider closing it if possible to improve performance.",
+                    "color": COLORS["critical"],
+                }
+            )
 
         # Recommendation 2: High CPU usage
         if cpu_percent > 50.0 and not is_critical:
-            recommendations.append({
-                'icon': '🔥',
-                'text': f'This process is using {cpu_percent:.1f}% CPU, which may slow down your Mac. '
-                        f'If you\'re not actively using it, try closing and reopening the app.',
-                'color': COLORS['critical']
-            })
+            recommendations.append(
+                {
+                    "icon": "🔥",
+                    "text": f"This process is using {cpu_percent:.1f}% CPU, which may slow down your Mac. "
+                    f"If you're not actively using it, try closing and reopening the app.",
+                    "color": COLORS["critical"],
+                }
+            )
         elif cpu_percent > 20.0 and not is_critical:
-            recommendations.append({
-                'icon': '⚡',
-                'text': f'This process is using {cpu_percent:.1f}% CPU. '
-                        f'This is normal if you\'re actively using the app, but consider closing it if not.',
-                'color': COLORS['warning']
-            })
+            recommendations.append(
+                {
+                    "icon": "⚡",
+                    "text": f"This process is using {cpu_percent:.1f}% CPU. "
+                    f"This is normal if you're actively using the app, but consider closing it if not.",
+                    "color": COLORS["warning"],
+                }
+            )
 
         # Recommendation 3: Long running time
         if uptime_days > 7 and not is_critical:
-            recommendations.append({
-                'icon': '⏰',
-                'text': f'This process has been running for over {int(uptime_days)} days. '
-                        f'Apps that run for a long time can accumulate memory leaks. '
-                        f'Try closing and reopening it to free up resources.',
-                'color': COLORS['mustard']
-            })
+            recommendations.append(
+                {
+                    "icon": "⏰",
+                    "text": f"This process has been running for over {int(uptime_days)} days. "
+                    f"Apps that run for a long time can accumulate memory leaks. "
+                    f"Try closing and reopening it to free up resources.",
+                    "color": COLORS["mustard"],
+                }
+            )
         elif uptime_days > 3 and memory_percent > 2.0 and not is_critical:
-            recommendations.append({
-                'icon': '🔄',
-                'text': f'This process has been running for {int(uptime_days)} days and is using significant memory. '
-                        f'Restarting it might improve performance.',
-                'color': COLORS['warning']
-            })
+            recommendations.append(
+                {
+                    "icon": "🔄",
+                    "text": f"This process has been running for {int(uptime_days)} days and is using significant memory. "
+                    f"Restarting it might improve performance.",
+                    "color": COLORS["warning"],
+                }
+            )
 
         # Recommendation 4: Browser helper processes
-        if 'helper' in process_name and ('chrome' in process_name or 'firefox' in process_name or 'safari' in process_name):
+        if "helper" in process_name and (
+            "chrome" in process_name
+            or "firefox" in process_name
+            or "safari" in process_name
+        ):
             if memory_percent > 3.0:
-                recommendations.append({
-                    'icon': '🌐',
-                    'text': 'This is a browser helper process using significant memory. '
-                            'Try closing unused browser tabs or extensions to reduce resource usage.',
-                    'color': COLORS['mustard']
-                })
+                recommendations.append(
+                    {
+                        "icon": "🌐",
+                        "text": "This is a browser helper process using significant memory. "
+                        "Try closing unused browser tabs or extensions to reduce resource usage.",
+                        "color": COLORS["mustard"],
+                    }
+                )
 
         # Recommendation 5: System process warning
         if is_critical:
-            recommendations.append({
-                'icon': '🔒',
-                'text': 'This is a critical system process. Do NOT force quit it - doing so could cause your Mac to crash or behave unexpectedly.',
-                'color': COLORS['sage']
-            })
+            recommendations.append(
+                {
+                    "icon": "🔒",
+                    "text": "This is a critical system process. Do NOT force quit it - doing so could cause your Mac to crash or behave unexpectedly.",
+                    "color": COLORS["sage"],
+                }
+            )
 
         # Recommendation 6: Electron/resource-heavy apps
-        electron_apps = ['electron', 'slack', 'discord', 'teams', 'spotify', 'atom', 'vscode']
+        electron_apps = [
+            "electron",
+            "slack",
+            "discord",
+            "teams",
+            "spotify",
+            "atom",
+            "vscode",
+        ]
         if any(app in process_name for app in electron_apps) and memory_percent > 4.0:
-            recommendations.append({
-                'icon': '💡',
-                'text': 'This app is known to use significant resources. '
-                        'Consider using a web browser version or lighter alternative if performance is an issue.',
-                'color': COLORS['mustard']
-            })
+            recommendations.append(
+                {
+                    "icon": "💡",
+                    "text": "This app is known to use significant resources. "
+                    "Consider using a web browser version or lighter alternative if performance is an issue.",
+                    "color": COLORS["mustard"],
+                }
+            )
 
         return recommendations
 
@@ -378,17 +443,17 @@ class ProcessDetailDialog(QDialog):
         panel_layout.addWidget(separator)
 
         # Status
-        status = self.process_data.get('status', 'unknown')
+        status = self.process_data.get("status", "unknown")
         status_row = StatRow("Status:", status.capitalize())
         panel_layout.addWidget(status_row)
 
         # Username
-        username = self.process_data.get('username', 'N/A')
+        username = self.process_data.get("username", "N/A")
         user_row = StatRow("User:", username)
         panel_layout.addWidget(user_row)
 
         # Create time
-        create_time = self.process_data.get('create_time')
+        create_time = self.process_data.get("create_time")
         if create_time:
             create_dt = datetime.fromtimestamp(create_time)
             create_str = create_dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -400,7 +465,7 @@ class ProcessDetailDialog(QDialog):
         panel_layout.addWidget(time_row)
 
         # Number of threads
-        num_threads = self.process_data.get('num_threads', 'N/A')
+        num_threads = self.process_data.get("num_threads", "N/A")
         threads_row = StatRow("Threads:", str(num_threads))
         panel_layout.addWidget(threads_row)
 
@@ -426,22 +491,22 @@ class ProcessDetailDialog(QDialog):
         panel_layout.addWidget(separator)
 
         # CPU
-        cpu = self.process_data.get('cpu_percent', 0)
+        cpu = self.process_data.get("cpu_percent", 0)
         cpu_row = StatRow("CPU Usage:", f"{cpu:.1f}%")
         panel_layout.addWidget(cpu_row)
 
         # Memory
-        memory_info = self.process_data.get('memory_info')
+        memory_info = self.process_data.get("memory_info")
         if memory_info:
             mem_mb = memory_info.rss / (1024 * 1024)
             mem_row = StatRow("Memory:", f"{mem_mb:.1f} MB")
         else:
-            mem_mb = self.process_data.get('memory_mb', 0)
+            mem_mb = self.process_data.get("memory_mb", 0)
             mem_row = StatRow("Memory:", f"{mem_mb:.1f} MB")
         panel_layout.addWidget(mem_row)
 
         # Memory percent
-        mem_percent = self.process_data.get('memory_percent', 0)
+        mem_percent = self.process_data.get("memory_percent", 0)
         mem_pct_row = StatRow("Memory %:", f"{mem_percent:.2f}%")
         panel_layout.addWidget(mem_pct_row)
 
@@ -449,7 +514,7 @@ class ProcessDetailDialog(QDialog):
 
     def _add_command_line_section(self):
         """Add command line section."""
-        cmdline = self.process_data.get('cmdline', '').strip()
+        cmdline = self.process_data.get("cmdline", "").strip()
 
         if not cmdline:
             return  # Don't show section if no command line
@@ -476,27 +541,33 @@ class ProcessDetailDialog(QDialog):
         cmd_label.setWordWrap(True)
         cmd_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         cmd_label.setProperty("mono", "true")
-        cmd_label.setStyleSheet(f"""
+        cmd_label.setStyleSheet(
+            f"""
             color: {COLORS['text_primary']};
             font-size: 12px;
             padding: 12px;
             background-color: rgba(0, 0, 0, 0.3);
             border: 1px solid {COLORS['border']};
             border-radius: 4px;
-        """)
+        """
+        )
         panel_layout.addWidget(cmd_label)
 
         # Help text
         help_text = QLabel("This is the full command used to start this process.")
-        help_text.setStyleSheet(f"color: {COLORS['text_secondary']}; font-size: 11px; font-style: italic;")
+        help_text.setStyleSheet(
+            f"color: {COLORS['text_secondary']}; font-size: 11px; font-style: italic;"
+        )
         panel_layout.addWidget(help_text)
 
         self.content_layout.addWidget(panel)
 
     def _update_description(self):
         """Update the description based on current mode."""
-        process_name = self.process_data.get('name', 'Unknown')
-        description = ProcessDescriber.get_description(process_name, simple=self.simple_mode)
+        process_name = self.process_data.get("name", "Unknown")
+        description = ProcessDescriber.get_description(
+            process_name, simple=self.simple_mode
+        )
         self.description_label.setText(description)
 
     def _on_explanation_mode_changed(self, is_simple: bool):

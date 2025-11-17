@@ -3,7 +3,14 @@ Custom styled widgets for the Mac Health Analyzer.
 Includes toggle switches, styled buttons, and animated panels.
 """
 
-from PyQt6.QtCore import Qt, pyqtSignal, QRect, QPropertyAnimation, QEasingCurve, pyqtProperty
+from PyQt6.QtCore import (
+    Qt,
+    pyqtSignal,
+    QRect,
+    QPropertyAnimation,
+    QEasingCurve,
+    pyqtProperty,
+)
 from PyQt6.QtWidgets import (
     QWidget,
     QPushButton,
@@ -12,7 +19,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QVBoxLayout,
     QSizePolicy,
-    QLineEdit
+    QLineEdit,
 )
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
 from ui.styles import COLORS
@@ -63,24 +70,30 @@ class ToggleSwitch(QWidget):
 
         # Draw background track
         if self._checked:
-            bg_color = QColor(COLORS['terracotta'])
+            bg_color = QColor(COLORS["terracotta"])
         else:
-            bg_color = QColor(COLORS['border'])
+            bg_color = QColor(COLORS["border"])
 
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(QBrush(bg_color))
-        painter.drawRoundedRect(0, 0, 50, 28, 0, 0)  # Square corners for brutalist style
+        painter.drawRoundedRect(
+            0, 0, 50, 28, 0, 0
+        )  # Square corners for brutalist style
 
         # Draw circle
-        circle_color = QColor(COLORS['bg_card']) if self._checked else QColor(COLORS['text_secondary'])
+        circle_color = (
+            QColor(COLORS["bg_card"])
+            if self._checked
+            else QColor(COLORS["text_secondary"])
+        )
         painter.setBrush(QBrush(circle_color))
         painter.drawEllipse(self._circle_position, 2, 24, 24)
-    
+
     def mouseReleaseEvent(self, event):
         """Handle mouse click."""
         if event.button() == Qt.MouseButton.LeftButton:
             self._checked = not self._checked
-            
+
             # Animate circle position
             if self._checked:
                 self.animation.setStartValue(self._circle_position)
@@ -88,17 +101,17 @@ class ToggleSwitch(QWidget):
             else:
                 self.animation.setStartValue(self._circle_position)
                 self.animation.setEndValue(2)
-            
+
             self.animation.start()
             self.toggled.emit(self._checked)
-    
+
     def setChecked(self, checked: bool):
         """Set checked state programmatically."""
         if self._checked != checked:
             self._checked = checked
             self._circle_position = 24 if checked else 2
             self.update()
-    
+
     def isChecked(self) -> bool:
         """Get checked state."""
         return self._checked
@@ -108,11 +121,11 @@ class StyledButton(QPushButton):
     """
     Enhanced QPushButton with additional styling options.
     """
-    
+
     def __init__(self, text: str, button_type: str = "primary", parent=None):
         """
         Initialize styled button.
-        
+
         Args:
             text: Button text
             button_type: Type of button ("primary", "danger", "secondary")
@@ -120,10 +133,10 @@ class StyledButton(QPushButton):
         """
         super().__init__(text, parent)
         self.button_type = button_type
-        
+
         if button_type == "danger":
             self.setProperty("danger", "true")
-        
+
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
 
@@ -131,11 +144,11 @@ class GlassmorphicPanel(QFrame):
     """
     Panel with glassmorphic effect.
     """
-    
+
     def __init__(self, parent=None):
         """
         Initialize glassmorphic panel.
-        
+
         Args:
             parent: Parent widget
         """
@@ -163,7 +176,9 @@ class MetricCard(QWidget):
 
         # Create panel
         self.panel = GlassmorphicPanel(self)
-        self.panel.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.panel.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
 
         layout = QVBoxLayout(self.panel)
         layout.setSpacing(12)
@@ -195,7 +210,9 @@ class MetricCard(QWidget):
         self.value_label.setProperty("mono", "true")
         self.value_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.value_label.setWordWrap(True)
-        self.value_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.value_label.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
         self.value_label.setMinimumHeight(48)
         layout.addWidget(self.value_label)
 
@@ -229,38 +246,38 @@ class StatRow(QWidget):
     """
     Row widget for displaying a statistic with label and value.
     """
-    
+
     def __init__(self, label: str, value: str = "", parent=None):
         """
         Initialize stat row.
-        
+
         Args:
             label: Label text
             value: Value text
             parent: Parent widget
         """
         super().__init__(parent)
-        
+
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 8, 0, 8)
-        
+
         # Label
         self.label = QLabel(label)
         self.label.setProperty("mono", "true")
         layout.addWidget(self.label)
-        
+
         # Spacer
         layout.addStretch()
-        
+
         # Value
         self.value_label = QLabel(value)
         self.value_label.setProperty("mono", "true")
         layout.addWidget(self.value_label)
-    
+
     def update_value(self, value: str):
         """
         Update the value.
-        
+
         Args:
             value: New value
         """
@@ -271,13 +288,13 @@ class SearchBar(QWidget):
     """
     Custom search bar with distinctive styling.
     """
-    
+
     search_changed = pyqtSignal(str)
-    
+
     def __init__(self, placeholder: str = "Search...", parent=None):
         """
         Initialize search bar.
-        
+
         Args:
             placeholder: Placeholder text
             parent: Parent widget
@@ -294,11 +311,11 @@ class SearchBar(QWidget):
         self.line_edit.setClearButtonEnabled(True)
         self.line_edit.textChanged.connect(self.search_changed.emit)
         layout.addWidget(self.line_edit)
-    
+
     def text(self) -> str:
         """Get search text."""
         return self.line_edit.text()
-    
+
     def clear(self):
         """Clear search text."""
         self.line_edit.clear()
