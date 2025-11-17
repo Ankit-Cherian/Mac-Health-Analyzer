@@ -1,6 +1,6 @@
 # Mac Health Analyzer
 
-A simple macOS app I built to see what's running on my Mac and manage startup items. Has a cyberpunk-inspired UI because why not.
+A simple macOS app I built to see what's running on my Mac and manage startup items.
 
 ## Screenshots
 
@@ -83,7 +83,7 @@ It has pretty good coverage (95%+) and tests most of the functionality.
 
 ## Open Source
 
-This is open source - feel free to fork it, modify it, or do whatever you want with it. If you add something cool, open a PR. If you find bugs, open an issue.
+This is open source - feel free to fork it. If you add something, open a PR. If you find bugs, open an issue.
 
 ## What It Does
 
@@ -91,7 +91,6 @@ This is open source - feel free to fork it, modify it, or do whatever you want w
 - Lets you disable startup items you don't need
 - Monitors running processes with real-time CPU/memory stats
 - Shows system health with live charts and gauges
-- Has a neon cyberpunk theme because terminals should look cool
 
 ## Notes
 
@@ -101,5 +100,3 @@ This is open source - feel free to fork it, modify it, or do whatever you want w
 - Built with PyQt6 and psutil
 
 ---
-
-Made this in my free time. Hope it's useful.
