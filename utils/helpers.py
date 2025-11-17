@@ -70,8 +70,14 @@ def get_process_list(include_system: bool = False) -> List[Dict[str, any]]:
     Returns:
         List of dicts with process information
     """
+    mem = psutil.virtual_memory()
+    total_ram = mem.total
+
+    # Prime CPU percent sampling to avoid initial zeros
+    psutil.cpu_percent(percpu=False)
+
     processes = []
-    
+
     for proc in psutil.process_iter(['pid', 'name', 'username', 'memory_info', 'cpu_percent']):
         try:
             pinfo = proc.info
@@ -85,8 +91,12 @@ def get_process_list(include_system: bool = False) -> List[Dict[str, any]]:
                 continue
             
             memory_mb = pinfo['memory_info'].rss / (1024 * 1024)  # Convert to MB
-            memory_percent = (pinfo['memory_info'].rss / psutil.virtual_memory().total) * 100
-            
+            memory_percent = (pinfo['memory_info'].rss / total_ram) * 100
+
+            # Capture both last reported CPU and a fresh sample
+            last_cpu_percent = pinfo.get('cpu_percent') or 0.0
+            sampled_cpu_percent = proc.cpu_percent(interval=None) or 0.0
+
             processes.append({
                 'pid': pinfo['pid'],
                 'name': pinfo['name'],
@@ -94,7 +104,8 @@ def get_process_list(include_system: bool = False) -> List[Dict[str, any]]:
                 'memory_mb': memory_mb,
                 'memory_percent': memory_percent,
                 'memory_human': bytes_to_human_readable(pinfo['memory_info'].rss),
-                'cpu_percent': pinfo['cpu_percent'] or 0.0,
+                'cpu_percent': sampled_cpu_percent,
+                'cpu_percent_last': last_cpu_percent,
             })
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass

@@ -7,7 +7,7 @@ import subprocess
 import os
 import plistlib
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Set
 
 
 def get_login_items() -> List[Dict[str, str]]:
@@ -49,7 +49,36 @@ def get_login_items() -> List[Dict[str, str]]:
     return []
 
 
-def get_launch_agents(user_only: bool = False) -> List[Dict[str, any]]:
+def fetch_launchctl_status() -> Set[str]:
+    """
+    Run `launchctl list` once and return loaded service labels.
+
+    Returns:
+        Set of loaded launchd labels.
+    """
+    try:
+        result = subprocess.run(
+            ['launchctl', 'list'],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+
+        if result.returncode == 0 and result.stdout:
+            lines = result.stdout.strip().split('\n')[1:]  # Skip header
+            services = set()
+            for line in lines:
+                parts = line.split()
+                if len(parts) >= 3:
+                    services.add(parts[2])  # Label is third column
+            return services
+    except Exception as e:
+        print(f"Error fetching launchctl status: {e}")
+
+    return set()
+
+
+def get_launch_agents(user_only: bool = False, loaded_labels: Optional[Set[str]] = None) -> List[Dict[str, any]]:
     """
     Get Launch Agents from standard directories.
     
@@ -60,6 +89,9 @@ def get_launch_agents(user_only: bool = False) -> List[Dict[str, any]]:
         List of dicts with agent information
     """
     agents = []
+
+    if loaded_labels is None:
+        loaded_labels = fetch_launchctl_status()
     
     # Directories to check
     directories = [
@@ -87,7 +119,7 @@ def get_launch_agents(user_only: bool = False) -> List[Dict[str, any]]:
                 if agent_info:
                     agent_info['type'] = 'Launch Agent'
                     agent_info['location'] = directory
-                    agent_info['enabled'] = is_launchd_item_enabled(agent_info['label'])
+                    agent_info['enabled'] = agent_info['label'] in loaded_labels
                     agents.append(agent_info)
         except Exception as e:
             print(f"Error reading directory {directory}: {e}")
@@ -95,7 +127,7 @@ def get_launch_agents(user_only: bool = False) -> List[Dict[str, any]]:
     return agents
 
 
-def get_launch_daemons() -> List[Dict[str, any]]:
+def get_launch_daemons(loaded_labels: Optional[Set[str]] = None) -> List[Dict[str, any]]:
     """
     Get Launch Daemons (system-level) from standard directories.
     
@@ -103,6 +135,9 @@ def get_launch_daemons() -> List[Dict[str, any]]:
         List of dicts with daemon information
     """
     daemons = []
+
+    if loaded_labels is None:
+        loaded_labels = fetch_launchctl_status()
     
     # Directories to check (system-level only)
     directories = [
@@ -125,7 +160,7 @@ def get_launch_daemons() -> List[Dict[str, any]]:
                 if daemon_info:
                     daemon_info['type'] = 'Launch Daemon'
                     daemon_info['location'] = directory
-                    daemon_info['enabled'] = is_launchd_item_enabled(daemon_info['label'])
+                    daemon_info['enabled'] = daemon_info['label'] in loaded_labels
                     daemons.append(daemon_info)
         except Exception as e:
             print(f"Error reading directory {directory}: {e}")

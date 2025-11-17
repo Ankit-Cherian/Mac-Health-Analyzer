@@ -3,6 +3,7 @@ Main Dashboard for Mac Health Analyzer.
 Central component with tabbed interface.
 """
 
+import time
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QLabel
 from PyQt6.QtCore import QTimer
 from ui.startup_tab import StartupTab
@@ -27,6 +28,7 @@ class Dashboard(QWidget):
         super().__init__(parent)
         self.startup_manager = startup_manager
         self.process_monitor = process_monitor
+        self._last_overview_refresh = 0.0
         
         self.setup_ui()
         self.setup_timers()
@@ -163,6 +165,11 @@ class Dashboard(QWidget):
     def refresh_overview(self):
         """Refresh overview data."""
         try:
+            now = time.time()
+            if now - self._last_overview_refresh > 1.0:
+                self.process_monitor.refresh()
+                self._last_overview_refresh = now
+
             # Update system info
             mem_info = self.process_monitor.get_memory_info()
             cpu_info = self.process_monitor.get_cpu_info()
