@@ -46,12 +46,21 @@ class Dashboard(QWidget):
         self.load_initial_data()
 
     def on_tab_changed(self, index):
-        """Handle tab change - refresh data for new tab."""
+        """Handle tab change - refresh data for new tab and manage timers."""
         current_widget = self.tab_widget.widget(index)
+
+        # Stop all timers first
+        self.process_timer.stop()
+        self.overview_timer.stop()
+
+        # Start appropriate timer and refresh data based on active tab
         if current_widget == self.processes_tab:
+            self.process_timer.start(10000)  # Resume process timer
             self.processes_tab.update_data()
         elif current_widget == self.overview_tab:
+            self.overview_timer.start(2000)  # Resume overview timer
             self.refresh_overview()
+        # If startup tab is selected, both timers remain stopped
 
     def setup_ui(self):
         """Set up the user interface."""
@@ -263,16 +272,16 @@ class Dashboard(QWidget):
         return widget
 
     def setup_timers(self):
-        """Set up auto-refresh timers."""
+        """Set up auto-refresh timers. Timers start/stop based on active tab."""
         # Process monitor refresh every 10 seconds (slower for stability)
         self.process_timer = QTimer()
         self.process_timer.timeout.connect(self.refresh_processes)
-        self.process_timer.start(10000)
+        # Don't start automatically - will start when tab is activated
 
         # Overview refresh every 2 seconds for real-time charts
         self.overview_timer = QTimer()
         self.overview_timer.timeout.connect(self.refresh_overview)
-        self.overview_timer.start(2000)
+        # Don't start automatically - will start when tab is activated
 
     def load_initial_data(self):
         """Load initial data for all tabs."""
@@ -284,12 +293,17 @@ class Dashboard(QWidget):
         self.process_monitor.refresh()
         self.processes_tab.update_data()
 
-        # Update overview
+        # Update overview (without starting timer yet)
         self.refresh_overview()
+
+        # Start timer for the initially active tab
+        current_index = self.tab_widget.currentIndex()
+        self.on_tab_changed(current_index)
 
     def refresh_processes(self):
         """Refresh process data."""
-        # Only refresh if processes tab is visible AND tab is visible to user
+        # Only refresh if processes tab is visible AND widget is visible to user
+        # Note: Timer is stopped when tab is not active, so this is a safety check
         try:
             if self.tab_widget.currentWidget() == self.processes_tab and self.isVisible():
                 self.processes_tab.update_data()
@@ -345,7 +359,11 @@ class Dashboard(QWidget):
             )
 
             # Update bar charts and cache process data
-            top_memory = self.process_monitor.get_top_memory_processes(8)
+            # Use get_top_processes for better performance (single call instead of two)
+            top_processes = self.process_monitor.get_top_processes(8)
+            top_memory = top_processes['memory']
+            top_cpu = top_processes['cpu']
+
             self._cached_top_memory = top_memory  # Cache retained for potential reuse
             memory_data = []
             for proc in top_memory:
@@ -358,7 +376,6 @@ class Dashboard(QWidget):
 
             self.memory_bar_chart.set_data(memory_data)
 
-            top_cpu = self.process_monitor.get_top_cpu_processes(8)
             self._cached_top_cpu = top_cpu  # Cache retained for potential reuse
             cpu_data = []
             for proc in top_cpu:

@@ -38,6 +38,9 @@ class ProcessMonitor:
         
     def refresh(self):
         """Refresh all process and system information."""
+        # Prime CPU sampling to ensure accurate readings on next call
+        psutil.cpu_percent(interval=None)
+
         self.processes = get_process_list(include_system=self.include_system_processes)
         self.memory_info = get_system_memory_info()
         self.cpu_info = get_cpu_info()
@@ -98,10 +101,10 @@ class ProcessMonitor:
     def get_top_cpu_processes(self, n: int = 10) -> List[Dict[str, any]]:
         """
         Get top N processes by CPU usage.
-        
+
         Args:
             n: Number of processes to return
-            
+
         Returns:
             List of top N processes
         """
@@ -111,6 +114,38 @@ class ProcessMonitor:
             reverse=True
         )
         return sorted_processes[:n]
+
+    def get_top_processes(self, n: int = 10) -> Dict[str, List[Dict[str, any]]]:
+        """
+        Get top N processes by both CPU and memory usage in a single operation.
+        This is more efficient than calling get_top_cpu_processes and
+        get_top_memory_processes separately since it sorts once per metric
+        instead of iterating twice.
+
+        Args:
+            n: Number of processes to return for each metric
+
+        Returns:
+            Dict with 'cpu' and 'memory' keys containing top N processes
+        """
+        # Sort by CPU
+        cpu_sorted = sorted(
+            self.processes,
+            key=lambda x: x['cpu_percent'],
+            reverse=True
+        )
+
+        # Sort by memory
+        memory_sorted = sorted(
+            self.processes,
+            key=lambda x: x['memory_mb'],
+            reverse=True
+        )
+
+        return {
+            'cpu': cpu_sorted[:n],
+            'memory': memory_sorted[:n]
+        }
     
     def search_processes(self, query: str) -> List[Dict[str, any]]:
         """
@@ -240,22 +275,24 @@ class ProcessMonitor:
     def get_process_details(self, pid: int) -> Optional[Dict[str, any]]:
         """
         Get detailed information about a process.
-        
+
         Args:
             pid: Process ID
-            
+
         Returns:
             Detailed process information or None if not found
         """
         try:
             proc = psutil.Process(pid)
+            # Use interval=None to get cached CPU value instead of blocking
+            # This prevents the UI from freezing when opening the dialog
             return {
                 'pid': proc.pid,
                 'name': proc.name(),
                 'username': proc.username(),
                 'status': proc.status(),
                 'create_time': proc.create_time(),
-                'cpu_percent': proc.cpu_percent(interval=0.1),
+                'cpu_percent': proc.cpu_percent(interval=None),
                 'memory_info': proc.memory_info(),
                 'num_threads': proc.num_threads(),
                 'cmdline': ' '.join(proc.cmdline()) if proc.cmdline() else '',
