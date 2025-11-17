@@ -5,6 +5,9 @@ A beautiful, powerful macOS system monitoring and startup management tool.
 """
 
 import sys
+import os
+import json
+from pathlib import Path
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
@@ -17,6 +20,7 @@ from process_monitor import ProcessMonitor
 from ui.dashboard import Dashboard
 from ui.styles import get_main_stylesheet, get_palette
 from ui.fonts import get_font_manager
+from ui.startup_guide import StartupGuide
 
 
 class MainWindow(QMainWindow):
@@ -86,6 +90,59 @@ class MainWindow(QMainWindow):
         self.dashboard.cleanup()
         event.accept()
 
+    def show_startup_guide_if_needed(self):
+        """Show startup guide if it hasn't been shown before."""
+        if not self._has_seen_guide():
+            guide = StartupGuide(self)
+            guide.exec()
+
+            # Save preference if user checked "don't show again"
+            if not guide.should_show_again():
+                self._save_guide_preference()
+
+    def _has_seen_guide(self) -> bool:
+        """Check if user has already seen the startup guide."""
+        config_path = self._get_config_path()
+        if not config_path.exists():
+            return False
+
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                return config.get('startup_guide_shown', False)
+        except Exception:
+            return False
+
+    def _save_guide_preference(self):
+        """Save that user has seen the guide."""
+        config_path = self._get_config_path()
+
+        # Create config directory if it doesn't exist
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+
+        try:
+            # Load existing config or create new one
+            config = {}
+            if config_path.exists():
+                with open(config_path, 'r') as f:
+                    config = json.load(f)
+
+            # Update config
+            config['startup_guide_shown'] = True
+
+            # Save config
+            with open(config_path, 'w') as f:
+                json.dump(config, f, indent=2)
+        except Exception as e:
+            print(f"Warning: Could not save guide preference: {e}")
+
+    def _get_config_path(self) -> Path:
+        """Get path to config file."""
+        # Use user's home directory
+        home = Path.home()
+        config_dir = home / '.mac-health-analyzer'
+        return config_dir / 'config.json'
+
 
 def main():
     """Main application entry point."""
@@ -112,18 +169,10 @@ def main():
     try:
         window = MainWindow()
         window.show()
-        
-        # Show welcome message
-        QMessageBox.information(
-            window,
-            "Welcome to Mac Health Analyzer",
-            "This tool helps you monitor and manage your Mac's startup items and running processes.\n\n"
-            "⚡ Startup Items: View and disable startup applications\n"
-            "📊 Running Processes: Monitor and manage active processes\n"
-            "🖥️ System Overview: See overall system health\n\n"
-            "Note: Some operations may require administrator privileges."
-        )
-        
+
+        # Show startup guide for first-time users
+        window.show_startup_guide_if_needed()
+
         sys.exit(app.exec())
     except Exception as e:
         print(f"Error starting application: {e}")

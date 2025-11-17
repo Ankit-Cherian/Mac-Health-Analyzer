@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal
 from ui.widgets import SearchBar, ToggleSwitch, GlassmorphicPanel, StyledButton
 from ui.styles import COLORS
+from ui.startup_detail_dialog import StartupDetailDialog
 
 
 class StartupTab(QWidget):
@@ -77,7 +78,12 @@ class StartupTab(QWidget):
         filter_layout.addWidget(self.filter_combo, stretch=1)
         
         layout.addLayout(filter_layout)
-        
+
+        # Hint label
+        hint_label = QLabel("💡 Double-click any item to see detailed information and recommendations")
+        hint_label.setStyleSheet(f"color: {COLORS['text_secondary']}; font-size: 12px; padding: 4px;")
+        layout.addWidget(hint_label)
+
         # Table
         self.table = self.create_table()
         layout.addWidget(self.table, stretch=1)
@@ -174,7 +180,10 @@ class StartupTab(QWidget):
         
         # Enable sorting
         table.setSortingEnabled(True)
-        
+
+        # Connect double-click handler
+        table.cellDoubleClicked.connect(self.on_item_double_clicked)
+
         return table
     
     def update_data(self):
@@ -299,4 +308,20 @@ class StartupTab(QWidget):
             
             # Refresh
             self.on_refresh()
+
+    def on_item_double_clicked(self, row: int, column: int):
+        """
+        Handle double-click on a startup item.
+
+        Args:
+            row: Row number that was double-clicked
+            column: Column number that was double-clicked
+        """
+        # Get item data from the first column
+        item_data = self.table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+
+        if item_data:
+            # Show detail dialog
+            dialog = StartupDetailDialog(item_data, self)
+            dialog.exec()
 
