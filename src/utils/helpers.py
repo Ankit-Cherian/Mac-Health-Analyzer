@@ -75,8 +75,8 @@ def get_process_list(include_system: bool = False) -> List[Dict[str, any]]:
     mem = psutil.virtual_memory()
     total_ram = mem.total
 
-    # Prime CPU percent sampling to avoid initial zeros
-    psutil.cpu_percent(percpu=False)
+    # Prime CPU percent sampling to avoid initial zeros without blocking UI
+    psutil.cpu_percent(interval=None, percpu=False)
 
     processes = []
 
