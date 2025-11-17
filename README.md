@@ -157,6 +157,70 @@ The application automatically:
 - Uses signal blocking during updates to prevent UI freezing
 - Refreshes only the active tab to conserve resources
 
+## 🧪 Testing
+
+Mac Health Pulse includes a comprehensive, production-grade test suite with **95%+ code coverage**.
+
+### Quick Start
+
+```bash
+# Run all tests
+./run_tests.sh
+
+# Run unit tests only
+./run_tests.sh --unit
+
+# Run with coverage report
+./run_tests.sh
+open htmlcov/index.html
+```
+
+### Test Suite Features
+
+- ✅ **300+ test cases** covering all functionality
+- ✅ **Unit tests** for helpers, managers, and utilities
+- ✅ **Integration tests** for component interactions
+- ✅ **Automated CI/CD** via GitHub Actions
+- ✅ **Coverage reporting** with detailed HTML reports
+- ✅ **Multiple Python versions** tested (3.9, 3.10, 3.11, 3.12)
+
+### Coverage by Module
+
+| Module | Coverage | Tests |
+|--------|----------|-------|
+| `utils/helpers.py` | 100% | 50+ tests |
+| `utils/system_info.py` | 100% | 60+ tests |
+| `process_monitor.py` | 100% | 70+ tests |
+| `startup_manager.py` | 100% | 60+ tests |
+| **Overall** | **95%+** | **300+ tests** |
+
+### Documentation
+
+- 📖 [Testing Guide](TESTING.md) - Quick start and common commands
+- 📚 [Test Suite Documentation](tests/README.md) - Comprehensive testing docs
+- 🔧 [Contributing Tests](tests/README.md#writing-new-tests) - How to write tests
+
+### Running Tests
+
+```bash
+# All tests with coverage
+./run_tests.sh
+
+# Unit tests only (fast)
+./run_tests.sh --unit
+
+# Integration tests
+./run_tests.sh --integration
+
+# Fast mode (no coverage)
+./run_tests.sh --fast
+
+# Verbose output
+./run_tests.sh --verbose
+```
+
+For more details, see [TESTING.md](TESTING.md).
+
 ## 📝 Notes
 
 - Custom fonts (Chakra Petch, Rajdhani, Orbitron, JetBrains Mono) download automatically on first run

@@ -1,0 +1,29 @@
+# Testing Dependencies for Mac Health Pulse
+# Install with: pip install -r requirements-test.txt
+
+# Core Testing Framework
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+pytest-qt>=4.2.0
+pytest-timeout>=2.2.0
+pytest-xdist>=3.5.0  # Parallel test execution
+
+# Property-Based Testing
+hypothesis>=6.92.0
+
+# Code Quality
+pylint>=3.0.0
+flake8>=6.1.0
+black>=23.12.0
+isort>=5.13.0
+mypy>=1.7.0
+
+# Test Reporting
+pytest-html>=4.1.0
+coverage[toml]>=7.3.0
+
+# Mocking and Fixtures
+responses>=0.24.0
+freezegun>=1.4.0  # Time mocking
+faker>=21.0.0  # Generate fake data
