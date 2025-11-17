@@ -45,14 +45,16 @@ def get_system_memory_info() -> Dict[str, any]:
 def get_cpu_info() -> Dict[str, any]:
     """
     Get CPU information.
-    
+
     Returns:
         Dict with CPU usage and count information
     """
-    cpu_percent = psutil.cpu_percent(interval=0.1)
+    # Use interval=None to get cached CPU value instead of blocking
+    # This prevents blocking the UI thread during updates
+    cpu_percent = psutil.cpu_percent(interval=None)
     cpu_count = psutil.cpu_count()
     cpu_count_logical = psutil.cpu_count(logical=True)
-    
+
     return {
         'percent': cpu_percent,
         'count': cpu_count,
@@ -73,8 +75,8 @@ def get_process_list(include_system: bool = False) -> List[Dict[str, any]]:
     mem = psutil.virtual_memory()
     total_ram = mem.total
 
-    # Prime CPU percent sampling to avoid initial zeros
-    psutil.cpu_percent(percpu=False)
+    # Prime CPU percent sampling to avoid initial zeros without blocking UI
+    psutil.cpu_percent(interval=None, percpu=False)
 
     processes = []
 
