@@ -111,7 +111,7 @@ if [ "$VERBOSE" = true ]; then
 fi
 
 if [ "$COVERAGE" = true ]; then
-    TEST_CMD="$TEST_CMD --cov=. --cov-report=html --cov-report=term-missing"
+    TEST_CMD="$TEST_CMD --cov=src --cov-report=html --cov-report=term-missing"
 fi
 
 # Add markers if specified

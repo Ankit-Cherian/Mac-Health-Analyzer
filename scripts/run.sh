@@ -1,8 +1,8 @@
 #!/bin/bash
 # Launch script for Mac Health Analyzer
 
-# Change to script directory
-cd "$(dirname "$0")"
+# Change to project root directory (parent of scripts/)
+cd "$(dirname "$0")/.."
 
 # Check if Python 3 is installed
 if ! command -v python3 &> /dev/null; then
@@ -19,5 +19,5 @@ fi
 
 # Run the application
 echo "Starting Mac Health Analyzer..."
-python3 main.py
+PYTHONPATH=src python3 -m main
 

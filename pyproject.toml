@@ -79,7 +79,7 @@ disable = [
 ]
 
 [tool.coverage.run]
-source = ["."]
+source = ["src"]
 omit = [
     "*/tests/*",
     "*/test_*.py",
