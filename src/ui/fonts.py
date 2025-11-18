@@ -21,8 +21,15 @@ def _variable_entries(weights: list[int], url: str, filename: str) -> dict:
     }
 
 
-# Font URLs from Google Fonts - Distinctive, readable fonts
+# Font URLs from Google Fonts - Distinctive, professional fonts
 FONTS = {
+    'Fraunces': {
+        'weights': _variable_entries(
+            [300, 400, 600, 700],
+            'https://github.com/google/fonts/raw/main/ofl/fraunces/Fraunces%5Bopsz%2Cwght%5D.ttf',
+            'Fraunces_Variable.ttf'
+        )
+    },
     'Sora': {
         'weights': _variable_entries(
             [300, 400, 600, 700, 800],
