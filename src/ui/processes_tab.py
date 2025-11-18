@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
     QLabel, QHeaderView, QMessageBox, QCheckBox
 )
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
 from ui.widgets import SearchBar, MetricCard, StyledButton
 from ui.styles import COLORS, get_status_color
 from ui.process_detail_dialog import ProcessDetailDialog
@@ -35,6 +35,9 @@ class ProcessesTab(QWidget):
         self.is_updating = False  # Lock to prevent concurrent updates
         
         self.setup_ui()
+        
+        # Connect to search bar
+        self.search_bar.search_changed.connect(self.on_search)
     
     def setup_ui(self):
         """Set up the user interface."""
@@ -56,7 +59,7 @@ class ProcessesTab(QWidget):
         self.system_processes_cb.stateChanged.connect(self.on_system_toggle)
         header_layout.addWidget(self.system_processes_cb)
         
-        # Refresh button
+        # Refresh button (now just triggers immediate data fetch attempt)
         self.refresh_btn = StyledButton("Refresh", "primary")
         self.refresh_btn.clicked.connect(self.on_refresh)
         header_layout.addWidget(self.refresh_btn)
@@ -81,7 +84,7 @@ class ProcessesTab(QWidget):
         # Search bar with hint
         search_layout = QHBoxLayout()
         self.search_bar = SearchBar("Search processes...")
-        self.search_bar.search_changed.connect(self.on_search)
+        # search_changed connected in __init__
         search_layout.addWidget(self.search_bar)
 
         # Hint label
@@ -144,15 +147,19 @@ class ProcessesTab(QWidget):
 
         return table
     
+    @pyqtSlot()
     def update_data(self):
-        """Update the table and metrics with current process data."""
-        # Skip if already updating
-        if self.is_updating:
+        """
+        Update the table and metrics with current process data.
+        Called when new data is available from the background worker.
+        """
+        # Skip if already updating or not visible (optimization)
+        if self.is_updating or not self.isVisible():
             return
             
         try:
             self.is_updating = True
-            self.process_monitor.refresh()
+            # Data is now instant from cache
             self.current_processes = self.process_monitor.get_processes()
             self.apply_filters()
             self.update_metrics()
@@ -227,6 +234,13 @@ class ProcessesTab(QWidget):
         try:
             # Block signals during update for better performance
             self.table.blockSignals(True)
+            
+            # Remember selection
+            selected_pids = {
+                self.table.item(item.row(), 0).data(Qt.ItemDataRole.DisplayRole)
+                for item in self.table.selectedItems()
+            }
+            
             self.table.setSortingEnabled(False)
             # Limit to 100 processes max for performance
             processes = processes[:100]
@@ -238,14 +252,22 @@ class ProcessesTab(QWidget):
                 pid_item.setData(Qt.ItemDataRole.DisplayRole, proc['pid'])
                 self.table.setItem(row, 0, pid_item)
                 
+                # Restore selection
+                if proc['pid'] in selected_pids:
+                    pid_item.setSelected(True)
+                
                 # Name
                 name_item = QTableWidgetItem(proc['name'])
                 self.table.setItem(row, 1, name_item)
+                if proc['pid'] in selected_pids:
+                    name_item.setSelected(True)
                 
                 # Memory (human readable)
                 memory_item = QTableWidgetItem(proc['memory_human'])
                 memory_item.setData(Qt.ItemDataRole.DisplayRole, proc['memory_mb'])
                 self.table.setItem(row, 2, memory_item)
+                if proc['pid'] in selected_pids:
+                    memory_item.setSelected(True)
                 
                 # Memory %
                 mem_percent = proc['memory_percent']
@@ -255,6 +277,8 @@ class ProcessesTab(QWidget):
                 if mem_percent > 10:
                     mem_percent_item.setForeground(self.get_color_for_percent(mem_percent))
                 self.table.setItem(row, 3, mem_percent_item)
+                if proc['pid'] in selected_pids:
+                    mem_percent_item.setSelected(True)
                 
                 # CPU %
                 cpu_percent = proc['cpu_percent']
@@ -264,14 +288,20 @@ class ProcessesTab(QWidget):
                 if cpu_percent > 10:
                     cpu_percent_item.setForeground(self.get_color_for_percent(cpu_percent))
                 self.table.setItem(row, 4, cpu_percent_item)
+                if proc['pid'] in selected_pids:
+                    cpu_percent_item.setSelected(True)
                 
                 # Store process data
                 pid_item.setData(Qt.ItemDataRole.UserRole, proc)
             
             self.table.setSortingEnabled(True)
             self.table.blockSignals(False)
-            # Default sort by memory usage
-            self.table.sortItems(3, Qt.SortOrder.DescendingOrder)
+            
+            # Only sort if it's not already sorted by something else to prevent jumping rows
+            # Default sort by memory usage if no header is clicked
+            if self.table.horizontalHeader().sortIndicatorSection() == -1:
+                self.table.sortItems(3, Qt.SortOrder.DescendingOrder)
+                
         except Exception as e:
             print(f"Error populating process table: {e}")
             self.table.setSortingEnabled(True)
@@ -303,7 +333,7 @@ class ProcessesTab(QWidget):
         """Handle system processes toggle."""
         include_system = state == Qt.CheckState.Checked.value
         self.process_monitor.set_include_system_processes(include_system)
-        self.update_data()
+        # The worker will update automatically next cycle
     
     def on_force_quit(self):
         """Handle force quit selected processes."""
@@ -343,7 +373,7 @@ class ProcessesTab(QWidget):
                 f"Successfully force quit {success_count} of {len(pids)} process(es)."
             )
             
-            # Refresh after a short delay
+            # Refresh immediately
             self.on_refresh()
 
     def on_process_double_clicked(self, row: int, column: int):
@@ -386,4 +416,3 @@ class ProcessesTab(QWidget):
                 "Error",
                 f"Failed to show process details: {str(e)}"
             )
-

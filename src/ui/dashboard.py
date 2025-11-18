@@ -7,7 +7,7 @@ import time
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
                              QLabel, QGridLayout, QScrollArea, QSplitter,
                              QSizePolicy)
-from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtCore import QTimer, Qt, pyqtSlot
 from ui.startup_tab import StartupTab
 from ui.processes_tab import ProcessesTab
 from ui.animations import AnimationHelper
@@ -32,35 +32,27 @@ class Dashboard(QWidget):
         super().__init__(parent)
         self.startup_manager = startup_manager
         self.process_monitor = process_monitor
-        self._last_overview_refresh = 0.0
         self._cached_top_memory = []  # Cache for top memory processes
         self._cached_top_cpu = []  # Cache for top CPU processes
+        self._active_tab = None
 
         self.setup_ui()
-        self.setup_timers()
+        
+        # Connect to data signals instead of using timers
+        self.process_monitor.data_updated.connect(self.on_data_updated)
 
-        # Connect tab change to stop updates when switching
+        # Connect tab change to handle visibility optimizations
         self.tab_widget.currentChanged.connect(self.on_tab_changed)
 
         # Initial data load
         self.load_initial_data()
 
     def on_tab_changed(self, index):
-        """Handle tab change - refresh data for new tab and manage timers."""
-        current_widget = self.tab_widget.widget(index)
-
-        # Stop all timers first
-        self.process_timer.stop()
-        self.overview_timer.stop()
-
-        # Start appropriate timer and refresh data based on active tab
-        if current_widget == self.processes_tab:
-            self.process_timer.start(10000)  # Resume process timer
-            self.processes_tab.update_data()
-        elif current_widget == self.overview_tab:
-            self.overview_timer.start(2000)  # Resume overview timer
-            self.refresh_overview()
-        # If startup tab is selected, both timers remain stopped
+        """Handle tab change."""
+        self._active_tab = self.tab_widget.widget(index)
+        
+        # Trigger immediate update for the newly selected tab if we have data
+        self.on_data_updated()
 
     def setup_ui(self):
         """Set up the user interface."""
@@ -84,6 +76,9 @@ class Dashboard(QWidget):
         self.tab_widget.addTab(self.overview_tab, "◉ SYSTEM")
 
         layout.addWidget(self.tab_widget)
+        
+        # Set initial active tab
+        self._active_tab = self.startup_tab
 
     def create_enhanced_overview_tab(self) -> QWidget:
         """
@@ -261,6 +256,10 @@ class Dashboard(QWidget):
         cards_grid.setColumnStretch(1, 1)
         cards_grid.setColumnStretch(2, 1)
 
+        cards_grid.setColumnStretch(0, 1)
+        cards_grid.setColumnStretch(1, 1)
+        cards_grid.setColumnStretch(2, 1)
+
         info_layout.addLayout(cards_grid)
 
         scroll_layout.addWidget(info_panel)
@@ -271,60 +270,40 @@ class Dashboard(QWidget):
 
         return widget
 
-    def setup_timers(self):
-        """Set up auto-refresh timers. Timers start/stop based on active tab."""
-        # Process monitor refresh every 10 seconds (slower for stability)
-        self.process_timer = QTimer()
-        self.process_timer.timeout.connect(self.refresh_processes)
-        # Don't start automatically - will start when tab is activated
-
-        # Overview refresh every 2 seconds for real-time charts
-        self.overview_timer = QTimer()
-        self.overview_timer.timeout.connect(self.refresh_overview)
-        # Don't start automatically - will start when tab is activated
-
     def load_initial_data(self):
         """Load initial data for all tabs."""
         # Load startup items
         self.startup_manager.refresh()
         self.startup_tab.update_data()
 
-        # Load processes
-        self.process_monitor.refresh()
-        self.processes_tab.update_data()
+        # Set initial state for overview
+        self.on_data_updated()
+        
+        # Set current active tab based on widget state
+        self._active_tab = self.tab_widget.currentWidget()
 
-        # Update overview (without starting timer yet)
-        self.refresh_overview()
+    @pyqtSlot()
+    def on_data_updated(self):
+        """Handle new data arrival from process monitor."""
+        # Always update overview charts if visible or we need history
+        # We update overview every time to keep charts smooth
+        self.update_overview_tab()
+        
+        # Update active tab
+        current_widget = self.tab_widget.currentWidget()
+        
+        if current_widget == self.processes_tab and self.isVisible():
+            self.processes_tab.update_data()
 
-        # Start timer for the initially active tab
-        current_index = self.tab_widget.currentIndex()
-        self.on_tab_changed(current_index)
-
-    def refresh_processes(self):
-        """Refresh process data."""
-        # Only refresh if processes tab is visible AND widget is visible to user
-        # Note: Timer is stopped when tab is not active, so this is a safety check
+    def update_overview_tab(self):
+        """Update the system overview tab."""
         try:
-            if self.tab_widget.currentWidget() == self.processes_tab and self.isVisible():
-                self.processes_tab.update_data()
-        except Exception as e:
-            print(f"Error refreshing processes: {e}")
-
-    def refresh_overview(self):
-        """Refresh overview data with enhanced visualizations."""
-        try:
-            # Only refresh if overview tab is active
-            if self.tab_widget.currentWidget() != self.overview_tab:
-                return
-
-            now = time.time()
-            if now - self._last_overview_refresh > 1.0:
-                self.process_monitor.refresh()
-                self._last_overview_refresh = now
-
-            # Get system info
+            # Get cached system info
             mem_info = self.process_monitor.get_memory_info()
             cpu_info = self.process_monitor.get_cpu_info()
+
+            if not mem_info or not cpu_info:
+                return
 
             # Update gauges
             cpu_percent = cpu_info.get('percent', 0.0)
@@ -358,35 +337,36 @@ class Dashboard(QWidget):
                 startup_status
             )
 
-            # Update bar charts and cache process data
-            # Use get_top_processes for better performance (single call instead of two)
-            top_processes = self.process_monitor.get_top_processes(8)
-            top_memory = top_processes['memory']
-            top_cpu = top_processes['cpu']
+            # Update bar charts only if overview is visible (expensive repainting)
+            if self.tab_widget.currentWidget() == self.overview_tab:
+                # Use get_top_processes for better performance
+                top_processes = self.process_monitor.get_top_processes(8)
+                top_memory = top_processes['memory']
+                top_cpu = top_processes['cpu']
 
-            self._cached_top_memory = top_memory  # Cache retained for potential reuse
-            memory_data = []
-            for proc in top_memory:
-                memory_data.append({
-                    'label': proc['name'],
-                    'value': proc.get('memory_percent', 0.0),
-                    'max': 100,
-                    'payload': proc
-                })
+                self._cached_top_memory = top_memory
+                memory_data = []
+                for proc in top_memory:
+                    memory_data.append({
+                        'label': proc['name'],
+                        'value': proc.get('memory_percent', 0.0),
+                        'max': 100,
+                        'payload': proc
+                    })
 
-            self.memory_bar_chart.set_data(memory_data)
+                self.memory_bar_chart.set_data(memory_data)
 
-            self._cached_top_cpu = top_cpu  # Cache retained for potential reuse
-            cpu_data = []
-            for proc in top_cpu:
-                cpu_data.append({
-                    'label': proc['name'],
-                    'value': proc.get('cpu_percent', 0.0),
-                    'max': 100,
-                    'payload': proc
-                })
+                self._cached_top_cpu = top_cpu
+                cpu_data = []
+                for proc in top_cpu:
+                    cpu_data.append({
+                        'label': proc['name'],
+                        'value': proc.get('cpu_percent', 0.0),
+                        'max': 100,
+                        'payload': proc
+                    })
 
-            self.cpu_bar_chart.set_data(cpu_data)
+                self.cpu_bar_chart.set_data(cpu_data)
 
             # Update status label
             self.status_label.setText("● ONLINE")
@@ -521,8 +501,6 @@ class Dashboard(QWidget):
 
     def cleanup(self):
         """Clean up resources."""
-        try:
-            self.process_timer.stop()
-            self.overview_timer.stop()
-        except Exception:
-            pass
+        # Stop the process monitor worker
+        if hasattr(self, 'process_monitor'):
+            self.process_monitor.cleanup()
