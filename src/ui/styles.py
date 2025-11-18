@@ -1,84 +1,112 @@
 """
-UI Styling for Mac Health Analyzer - Neo-Brutalist Earth Edition.
-Bold geometric design with warm earth tones, exceptional readability, and organic sophistication.
+UI Styling for Mac Health Analyzer - Refined Earth Edition.
+Professional design with warm earth tones, sophisticated depth, and expert-level polish.
+Designed to feel hand-crafted by a seasoned UI/UX professional.
 """
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QPalette
 
 
-# Neo-Brutalist Earth Tone Palette
+# Refined Earth Tone Palette with Professional Depth
 COLORS = {
-    # Backgrounds - Warm, layered earth tones
+    # Layered Backgrounds - Atmospheric earth tones with depth
     'bg_primary': '#f5f1e8',      # Warm cream (main background)
     'bg_secondary': '#e8dcc8',    # Light sand
     'bg_tertiary': '#d4c4a8',     # Warm tan
-    'bg_card': '#ffffff',         # Pure white for cards
+    'bg_card': '#fffcf7',         # Off-white with warmth for cards
+    'bg_elevated': '#ffffff',     # Pure white for elevated elements
     'bg_dark': '#2d2520',         # Rich espresso for contrast
+    'bg_overlay': '#2d252008',    # Subtle overlay for depth
 
-    # Earth Accent Colors - Muted, sophisticated tones
+    # Textured accents for atmosphere
+    'texture_light': '#f5f1e810',  # Subtle texture overlay
+    'texture_pattern': '#2d252005', # Micro-pattern overlay
+
+    # Earth Accent Colors - Professional, sophisticated tones
     'terracotta': '#c1614a',      # Warm terracotta (primary accent)
+    'terracotta_dark': '#a04d38',  # Deeper terracotta for depth
     'sage': '#6b8e6f',            # Sage green (success/low status)
+    'sage_dark': '#587258',       # Deeper sage
     'mustard': '#d4a843',         # Warm mustard (warning)
+    'mustard_dark': '#b38f36',    # Deeper mustard
     'burnt_sienna': '#a0522d',    # Burnt orange/sienna (critical)
     'clay': '#8b7355',            # Clay brown (secondary accent)
+    'clay_light': '#a38a6f',      # Lighter clay
     'olive': '#6c6c3d',           # Olive green (tertiary)
 
-    # Gradients - Warm earth transitions
+    # Sophisticated Gradients - Layered transitions
     'gradient_start': '#c1614a',   # Terracotta
     'gradient_mid': '#d4a843',     # Mustard
     'gradient_end': '#6b8e6f',     # Sage
+    'gradient_overlay': '#f5f1e8cc', # Atmospheric overlay
 
-    # Text - High contrast, warm tones
+    # Professional Typography Colors
     'text_primary': '#2d2520',    # Rich espresso (primary text)
     'text_secondary': '#6b5d54',  # Warm gray-brown (secondary)
+    'text_tertiary': '#8b7d70',   # Medium warm gray
     'text_muted': '#9a8b7f',      # Muted brown (tertiary)
     'text_light': '#f5f1e8',      # Cream (for dark backgrounds)
+    'text_accent': '#c1614a',     # Terracotta for emphasis
 
-    # Status colors - Organic, readable
+    # Refined Status Colors
     'status_low': '#6b8e6f',      # Sage green - optimal
     'status_medium': '#d4a843',   # Mustard - warning
     'status_high': '#c1614a',     # Terracotta - critical
     'warning': '#d4a843',         # Alias for warning accents
     'critical': '#a0522d',        # Alias for high severity accents
 
-    # UI elements
+    # Professional UI Elements with Depth
     'border': '#d4c4a8',          # Warm tan border
+    'border_subtle': '#e8dcc8',   # Subtle border
     'border_dark': '#8b7355',     # Clay border for emphasis
+    'border_focus': '#c1614a',    # Focus state
     'hover': '#e8dcc8',           # Light sand hover
-    'shadow': '#2d252020',        # Subtle espresso shadow
-    'accent_line': '#2d2520',     # Bold black lines (brutalist)
+    'hover_elevated': '#f5f1e8',  # Elevated hover state
+
+    # Sophisticated Shadow System
+    'shadow_sm': 'rgba(45, 37, 32, 0.04)',   # Subtle depth
+    'shadow_md': 'rgba(45, 37, 32, 0.08)',   # Medium depth
+    'shadow_lg': 'rgba(45, 37, 32, 0.12)',   # Strong depth
+    'shadow_xl': 'rgba(45, 37, 32, 0.16)',   # Maximum depth
+    'shadow_inner': 'rgba(45, 37, 32, 0.06)', # Inner shadow
+
+    # Accent elements
+    'accent_line': '#2d2520',     # Bold lines
+    'accent_glow': '#c1614a40',   # Subtle glow effect
+    'divider': '#d4c4a880',       # Subtle dividers
 }
 
 
 def get_main_stylesheet() -> str:
     """
-    Get the main application stylesheet with neo-brutalist earth design.
+    Get the main application stylesheet with refined professional earth design.
 
     Returns:
-        QStyleSheet string
+        QStyleSheet string with expert-level polish and depth
     """
     return f"""
-    /* Main Application Window - Warm earth gradient */
+    /* Main Application Window - Sophisticated layered background */
     QMainWindow {{
         background: qlineargradient(
             x1: 0, y1: 0, x2: 1, y2: 1,
             stop: 0 {COLORS['bg_primary']},
-            stop: 0.6 {COLORS['bg_secondary']},
+            stop: 0.5 {COLORS['bg_secondary']},
             stop: 1 {COLORS['bg_tertiary']}
         );
     }}
 
-    /* Central Widget */
+    /* Central Widget - Professional base styling */
     QWidget {{
         background: transparent;
         color: {COLORS['text_primary']};
-        font-family: "Sora", "Helvetica Neue";
+        font-family: "Fraunces", "Sora", "Georgia", serif;
         font-size: 14px;
         font-weight: 400;
+        line-height: 1.6;
     }}
 
-    /* Tab Widget - Bold brutalist tabs */
+    /* Tab Widget - Refined professional tabs with depth */
     QTabWidget::pane {{
         border: none;
         background: transparent;
@@ -87,49 +115,55 @@ def get_main_stylesheet() -> str:
     QTabBar::tab {{
         background: {COLORS['bg_card']};
         color: {COLORS['text_secondary']};
-        padding: 18px 40px;
-        margin-right: 4px;
-        border: 3px solid {COLORS['border']};
+        padding: 20px 48px;
+        margin-right: 6px;
+        border: 2px solid {COLORS['border_subtle']};
         border-bottom: none;
-        border-top: 4px solid transparent;
-        font-size: 15px;
+        border-top: 3px solid transparent;
+        font-family: "Sora", "Helvetica Neue", sans-serif;
+        font-size: 13px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
+        letter-spacing: 2px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }}
 
     QTabBar::tab:selected {{
-        background: {COLORS['bg_card']};
+        background: {COLORS['bg_elevated']};
         color: {COLORS['terracotta']};
         font-weight: 700;
-        border: 3px solid {COLORS['border_dark']};
+        border: 2px solid {COLORS['terracotta']};
         border-bottom: none;
-        border-top: 4px solid {COLORS['terracotta']};
+        border-top: 3px solid {COLORS['terracotta']};
+        box-shadow: 0 -2px 8px {COLORS['shadow_md']};
     }}
 
     QTabBar::tab:hover:!selected {{
         background: {COLORS['hover']};
         color: {COLORS['text_primary']};
-        border-top: 4px solid {COLORS['clay']};
+        border-top: 3px solid {COLORS['clay_light']};
+        border-color: {COLORS['border']};
     }}
 
-    /* Table Widget - Clean, readable data display */
+    /* Table Widget - Professional data display with depth */
     QTableWidget {{
-        background: {COLORS['bg_card']};
-        border: 3px solid {COLORS['border']};
+        background: {COLORS['bg_elevated']};
+        border: 2px solid {COLORS['border']};
         border-radius: 0px;
-        gridline-color: {COLORS['border']};
+        gridline-color: {COLORS['border_subtle']};
         selection-background-color: {COLORS['terracotta']};
         selection-color: {COLORS['text_light']};
-        font-family: "IBM Plex Mono", "Menlo", "Courier New", monospace;
+        font-family: "IBM Plex Mono", "SF Mono", "Menlo", monospace;
         font-size: 13px;
         font-weight: 400;
+        line-height: 1.5;
     }}
 
     QTableWidget::item {{
-        padding: 12px;
+        padding: 14px 16px;
         border: none;
         color: {COLORS['text_primary']};
+        border-bottom: 1px solid {COLORS['border_subtle']};
     }}
 
     QTableWidget::item:selected {{
@@ -144,42 +178,50 @@ def get_main_stylesheet() -> str:
     }}
 
     QHeaderView::section {{
-        background: {COLORS['bg_dark']};
+        background: qlineargradient(
+            x1: 0, y1: 0, x2: 0, y2: 1,
+            stop: 0 {COLORS['bg_dark']},
+            stop: 1 #1f1a17
+        );
         color: {COLORS['text_light']};
-        padding: 14px 10px;
+        padding: 16px 12px;
         border: none;
-        border-right: 1px solid {COLORS['clay']};
-        border-bottom: 3px solid {COLORS['terracotta']};
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 2px solid {COLORS['terracotta']};
+        font-family: "Sora", "Helvetica Neue", sans-serif;
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
+        letter-spacing: 2px;
     }}
 
     QHeaderView::section:hover {{
-        background: {COLORS['clay']};
+        background: qlineargradient(
+            x1: 0, y1: 0, x2: 0, y2: 1,
+            stop: 0 {COLORS['clay']},
+            stop: 1 {COLORS['bg_dark']}
+        );
         color: {COLORS['text_light']};
     }}
 
-    /* Scroll Bars - Minimalist geometric style */
+    /* Scroll Bars - Refined minimal style */
     QScrollBar:vertical {{
         background: {COLORS['bg_secondary']};
-        width: 12px;
+        width: 10px;
         margin: 0px;
         border-radius: 0px;
-        border-left: 2px solid {COLORS['border']};
+        border-left: 1px solid {COLORS['border_subtle']};
     }}
 
     QScrollBar::handle:vertical {{
-        background: {COLORS['clay']};
+        background: {COLORS['clay_light']};
         border-radius: 0px;
-        border: 2px solid {COLORS['border_dark']};
-        min-height: 30px;
+        border: none;
+        min-height: 40px;
     }}
 
     QScrollBar::handle:vertical:hover {{
         background: {COLORS['terracotta']};
-        border: 2px solid {COLORS['burnt_sienna']};
     }}
 
     QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
@@ -188,150 +230,181 @@ def get_main_stylesheet() -> str:
 
     QScrollBar:horizontal {{
         background: {COLORS['bg_secondary']};
-        height: 12px;
+        height: 10px;
         margin: 0px;
         border-radius: 0px;
-        border-top: 2px solid {COLORS['border']};
+        border-top: 1px solid {COLORS['border_subtle']};
     }}
 
     QScrollBar::handle:horizontal {{
-        background: {COLORS['clay']};
+        background: {COLORS['clay_light']};
         border-radius: 0px;
-        border: 2px solid {COLORS['border_dark']};
-        min-width: 30px;
+        border: none;
+        min-width: 40px;
     }}
 
     QScrollBar::handle:horizontal:hover {{
         background: {COLORS['terracotta']};
-        border: 2px solid {COLORS['burnt_sienna']};
     }}
 
     QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
         width: 0px;
     }}
 
-    /* Push Buttons - Bold brutalist style */
+    /* Push Buttons - Refined professional style */
     QPushButton {{
-        background: {COLORS['terracotta']};
+        background: qlineargradient(
+            x1: 0, y1: 0, x2: 0, y2: 1,
+            stop: 0 {COLORS['terracotta']},
+            stop: 1 {COLORS['terracotta_dark']}
+        );
         color: {COLORS['text_light']};
-        border: 3px solid {COLORS['accent_line']};
+        border: 2px solid {COLORS['terracotta_dark']};
         border-radius: 0px;
-        padding: 14px 28px;
-        font-size: 14px;
-        font-weight: 700;
+        padding: 16px 32px;
+        font-family: "Sora", "Helvetica Neue", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1.2px;
+        letter-spacing: 1.5px;
     }}
 
     QPushButton:hover {{
-        background: {COLORS['burnt_sienna']};
-        border: 3px solid {COLORS['bg_dark']};
+        background: qlineargradient(
+            x1: 0, y1: 0, x2: 0, y2: 1,
+            stop: 0 {COLORS['terracotta_dark']},
+            stop: 1 {COLORS['burnt_sienna']}
+        );
+        border: 2px solid {COLORS['burnt_sienna']};
         color: {COLORS['text_light']};
     }}
 
     QPushButton:pressed {{
-        background: {COLORS['clay']};
-        border: 3px solid {COLORS['accent_line']};
+        background: {COLORS['burnt_sienna']};
+        border: 2px solid {COLORS['burnt_sienna']};
+        padding: 17px 32px 15px 32px;
     }}
 
     QPushButton:disabled {{
         background: {COLORS['border']};
         color: {COLORS['text_muted']};
-        border: 3px solid {COLORS['border']};
+        border: 2px solid {COLORS['border']};
     }}
 
-    /* Danger Button - Burnt sienna accent */
+    /* Danger Button - Critical action styling */
     QPushButton[danger="true"] {{
-        background: {COLORS['burnt_sienna']};
+        background: qlineargradient(
+            x1: 0, y1: 0, x2: 0, y2: 1,
+            stop: 0 {COLORS['burnt_sienna']},
+            stop: 1 #8a4223
+        );
         color: {COLORS['text_light']};
-        border: 3px solid {COLORS['accent_line']};
+        border: 2px solid #8a4223;
     }}
 
     QPushButton[danger="true"]:hover {{
-        background: {COLORS['terracotta']};
-        border: 3px solid {COLORS['bg_dark']};
+        background: qlineargradient(
+            x1: 0, y1: 0, x2: 0, y2: 1,
+            stop: 0 #8a4223,
+            stop: 1 #6d341b
+        );
+        border: 2px solid #6d341b;
     }}
 
-    /* Line Edit (Search/Input) - Clean input style */
+    /* Line Edit (Search/Input) - Professional input style */
     QLineEdit {{
-        background: {COLORS['bg_card']};
-        border: 3px solid {COLORS['border']};
+        background: {COLORS['bg_elevated']};
+        border: 2px solid {COLORS['border']};
         border-radius: 0px;
-        padding: 12px 16px;
+        padding: 14px 18px;
         color: {COLORS['text_primary']};
+        font-family: "Sora", "Helvetica Neue", sans-serif;
         font-size: 14px;
         font-weight: 400;
+        transition: all 0.2s ease;
     }}
 
     QLineEdit#searchField {{
-        border: 3px solid {COLORS['border_dark']};
-        padding-left: 32px;
-        background-color: {COLORS['bg_card']};
-        background-position: 10px center;
+        border: 2px solid {COLORS['border_dark']};
+        padding-left: 40px;
+        background-color: {COLORS['bg_elevated']};
+        background-position: 12px center;
     }}
 
     QLineEdit:focus {{
-        border: 3px solid {COLORS['terracotta']};
-        background: {COLORS['bg_card']};
+        border: 2px solid {COLORS['terracotta']};
+        background: {COLORS['bg_elevated']};
         color: {COLORS['text_primary']};
+        outline: none;
     }}
 
     QLineEdit::placeholder {{
         color: {COLORS['text_muted']};
+        font-weight: 400;
     }}
 
-    /* Labels - Clear, bold typography */
+    /* Labels - Professional typography hierarchy */
     QLabel {{
         color: {COLORS['text_primary']};
         background: transparent;
         font-weight: 400;
+        line-height: 1.6;
     }}
 
     QLabel[heading="h1"] {{
-        font-size: 52px;
-        font-weight: 800;
+        font-family: "Fraunces", "Georgia", serif;
+        font-size: 56px;
+        font-weight: 700;
         color: {COLORS['bg_dark']};
-        letter-spacing: -0.5px;
+        letter-spacing: -1px;
+        line-height: 1.1;
     }}
 
     QLabel[heading="h2"] {{
-        font-size: 34px;
-        font-weight: 700;
+        font-family: "Fraunces", "Georgia", serif;
+        font-size: 36px;
+        font-weight: 600;
         color: {COLORS['terracotta']};
-        letter-spacing: 0px;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
     }}
 
     QLabel[heading="h3"] {{
-        font-size: 20px;
+        font-family: "Sora", "Helvetica Neue", sans-serif;
+        font-size: 14px;
         font-weight: 700;
-        color: {COLORS['bg_dark']};
+        color: {COLORS['text_secondary']};
         text-transform: uppercase;
-        letter-spacing: 1.5px;
+        letter-spacing: 2.5px;
     }}
 
     QLabel[metricValue="true"] {{
-        font-size: 30px;
-        font-weight: 700;
+        font-family: "IBM Plex Mono", "SF Mono", monospace;
+        font-size: 32px;
+        font-weight: 600;
         color: {COLORS['text_primary']};
-        letter-spacing: 0.5px;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
     }}
 
     QLabel[chartTitle="true"] {{
-        font-size: 16px;
-        font-weight: 700;
+        font-family: "Sora", "Helvetica Neue", sans-serif;
+        font-size: 15px;
+        font-weight: 600;
         color: {COLORS['terracotta']};
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
     }}
 
     QLabel[mono="true"] {{
-        font-family: "IBM Plex Mono", "Menlo", "Courier New", monospace;
+        font-family: "IBM Plex Mono", "SF Mono", "Menlo", monospace;
         font-weight: 400;
+        line-height: 1.5;
     }}
 
-    /* Search field - matches brutalist cards */
+    /* Search field - Professional search styling */
     QFrame[search="true"] {{
-        background: {COLORS['bg_card']};
-        border: 3px solid {COLORS['border']};
+        background: {COLORS['bg_elevated']};
+        border: 2px solid {COLORS['border']};
         border-radius: 0px;
     }}
 
@@ -354,19 +427,20 @@ def get_main_stylesheet() -> str:
         color: {COLORS['text_muted']};
     }}
 
-    /* Brutalist Panel - Bold card style */
+    /* Panel - Professional card with depth */
     QFrame[panel="true"][panelVariant="primary"] {{
-        background: {COLORS['bg_card']};
-        border: 4px solid {COLORS['accent_line']};
+        background: {COLORS['bg_elevated']};
+        border: 2px solid {COLORS['border']};
         border-radius: 0px;
-        padding: 24px;
+        padding: 28px;
     }}
 
     QFrame[panel="true"][panelVariant="primary"]:hover {{
-        border: 4px solid {COLORS['terracotta']};
+        border: 2px solid {COLORS['terracotta']};
+        box-shadow: 0 4px 12px {COLORS['shadow_md']};
     }}
 
-    /* Minimal panel variant for nested content (no heavy border) */
+    /* Minimal panel variant for nested content */
     QFrame[panel="true"][panelVariant="minimal"] {{
         background: {COLORS['bg_card']};
         border: none;
@@ -374,75 +448,82 @@ def get_main_stylesheet() -> str:
         padding: 0px;
     }}
 
-    /* Status Indicators - Earth tone colors */
+    /* Status Indicators - Professional status styling */
     QLabel[status="low"] {{
         color: {COLORS['status_low']};
-        font-weight: 700;
+        font-weight: 600;
     }}
 
     QLabel[status="medium"] {{
         color: {COLORS['status_medium']};
-        font-weight: 700;
+        font-weight: 600;
     }}
 
     QLabel[status="high"] {{
         color: {COLORS['status_high']};
-        font-weight: 700;
+        font-weight: 600;
     }}
 
-    /* Checkboxes - Bold geometric style */
+    /* Checkboxes - Refined checkbox style */
     QCheckBox {{
         color: {COLORS['text_primary']};
-        spacing: 10px;
+        spacing: 12px;
+        font-family: "Sora", "Helvetica Neue", sans-serif;
         font-size: 14px;
+        line-height: 1.6;
     }}
 
     QCheckBox::indicator {{
-        width: 22px;
-        height: 22px;
-        border: 3px solid {COLORS['border_dark']};
+        width: 20px;
+        height: 20px;
+        border: 2px solid {COLORS['border_dark']};
         border-radius: 0px;
-        background: {COLORS['bg_card']};
+        background: {COLORS['bg_elevated']};
     }}
 
     QCheckBox::indicator:checked {{
-        background: {COLORS['terracotta']};
-        border: 3px solid {COLORS['accent_line']};
+        background: qlineargradient(
+            x1: 0, y1: 0, x2: 1, y2: 1,
+            stop: 0 {COLORS['terracotta']},
+            stop: 1 {COLORS['terracotta_dark']}
+        );
+        border: 2px solid {COLORS['terracotta_dark']};
     }}
 
     QCheckBox::indicator:hover {{
-        border: 3px solid {COLORS['terracotta']};
+        border: 2px solid {COLORS['terracotta']};
     }}
 
-    /* Combo Box - Clean dropdown */
+    /* Combo Box - Professional dropdown */
     QComboBox {{
-        background: {COLORS['bg_card']};
-        border: 3px solid {COLORS['border']};
+        background: {COLORS['bg_elevated']};
+        border: 2px solid {COLORS['border']};
         border-radius: 0px;
-        padding: 12px 16px;
+        padding: 14px 18px;
         color: {COLORS['text_primary']};
+        font-family: "Sora", "Helvetica Neue", sans-serif;
         font-size: 14px;
     }}
 
     QComboBox:hover {{
-        border: 3px solid {COLORS['terracotta']};
+        border: 2px solid {COLORS['terracotta']};
     }}
 
     QComboBox::drop-down {{
         border: none;
-        width: 30px;
+        width: 32px;
     }}
 
     QComboBox::down-arrow {{
         image: none;
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
-        border-top: 6px solid {COLORS['terracotta']};
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 5px solid {COLORS['terracotta']};
     }}
 
     QComboBox QAbstractItemView {{
-        background: {COLORS['bg_card']};
-        border: 3px solid {COLORS['terracotta']};
+        background: {COLORS['bg_elevated']};
+        border: 2px solid {COLORS['terracotta']};
         selection-background-color: {COLORS['terracotta']};
         selection-color: {COLORS['text_light']};
     }}
@@ -453,34 +534,40 @@ def get_main_stylesheet() -> str:
     }}
 
     QMessageBox QPushButton {{
-        min-width: 100px;
+        min-width: 120px;
     }}
 
-    /* Progress Bar - Bold geometric bar */
+    /* Progress Bar - Professional progress indicator */
     QProgressBar {{
         background: {COLORS['bg_secondary']};
-        border: 3px solid {COLORS['border_dark']};
+        border: 2px solid {COLORS['border']};
         border-radius: 0px;
         text-align: center;
         color: {COLORS['text_primary']};
-        font-weight: 700;
-        height: 28px;
+        font-family: "IBM Plex Mono", "SF Mono", monospace;
+        font-weight: 600;
+        height: 32px;
     }}
 
     QProgressBar::chunk {{
-        background: {COLORS['terracotta']};
+        background: qlineargradient(
+            x1: 0, y1: 0, x2: 1, y2: 0,
+            stop: 0 {COLORS['terracotta']},
+            stop: 1 {COLORS['terracotta_dark']}
+        );
         border-radius: 0px;
     }}
 
-    /* Tooltip - Clean popup */
+    /* Tooltip - Professional tooltip */
     QToolTip {{
         background: {COLORS['bg_dark']};
         color: {COLORS['text_light']};
-        border: 3px solid {COLORS['terracotta']};
+        border: 2px solid {COLORS['terracotta']};
         border-radius: 0px;
-        padding: 10px;
-        font-family: "IBM Plex Mono", monospace;
+        padding: 12px 16px;
+        font-family: "IBM Plex Mono", "SF Mono", monospace;
         font-size: 12px;
+        line-height: 1.5;
     }}
     """
 

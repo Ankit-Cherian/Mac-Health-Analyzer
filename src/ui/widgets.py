@@ -1,9 +1,10 @@
 """
 Custom styled widgets for the Mac Health Analyzer.
-Includes toggle switches, styled buttons, and animated panels.
+Professional components with sophisticated micro-interactions and polish.
+Designed to feel hand-crafted by a seasoned UI/UX professional.
 """
 
-from PyQt6.QtCore import Qt, pyqtSignal, QRect, QPropertyAnimation, QEasingCurve, pyqtProperty
+from PyQt6.QtCore import Qt, pyqtSignal, QRect, QPropertyAnimation, QEasingCurve, pyqtProperty, QVariantAnimation
 from PyQt6.QtWidgets import (
     QWidget,
     QPushButton,
@@ -12,7 +13,8 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QVBoxLayout,
     QSizePolicy,
-    QLineEdit
+    QLineEdit,
+    QGraphicsOpacityEffect
 )
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
 from ui.styles import COLORS
@@ -20,7 +22,8 @@ from ui.styles import COLORS
 
 class ToggleSwitch(QWidget):
     """
-    Custom toggle switch widget with smooth animation and neon glow.
+    Professional toggle switch with smooth spring animation.
+    Features sophisticated micro-interactions and polished visual feedback.
     """
 
     toggled = pyqtSignal(bool)
@@ -37,13 +40,13 @@ class ToggleSwitch(QWidget):
         self._checked = initial_state
         self._circle_position = 24 if initial_state else 2
 
-        self.setFixedSize(50, 28)
+        self.setFixedSize(52, 28)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
-        # Animation for smooth toggle
+        # Professional spring animation for smooth toggle
         self.animation = QPropertyAnimation(self, b"circle_position")
-        self.animation.setDuration(200)
-        self.animation.setEasingCurve(QEasingCurve.Type.InOutCubic)
+        self.animation.setDuration(250)
+        self.animation.setEasingCurve(QEasingCurve.Type.OutBack)  # Subtle spring effect
 
     @pyqtProperty(int)
     def circle_position(self):
@@ -57,22 +60,35 @@ class ToggleSwitch(QWidget):
         self.update()
 
     def paintEvent(self, event):
-        """Paint the toggle switch with neon glow."""
+        """Paint the toggle switch with professional depth and gradients."""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        # Draw background track
+        # Draw background track with subtle depth
         if self._checked:
+            # Active state: terracotta with depth
             bg_color = QColor(COLORS['terracotta'])
+            border_color = QColor(COLORS['terracotta_dark'])
         else:
+            # Inactive state: subtle gray
             bg_color = QColor(COLORS['border'])
+            border_color = QColor(COLORS['border_dark'])
 
-        painter.setPen(Qt.PenStyle.NoPen)
+        # Background with border for depth
+        painter.setPen(QPen(border_color, 2))
         painter.setBrush(QBrush(bg_color))
-        painter.drawRoundedRect(0, 0, 50, 28, 0, 0)  # Square corners for brutalist style
+        painter.drawRoundedRect(1, 1, 50, 26, 0, 0)  # Square corners with slight inset
 
-        # Draw circle
-        circle_color = QColor(COLORS['bg_card']) if self._checked else QColor(COLORS['text_secondary'])
+        # Draw circle with subtle shadow effect
+        circle_color = QColor(COLORS['bg_elevated']) if self._checked else QColor(COLORS['text_secondary'])
+
+        # Shadow
+        shadow_color = QColor(0, 0, 0, 20)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QBrush(shadow_color))
+        painter.drawEllipse(self._circle_position + 1, 3, 24, 24)
+
+        # Circle
         painter.setBrush(QBrush(circle_color))
         painter.drawEllipse(self._circle_position, 2, 24, 24)
     
@@ -146,7 +162,8 @@ class GlassmorphicPanel(QFrame):
 
 class MetricCard(QWidget):
     """
-    Enhanced card widget for displaying metrics with cyberpunk styling.
+    Professional metric card with sophisticated visual hierarchy and depth.
+    Features refined typography, status indicators, and polished animations.
     """
 
     def __init__(self, title: str, value: str = "", status: str = "low", parent=None):
@@ -161,24 +178,25 @@ class MetricCard(QWidget):
         """
         super().__init__(parent)
 
-        # Create panel
+        # Create panel with depth
         self.panel = GlassmorphicPanel(self)
         self.panel.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         layout = QVBoxLayout(self.panel)
-        layout.setSpacing(12)
-        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(16)
+        layout.setContentsMargins(28, 28, 28, 28)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        # Title with icon
+        # Title with refined status indicator
         title_layout = QHBoxLayout()
-        title_layout.setSpacing(8)
+        title_layout.setSpacing(10)
         title_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
-        # Status indicator dot
+        # Sophisticated status indicator
         self.status_indicator = QLabel("●")
         self.status_indicator.setProperty("status", status)
         self.status_indicator.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.status_indicator.setStyleSheet(f"font-size: 16px;")
         title_layout.addWidget(self.status_indicator)
 
         self.title_label = QLabel(title.upper())
@@ -188,7 +206,10 @@ class MetricCard(QWidget):
 
         layout.addLayout(title_layout)
 
-        # Value with glow effect
+        # Add subtle spacing
+        layout.addSpacing(8)
+
+        # Value with professional typography
         self.value_label = QLabel(value)
         self.value_label.setProperty("metricValue", "true")
         self.value_label.setProperty("status", status)
@@ -196,7 +217,7 @@ class MetricCard(QWidget):
         self.value_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.value_label.setWordWrap(True)
         self.value_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        self.value_label.setMinimumHeight(48)
+        self.value_label.setMinimumHeight(52)
         layout.addWidget(self.value_label)
 
         # Main layout
@@ -204,7 +225,7 @@ class MetricCard(QWidget):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.addWidget(self.panel)
 
-        self.setMinimumHeight(140)
+        self.setMinimumHeight(160)
 
     def update_value(self, value: str, status: str = None):
         """

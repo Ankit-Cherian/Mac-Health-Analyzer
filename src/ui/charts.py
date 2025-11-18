@@ -1,6 +1,7 @@
 """
-Chart widgets for Mac Health Analyzer - Neo-Brutalist Earth Edition.
-Clean, readable visualizations with bold geometric design.
+Chart widgets for Mac Health Analyzer - Refined Professional Edition.
+Sophisticated visualizations with expert-level polish and depth.
+Designed to feel hand-crafted by a seasoned data visualization professional.
 """
 
 from collections import deque
@@ -11,7 +12,7 @@ from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QLinearGradient, QConica
 from .styles import COLORS
 
 
-# Configure PyQtGraph for light theme
+# Configure PyQtGraph for professional light theme
 pg.setConfigOption('background', COLORS['bg_primary'])
 pg.setConfigOption('foreground', COLORS['text_primary'])
 pg.setConfigOption('antialias', True)
@@ -19,7 +20,8 @@ pg.setConfigOption('antialias', True)
 
 class RealtimeLineChart(QWidget):
     """
-    Real-time line chart with neon glow effect for CPU/Memory monitoring.
+    Professional real-time line chart with sophisticated visual polish.
+    Features smooth animations, refined gradients, and expert-level data visualization.
     """
 
     def __init__(self, title: str = "Metric", max_points: int = 60, parent=None):
@@ -32,55 +34,60 @@ class RealtimeLineChart(QWidget):
         self.setup_ui()
 
     def setup_ui(self):
-        """Setup the chart UI."""
+        """Setup the chart UI with professional styling."""
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(12)
 
         self.title_label = QLabel(self.title.upper())
         self.title_label.setProperty("chartTitle", "true")
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.title_label)
 
-        # Add current value label at the top
+        # Professional current value display with refined typography
         self.current_value_label = QLabel("--")
         self.current_value_label.setStyleSheet(f"""
             color: {COLORS['terracotta']};
-            font-size: 24px;
-            font-weight: bold;
-            padding: 8px;
-            background-color: {COLORS['bg_card']};
+            font-family: "IBM Plex Mono", "SF Mono", monospace;
+            font-size: 28px;
+            font-weight: 600;
+            padding: 12px;
+            background-color: {COLORS['bg_elevated']};
+            border: 1px solid {COLORS['border_subtle']};
+            letter-spacing: -0.5px;
         """)
         self.current_value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.current_value_label)
 
-        # Create plot widget
+        # Create plot widget with professional styling
         self.plot_widget = pg.PlotWidget()
-        self.plot_widget.setBackground(COLORS['bg_card'])
-        # Use very light grid lines to avoid overwhelming the nested card layout
-        self.plot_widget.showGrid(x=True, y=True, alpha=0.08)
+        self.plot_widget.setBackground(COLORS['bg_elevated'])
+
+        # Refined subtle grid for professional data visualization
+        self.plot_widget.showGrid(x=True, y=True, alpha=0.12)
         self.plot_widget.setMouseEnabled(x=False, y=False)
         self.plot_widget.setMenuEnabled(False)
         self.plot_widget.hideButtons()
 
-        # Style the plot with clearer labels
-        self.plot_widget.setLabel('left', self.title, color=COLORS['terracotta'],
-                                  **{'font-size': '14pt', 'font-weight': 'bold'})
-        self.plot_widget.setLabel('bottom', 'Time (seconds ago)', color=COLORS['text_secondary'],
-                                  **{'font-size': '12pt', 'font-weight': 'bold'})
+        # Professional axis labels with refined typography
+        self.plot_widget.setLabel('left', self.title, color=COLORS['text_secondary'],
+                                  **{'font-size': '13pt', 'font-weight': '600'})
+        self.plot_widget.setLabel('bottom', 'Time (seconds ago)', color=COLORS['text_tertiary'],
+                                  **{'font-size': '11pt', 'font-weight': '500'})
 
-        # Set axis color and styling
-        axis_pen = pg.mkPen(color=COLORS['border'], width=1)
+        # Sophisticated axis styling with subtle borders
+        axis_pen = pg.mkPen(color=COLORS['border_subtle'], width=1.5)
         left_axis = self.plot_widget.getAxis('left')
         bottom_axis = self.plot_widget.getAxis('bottom')
 
         left_axis.setPen(axis_pen)
         bottom_axis.setPen(axis_pen)
 
-        # Make axis labels more visible
-        left_axis.setStyle(tickTextOffset=10)
-        bottom_axis.setStyle(tickTextOffset=10)
+        # Professional spacing and alignment
+        left_axis.setStyle(tickTextOffset=12)
+        bottom_axis.setStyle(tickTextOffset=12)
 
-        # Set fixed ranges to keep the chart scale stable
+        # Fixed ranges for stable, professional visualization
         self.plot_widget.setYRange(0, 100)
         self.plot_widget.enableAutoRange(axis='xy', enable=False)
         self.plot_widget.setLimits(xMin=0, xMax=self.max_points, yMin=0, yMax=100)
@@ -89,8 +96,8 @@ class RealtimeLineChart(QWidget):
         if '%' in self.title:
             left_axis.setLabel(units='%')
 
-        # Create the line with bold style
-        line_pen = pg.mkPen(color=COLORS['terracotta'], width=3)
+        # Create the line with sophisticated gradient effect
+        line_pen = pg.mkPen(color=COLORS['terracotta'], width=2.5)
         self.data_line = self.plot_widget.plot(
             pen=line_pen,
             name=self.title

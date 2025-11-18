@@ -1,10 +1,23 @@
 """
 Animation utilities for the Mac Health Analyzer.
-Provides smooth transitions, staggered reveals, and micro-interactions.
+Professional animations with sophisticated easing and micro-interactions.
+Designed for smooth, polished UI transitions that feel hand-crafted.
 """
 
 from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QAbstractAnimation, QParallelAnimationGroup, QSequentialAnimationGroup
 from PyQt6.QtWidgets import QWidget, QGraphicsOpacityEffect
+
+
+# Professional easing curves for different animation types
+EASING_CURVES = {
+    'smooth': QEasingCurve.Type.InOutCubic,      # General smooth transitions
+    'spring': QEasingCurve.Type.OutBack,          # Subtle spring effect
+    'ease_out': QEasingCurve.Type.OutCubic,       # Fast start, slow end
+    'ease_in': QEasingCurve.Type.InCubic,         # Slow start, fast end
+    'bounce': QEasingCurve.Type.OutBounce,        # Playful bounce
+    'elastic': QEasingCurve.Type.OutElastic,      # Elastic overshoot
+    'soft': QEasingCurve.Type.InOutSine,          # Very gentle transition
+}
 
 
 class AnimationHelper:
@@ -13,15 +26,16 @@ class AnimationHelper:
     """
     
     @staticmethod
-    def fade_in(widget: QWidget, duration: int = 300, delay: int = 0) -> QPropertyAnimation:
+    def fade_in(widget: QWidget, duration: int = 400, delay: int = 0, easing: str = 'ease_out') -> QPropertyAnimation:
         """
-        Create a fade-in animation.
-        
+        Create a professional fade-in animation with smooth easing.
+
         Args:
             widget: Widget to animate
-            duration: Animation duration in ms
+            duration: Animation duration in ms (default: 400 for smooth feel)
             delay: Delay before starting in ms
-            
+            easing: Easing curve type ('smooth', 'spring', 'ease_out', etc.)
+
         Returns:
             QPropertyAnimation object
         """
@@ -29,19 +43,19 @@ class AnimationHelper:
         if not widget.graphicsEffect():
             effect = QGraphicsOpacityEffect(widget)
             widget.setGraphicsEffect(effect)
-        
+
         effect = widget.graphicsEffect()
         effect.setOpacity(0)
-        
+
         animation = QPropertyAnimation(effect, b"opacity")
         animation.setDuration(duration)
         animation.setStartValue(0.0)
         animation.setEndValue(1.0)
-        animation.setEasingCurve(QEasingCurve.Type.OutCubic)
-        
+        animation.setEasingCurve(EASING_CURVES.get(easing, QEasingCurve.Type.OutCubic))
+
         if delay > 0:
             animation.setStartDelay(delay)
-        
+
         return animation
     
     @staticmethod
@@ -72,24 +86,26 @@ class AnimationHelper:
         return animation
     
     @staticmethod
-    def staggered_fade_in(widgets: list, duration: int = 300, delay_increment: int = 50) -> QParallelAnimationGroup:
+    def staggered_fade_in(widgets: list, duration: int = 400, delay_increment: int = 80, easing: str = 'smooth') -> QParallelAnimationGroup:
         """
-        Create staggered fade-in animations for multiple widgets.
-        
+        Create sophisticated staggered fade-in animations for multiple widgets.
+        Perfect for revealing content with professional polish.
+
         Args:
             widgets: List of widgets to animate
-            duration: Animation duration in ms
-            delay_increment: Delay between each widget's animation start
-            
+            duration: Animation duration in ms (default: 400 for smooth feel)
+            delay_increment: Delay between each widget's animation start (default: 80ms)
+            easing: Easing curve type
+
         Returns:
             QParallelAnimationGroup containing all animations
         """
         group = QParallelAnimationGroup()
-        
+
         for i, widget in enumerate(widgets):
-            animation = AnimationHelper.fade_in(widget, duration, delay=i * delay_increment)
+            animation = AnimationHelper.fade_in(widget, duration, delay=i * delay_increment, easing=easing)
             group.addAnimation(animation)
-        
+
         return group
     
     @staticmethod
