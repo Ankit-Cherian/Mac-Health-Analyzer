@@ -5,6 +5,7 @@ Handles detection and management of login items, Launch Agents, and Launch Daemo
 
 from typing import List, Dict
 import time
+from PyQt6.QtCore import QObject, QRunnable, QThreadPool, pyqtSignal, pyqtSlot
 from utils.system_info import (
     get_login_items,
     get_launch_agents,
@@ -16,13 +17,57 @@ from utils.system_info import (
 )
 
 
-class StartupManager:
+class StartupScanWorker(QRunnable):
+    """
+    Worker runnable for scanning startup items in the background.
+    """
+    
+    def __init__(self, signals, launchctl_cache):
+        """
+        Initialize worker.
+        
+        Args:
+            signals: StartupManagerSignals instance
+            launchctl_cache: Set of loaded launchctl labels
+        """
+        super().__init__()
+        self.signals = signals
+        self.launchctl_cache = launchctl_cache
+    
+    def run(self):
+        """Execute the startup scan."""
+        try:
+            # If cache is empty, fetch it (blocking but in thread)
+            current_cache = self.launchctl_cache
+            if not current_cache:
+                current_cache = fetch_launchctl_status()
+            
+            login_items = get_login_items()
+            launch_agents = get_launch_agents(loaded_labels=current_cache)
+            launch_daemons = get_launch_daemons(loaded_labels=current_cache)
+            
+            all_items = login_items + launch_agents + launch_daemons
+            
+            self.signals.scan_finished.emit(all_items, current_cache)
+        except Exception as e:
+            self.signals.scan_error.emit(str(e))
+
+
+class StartupManagerSignals(QObject):
+    """Signals for StartupManager."""
+    scan_finished = pyqtSignal(list, set)  # items, launchctl_cache
+    scan_error = pyqtSignal(str)
+    data_updated = pyqtSignal()  # Emitted when data is ready for UI
+
+
+class StartupManager(QObject):
     """
     Manages startup items on macOS.
     """
     
     def __init__(self):
         """Initialize the startup manager."""
+        super().__init__()
         self.login_items = []
         self.launch_agents = []
         self.launch_daemons = []
@@ -30,22 +75,49 @@ class StartupManager:
         self._launchctl_cache = set()
         self._launchctl_cache_ts = 0.0
         
+        # Thread pool for async scans
+        self._thread_pool = QThreadPool()
+        self._signals = StartupManagerSignals()
+        self._signals.scan_finished.connect(self._on_scan_finished)
+        self._signals.scan_error.connect(self._on_scan_error)
+        
+        # Expose data_updated signal through this object
+        self.data_updated = self._signals.data_updated
+        self.scan_error = self._signals.scan_error
+        
     def refresh(self):
-        """Refresh all startup items."""
+        """
+        Refresh all startup items asynchronously.
+        Triggers a background scan.
+        """
         now = time.time()
-        if not self._launchctl_cache or now - self._launchctl_cache_ts > 5:
-            self._launchctl_cache = fetch_launchctl_status()
+        
+        # Reset cache if stale (> 5 seconds)
+        if now - self._launchctl_cache_ts > 5:
+            self._launchctl_cache = set()
             self._launchctl_cache_ts = now
+            
+        worker = StartupScanWorker(self._signals, self._launchctl_cache)
+        self._thread_pool.start(worker)
+        
+    @pyqtSlot(list, set)
+    def _on_scan_finished(self, items, launchctl_cache):
+        """Handle completion of background scan."""
+        self.all_items = items
+        self._launchctl_cache = launchctl_cache
+        
+        # Split back into categories for convenience
+        self.login_items = [i for i in items if i.get('type') == 'Login Item']
+        self.launch_agents = [i for i in items if i.get('type') == 'Launch Agent']
+        self.launch_daemons = [i for i in items if i.get('type') == 'Launch Daemon']
+        
+        self.data_updated.emit()
+        
+    @pyqtSlot(str)
+    def _on_scan_error(self, error_msg):
+        """Handle scan error."""
+        print(f"Startup scan error: {error_msg}")
 
-        self.login_items = get_login_items()
-        self.launch_agents = get_launch_agents(loaded_labels=self._launchctl_cache)
-        self.launch_daemons = get_launch_daemons(loaded_labels=self._launchctl_cache)
-        
-        # Combine all items
-        self.all_items = self.login_items + self.launch_agents + self.launch_daemons
-        
-        return self.all_items
-    
     def get_all_items(self) -> List[Dict[str, any]]:
         """
         Get all startup items.
@@ -208,4 +280,3 @@ class StartupManager:
             'launch_agents': len(self.launch_agents),
             'launch_daemons': len(self.launch_daemons),
         }
-

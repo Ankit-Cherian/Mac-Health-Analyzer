@@ -29,6 +29,8 @@ wheels/
 # Fonts (downloaded at runtime)
 assets/fonts/*.ttf
 assets/fonts/*.otf
+src/assets/fonts/*.ttf
+src/assets/fonts/*.otf
 
 # IDE
 .vscode/

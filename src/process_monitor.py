@@ -4,28 +4,173 @@ Handles real-time monitoring of running processes and system resources.
 """
 
 import psutil
+import time
 from typing import List, Dict, Optional
+from PyQt6.QtCore import QObject, QThread, pyqtSignal, QMutex, QMutexLocker
 from utils.helpers import (
-    get_process_list,
     get_system_memory_info,
     get_cpu_info,
-    get_top_memory_processes,
-    get_top_cpu_processes,
     kill_process,
+    bytes_to_human_readable
 )
 
 
-class ProcessMonitor:
+class ProcessWorker(QThread):
+    """
+    Background worker thread for process monitoring.
+    """
+    stats_updated = pyqtSignal(dict)  # Emits full stats dictionary
+
+    def __init__(self):
+        """Initialize the worker thread."""
+        super().__init__()
+        self._running = True
+        self._paused = False
+        self.include_system_processes = False
+        self._mutex = QMutex()
+        
+        # Persistent cache for process objects
+        # Key: PID, Value: psutil.Process object
+        self._process_cache = {}
+        
+        # Prime global CPU usage
+        psutil.cpu_percent(interval=None)
+
+    def set_include_system_processes(self, include: bool):
+        """Set whether to include system processes."""
+        with QMutexLocker(self._mutex):
+            self.include_system_processes = include
+
+    def stop(self):
+        """Stop the worker thread."""
+        self._running = False
+        self.wait()
+
+    def run(self):
+        """Main loop for the worker thread."""
+        while self._running:
+            if not self._paused:
+                try:
+                    self._collect_metrics()
+                except Exception as e:
+                    print(f"Error in process worker: {e}")
+            
+            # Sleep for 2 seconds
+            # We use shorter sleeps to check for stop signal more frequently
+            for _ in range(20):
+                if not self._running:
+                    break
+                self.msleep(100)
+
+    def _collect_metrics(self):
+        """Collect system metrics and process list."""
+        # 1. System-wide metrics
+        memory_info = get_system_memory_info()
+        cpu_info = get_cpu_info()
+        
+        # 2. Process list
+        current_pids = set()
+        processes_data = []
+        
+        total_ram = memory_info['total']
+        
+        with QMutexLocker(self._mutex):
+            include_system = self.include_system_processes
+            
+        # Iterate through all running processes
+        for pid in psutil.pids():
+            current_pids.add(pid)
+            
+            # Get or create process object
+            try:
+                if pid in self._process_cache:
+                    proc = self._process_cache[pid]
+                else:
+                    proc = psutil.Process(pid)
+                    self._process_cache[pid] = proc
+                
+                # Use oneshot for efficient attribute retrieval
+                with proc.oneshot():
+                    name = proc.name()
+                    username = proc.username()
+                    
+                    # Filter system processes if needed
+                    if not include_system and username in ['root', '_windowserver', 'nobody']:
+                        continue
+                        
+                    memory_full = proc.memory_info()
+                    memory_rss = memory_full.rss
+                    memory_mb = memory_rss / (1024 * 1024)
+                    memory_percent = (memory_rss / total_ram) * 100
+                    
+                    # CPU percent - this works correctly because we persist the object!
+                    # interval=None compares with the last call on this object
+                    cpu_percent = proc.cpu_percent(interval=None)
+                    
+                    processes_data.append({
+                        'pid': pid,
+                        'name': name,
+                        'username': username,
+                        'memory_mb': memory_mb,
+                        'memory_percent': memory_percent,
+                        'memory_human': bytes_to_human_readable(memory_rss),
+                        'cpu_percent': cpu_percent,
+                    })
+                    
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                # Process is gone or inaccessible
+                if pid in self._process_cache:
+                    del self._process_cache[pid]
+                continue
+            except Exception:
+                continue
+                
+        # Clean up cache for dead processes
+        cached_pids = list(self._process_cache.keys())
+        for pid in cached_pids:
+            if pid not in current_pids:
+                del self._process_cache[pid]
+                
+        # Emit all data
+        self.stats_updated.emit({
+            'processes': processes_data,
+            'memory_info': memory_info,
+            'cpu_info': cpu_info,
+            'process_count': len(processes_data)
+        })
+
+
+class ProcessMonitor(QObject):
     """
     Monitors running processes and system resources.
+    Acts as a facade for the background worker.
     """
+    data_updated = pyqtSignal()  # Signal when new data is available
     
     def __init__(self):
         """Initialize the process monitor."""
-        self.processes = []
-        self.memory_info = {}
-        self.cpu_info = {}
-        self.include_system_processes = False
+        super().__init__()
+        self._worker = ProcessWorker()
+        self._worker.stats_updated.connect(self._on_stats_updated)
+        
+        # Cache for UI access
+        self._latest_data = {
+            'processes': [],
+            'memory_info': {},
+            'cpu_info': {},
+            'process_count': 0
+        }
+        
+        self._worker.start()
+        
+    def _on_stats_updated(self, data):
+        """Handle updates from worker."""
+        self._latest_data = data
+        self.data_updated.emit()
+        
+    def cleanup(self):
+        """Clean up resources."""
+        self._worker.stop()
         
     def set_include_system_processes(self, include: bool):
         """
@@ -34,82 +179,49 @@ class ProcessMonitor:
         Args:
             include: True to include system processes, False otherwise
         """
-        self.include_system_processes = include
+        self._worker.set_include_system_processes(include)
         
     def refresh(self):
-        """Refresh all process and system information."""
-        # Prime CPU sampling to ensure accurate readings on next call
-        psutil.cpu_percent(interval=None)
-
-        self.processes = get_process_list(include_system=self.include_system_processes)
-        self.memory_info = get_system_memory_info()
-        self.cpu_info = get_cpu_info()
+        """
+        Legacy method for compatibility.
+        Now essentially a no-op since the worker runs automatically.
+        """
+        pass
         
     def get_processes(self) -> List[Dict[str, any]]:
         """
-        Get list of all processes.
+        Get list of all processes (instant return from cache).
         
         Returns:
             List of process information dicts
         """
-        return self.processes
+        return self._latest_data['processes']
     
     def get_process_count(self) -> int:
-        """
-        Get count of processes.
-        
-        Returns:
-            Number of processes
-        """
-        return len(self.processes)
+        """Get count of processes."""
+        return self._latest_data['process_count']
     
     def get_memory_info(self) -> Dict[str, any]:
-        """
-        Get system memory information.
-        
-        Returns:
-            Dict with memory information
-        """
-        return self.memory_info
+        """Get system memory information."""
+        return self._latest_data['memory_info']
     
     def get_cpu_info(self) -> Dict[str, any]:
-        """
-        Get CPU information.
-        
-        Returns:
-            Dict with CPU information
-        """
-        return self.cpu_info
+        """Get CPU information."""
+        return self._latest_data['cpu_info']
     
     def get_top_memory_processes(self, n: int = 10) -> List[Dict[str, any]]:
-        """
-        Get top N processes by memory usage.
-        
-        Args:
-            n: Number of processes to return
-            
-        Returns:
-            List of top N processes
-        """
+        """Get top N processes by memory usage."""
         sorted_processes = sorted(
-            self.processes,
+            self._latest_data['processes'],
             key=lambda x: x['memory_mb'],
             reverse=True
         )
         return sorted_processes[:n]
     
     def get_top_cpu_processes(self, n: int = 10) -> List[Dict[str, any]]:
-        """
-        Get top N processes by CPU usage.
-
-        Args:
-            n: Number of processes to return
-
-        Returns:
-            List of top N processes
-        """
+        """Get top N processes by CPU usage."""
         sorted_processes = sorted(
-            self.processes,
+            self._latest_data['processes'],
             key=lambda x: x['cpu_percent'],
             reverse=True
         )
@@ -118,26 +230,19 @@ class ProcessMonitor:
     def get_top_processes(self, n: int = 10) -> Dict[str, List[Dict[str, any]]]:
         """
         Get top N processes by both CPU and memory usage in a single operation.
-        This is more efficient than calling get_top_cpu_processes and
-        get_top_memory_processes separately since it sorts once per metric
-        instead of iterating twice.
-
-        Args:
-            n: Number of processes to return for each metric
-
-        Returns:
-            Dict with 'cpu' and 'memory' keys containing top N processes
         """
+        processes = self._latest_data['processes']
+        
         # Sort by CPU
         cpu_sorted = sorted(
-            self.processes,
+            processes,
             key=lambda x: x['cpu_percent'],
             reverse=True
         )
 
         # Sort by memory
         memory_sorted = sorted(
-            self.processes,
+            processes,
             key=lambda x: x['memory_mb'],
             reverse=True
         )
@@ -148,32 +253,16 @@ class ProcessMonitor:
         }
     
     def search_processes(self, query: str) -> List[Dict[str, any]]:
-        """
-        Search processes by name.
-        
-        Args:
-            query: Search query
-            
-        Returns:
-            List of matching processes
-        """
+        """Search processes by name."""
         query_lower = query.lower()
         return [
-            proc for proc in self.processes
+            proc for proc in self._latest_data['processes']
             if query_lower in proc['name'].lower()
         ]
     
     def get_process_by_pid(self, pid: int) -> Optional[Dict[str, any]]:
-        """
-        Get process information by PID.
-        
-        Args:
-            pid: Process ID
-            
-        Returns:
-            Process information or None if not found
-        """
-        for proc in self.processes:
+        """Get process information by PID."""
+        for proc in self._latest_data['processes']:
             if proc['pid'] == pid:
                 return proc
         return None
@@ -181,111 +270,61 @@ class ProcessMonitor:
     def kill_process(self, pid: int, force: bool = False) -> bool:
         """
         Kill a process by PID.
-        
-        Args:
-            pid: Process ID
-            force: If True, use SIGKILL instead of SIGTERM
-            
-        Returns:
-            True if successful, False otherwise
+        This is a write action, so we can just call the helper directly.
         """
         return kill_process(pid, force)
     
     def get_memory_usage_percentage(self) -> float:
-        """
-        Get overall memory usage percentage.
-        
-        Returns:
-            Memory usage percentage
-        """
-        return self.memory_info.get('percent', 0.0)
+        """Get overall memory usage percentage."""
+        return self._latest_data['memory_info'].get('percent', 0.0)
     
     def get_cpu_usage_percentage(self) -> float:
-        """
-        Get overall CPU usage percentage.
-        
-        Returns:
-            CPU usage percentage
-        """
-        return self.cpu_info.get('percent', 0.0)
+        """Get overall CPU usage percentage."""
+        return self._latest_data['cpu_info'].get('percent', 0.0)
     
     def get_system_summary(self) -> Dict[str, any]:
-        """
-        Get summary of system resources.
+        """Get summary of system resources."""
+        mem_info = self._latest_data['memory_info']
+        cpu_info = self._latest_data['cpu_info']
         
-        Returns:
-            Dict with system summary
-        """
         return {
             'process_count': self.get_process_count(),
             'memory_percent': self.get_memory_usage_percentage(),
-            'memory_used_human': self.memory_info.get('used_human', 'N/A'),
-            'memory_total_human': self.memory_info.get('total_human', 'N/A'),
+            'memory_used_human': mem_info.get('used_human', 'N/A'),
+            'memory_total_human': mem_info.get('total_human', 'N/A'),
             'cpu_percent': self.get_cpu_usage_percentage(),
-            'cpu_count': self.cpu_info.get('count', 0),
-            'cpu_count_logical': self.cpu_info.get('count_logical', 0),
+            'cpu_count': cpu_info.get('count', 0),
+            'cpu_count_logical': cpu_info.get('count_logical', 0),
         }
     
     def sort_processes(self, key: str, reverse: bool = True) -> List[Dict[str, any]]:
-        """
-        Sort processes by a given key.
-        
-        Args:
-            key: Key to sort by ('name', 'pid', 'memory_mb', 'cpu_percent')
-            reverse: If True, sort in descending order
-            
-        Returns:
-            Sorted list of processes
-        """
+        """Sort processes by a given key."""
         if key not in ['name', 'pid', 'memory_mb', 'cpu_percent', 'username']:
             key = 'memory_mb'
             
-        return sorted(self.processes, key=lambda x: x[key], reverse=reverse)
+        return sorted(self._latest_data['processes'], key=lambda x: x[key], reverse=reverse)
     
     def filter_by_memory_threshold(self, threshold_mb: float) -> List[Dict[str, any]]:
-        """
-        Filter processes by memory usage threshold.
-        
-        Args:
-            threshold_mb: Minimum memory usage in MB
-            
-        Returns:
-            List of processes using more than threshold
-        """
+        """Filter processes by memory usage threshold."""
         return [
-            proc for proc in self.processes
+            proc for proc in self._latest_data['processes']
             if proc['memory_mb'] >= threshold_mb
         ]
     
     def filter_by_cpu_threshold(self, threshold_percent: float) -> List[Dict[str, any]]:
-        """
-        Filter processes by CPU usage threshold.
-        
-        Args:
-            threshold_percent: Minimum CPU usage percentage
-            
-        Returns:
-            List of processes using more than threshold
-        """
+        """Filter processes by CPU usage threshold."""
         return [
-            proc for proc in self.processes
+            proc for proc in self._latest_data['processes']
             if proc['cpu_percent'] >= threshold_percent
         ]
     
     def get_process_details(self, pid: int) -> Optional[Dict[str, any]]:
         """
         Get detailed information about a process.
-
-        Args:
-            pid: Process ID
-
-        Returns:
-            Detailed process information or None if not found
+        This fetches fresh data on demand since it's a user-initiated action.
         """
         try:
             proc = psutil.Process(pid)
-            # Use interval=None to get cached CPU value instead of blocking
-            # This prevents the UI from freezing when opening the dialog
             return {
                 'pid': proc.pid,
                 'name': proc.name(),
@@ -299,4 +338,3 @@ class ProcessMonitor:
             }
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             return None
-

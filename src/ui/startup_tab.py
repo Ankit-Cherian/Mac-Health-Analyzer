@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
     QLabel, QPushButton, QHeaderView, QMessageBox, QComboBox
 )
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
 from ui.widgets import SearchBar, ToggleSwitch, GlassmorphicPanel, StyledButton
 from ui.styles import COLORS
 from ui.startup_detail_dialog import StartupDetailDialog
@@ -33,6 +33,9 @@ class StartupTab(QWidget):
         self.current_items = []
         
         self.setup_ui()
+        
+        # Connect to startup manager updates
+        self.startup_manager.data_updated.connect(self.update_data)
     
     def setup_ui(self):
         """Set up the user interface."""
@@ -186,11 +189,17 @@ class StartupTab(QWidget):
 
         return table
     
+    @pyqtSlot()
     def update_data(self):
         """Update the table with current startup items."""
+        # Populate logic
         self.current_items = self.startup_manager.get_all_items()
         self.apply_filters()
         self.update_summary()
+
+        # Re-enable button if it was disabled (after a refresh)
+        self.refresh_btn.setEnabled(True)
+        self.refresh_btn.setText("Refresh")
     
     def update_summary(self):
         """Update summary statistics."""
@@ -274,8 +283,10 @@ class StartupTab(QWidget):
     
     def on_refresh(self):
         """Handle refresh button click."""
+        self.refresh_btn.setEnabled(False)
+        self.refresh_btn.setText("Refreshing...")
         self.startup_manager.refresh()
-        self.update_data()
+        # Re-enable happens in update_data which is connected to the data_updated signal
     
     def on_disable_selected(self):
         """Handle disable selected items."""
@@ -308,7 +319,7 @@ class StartupTab(QWidget):
             
             # Refresh
             self.on_refresh()
-
+    
     def on_item_double_clicked(self, row: int, column: int):
         """
         Handle double-click on a startup item.
@@ -336,4 +347,3 @@ class StartupTab(QWidget):
                 "Error",
                 f"Failed to open item details: {str(e)}"
             )
-
