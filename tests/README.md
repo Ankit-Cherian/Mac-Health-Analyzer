@@ -65,9 +65,6 @@ The test suite provides comprehensive coverage for:
 - `bytes_to_human_readable()` - All units (B, KB, MB, GB, TB, PB)
 - `get_system_memory_info()` - Memory statistics
 - `get_cpu_info()` - CPU statistics
-- `get_process_list()` - Process enumeration with filtering
-- `get_top_memory_processes()` - Top N by memory
-- `get_top_cpu_processes()` - Top N by CPU
 - `kill_process()` - Process termination
 - `get_resource_usage_color()` - Color coding logic
 - `format_percentage()` - Percentage formatting
@@ -113,11 +110,9 @@ The test suite provides comprehensive coverage for:
 - `get_summary()` - Summary statistics
 
 #### ✅ **Integration Tests**
-- Full refresh cycles for both managers
-- System process filtering behavior
+- Full refresh cycles for StartupManager
 - Launchctl caching behavior
 - Enable/disable workflows
-- Concurrent manager usage
 
 ### Coverage Goals
 

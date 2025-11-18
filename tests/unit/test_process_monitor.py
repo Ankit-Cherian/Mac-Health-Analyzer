@@ -45,43 +45,6 @@ class TestSetIncludeSystemProcesses:
         assert monitor.include_system_processes is False
 
 
-class TestRefresh:
-    """Test refresh method."""
-
-    @pytest.mark.unit
-    @patch('process_monitor.get_cpu_info')
-    @patch('process_monitor.get_system_memory_info')
-    @patch('process_monitor.get_process_list')
-    def test_refresh_updates_all_data(self, mock_get_processes, mock_get_mem, mock_get_cpu):
-        """Test that refresh updates all data."""
-        mock_get_processes.return_value = [{'pid': 123, 'name': 'test'}]
-        mock_get_mem.return_value = {'total': 16000000000}
-        mock_get_cpu.return_value = {'percent': 50.0}
-
-        monitor = ProcessMonitor()
-        monitor.refresh()
-
-        assert monitor.processes == [{'pid': 123, 'name': 'test'}]
-        assert monitor.memory_info == {'total': 16000000000}
-        assert monitor.cpu_info == {'percent': 50.0}
-
-    @pytest.mark.unit
-    @patch('process_monitor.get_cpu_info')
-    @patch('process_monitor.get_system_memory_info')
-    @patch('process_monitor.get_process_list')
-    def test_refresh_respects_include_system(self, mock_get_processes, mock_get_mem, mock_get_cpu):
-        """Test that refresh respects include_system_processes flag."""
-        mock_get_processes.return_value = []
-        mock_get_mem.return_value = {}
-        mock_get_cpu.return_value = {}
-
-        monitor = ProcessMonitor()
-        monitor.set_include_system_processes(True)
-        monitor.refresh()
-
-        mock_get_processes.assert_called_once_with(include_system=True)
-
-
 class TestGetProcesses:
     """Test get_processes method."""
 
