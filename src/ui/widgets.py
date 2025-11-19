@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QGraphicsOpacityEffect
 )
-from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
+from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QLinearGradient
 from ui.styles import COLORS
 
 
@@ -41,6 +41,7 @@ class ToggleSwitch(QWidget):
         self._circle_position = 24 if initial_state else 2
         self._hovered = False
         self._bg_opacity = 1.0 if initial_state else 0.0
+        self._hover_opacity = 0.0
 
         self.setFixedSize(52, 28)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -55,6 +56,17 @@ class ToggleSwitch(QWidget):
         self.bg_animation = QPropertyAnimation(self, b"bg_opacity")
         self.bg_animation.setDuration(300)
         self.bg_animation.setEasingCurve(QEasingCurve.Type.InOutQuart)
+
+        # Hover glow animation for subtle brightness change
+        self.hover_animation = QVariantAnimation(self)
+        self.hover_animation.setDuration(140)
+        self.hover_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
+        self.hover_animation.valueChanged.connect(self._update_hover_opacity)
+
+    def _update_hover_opacity(self, value: float):
+        """Update hover intensity and repaint."""
+        self._hover_opacity = value
+        self.update()
 
     @pyqtProperty(int)
     def circle_position(self):
@@ -81,13 +93,19 @@ class ToggleSwitch(QWidget):
     def enterEvent(self, event):
         """Handle mouse enter for hover effect."""
         self._hovered = True
-        self.update()
+        self.hover_animation.stop()
+        self.hover_animation.setStartValue(self._hover_opacity)
+        self.hover_animation.setEndValue(1.0)
+        self.hover_animation.start()
         super().enterEvent(event)
 
     def leaveEvent(self, event):
         """Handle mouse leave for hover effect."""
         self._hovered = False
-        self.update()
+        self.hover_animation.stop()
+        self.hover_animation.setStartValue(self._hover_opacity)
+        self.hover_animation.setEndValue(0.0)
+        self.hover_animation.start()
         super().leaveEvent(event)
 
     def paintEvent(self, event):
@@ -113,9 +131,10 @@ class ToggleSwitch(QWidget):
             int(inactive_border.blue() + (active_border.blue() - inactive_border.blue()) * self._bg_opacity)
         )
 
-        # Apply hover effect - slightly brighter
-        if self._hovered:
-            bg_color = bg_color.lighter(110)
+        # Apply hover effect - slightly brighter with animation
+        if self._hover_opacity > 0:
+            brighten = 100 + int(10 * self._hover_opacity)
+            bg_color = bg_color.lighter(brighten)
 
         # Draw outer shadow for depth (only when not hovered)
         if not self._hovered:
@@ -131,9 +150,11 @@ class ToggleSwitch(QWidget):
 
         # Inner highlight for depth (subtle gradient effect)
         if self._checked:
-            inner_highlight = QColor(255, 255, 255, 15)
+            highlight_gradient = QLinearGradient(1, 1, 1, 14)
+            highlight_gradient.setColorAt(0.0, QColor(255, 255, 255, 30))
+            highlight_gradient.setColorAt(1.0, QColor(255, 255, 255, 0))
             painter.setPen(Qt.PenStyle.NoPen)
-            painter.setBrush(QBrush(inner_highlight))
+            painter.setBrush(QBrush(highlight_gradient))
             painter.drawRoundedRect(3, 3, 48, 12, 6, 6)
 
         # Interpolate circle color
@@ -144,6 +165,10 @@ class ToggleSwitch(QWidget):
             int(inactive_circle.green() + (active_circle.green() - inactive_circle.green()) * self._bg_opacity),
             int(inactive_circle.blue() + (active_circle.blue() - inactive_circle.blue()) * self._bg_opacity)
         )
+
+        if self._hover_opacity > 0:
+            brighten = 100 + int(8 * self._hover_opacity)
+            circle_color = circle_color.lighter(brighten)
 
         # Multi-layer shadow for circle depth
         painter.setPen(Qt.PenStyle.NoPen)
