@@ -16,13 +16,13 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QGraphicsOpacityEffect
 )
-from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
+from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QLinearGradient
 from ui.styles import COLORS
 
 
 class ToggleSwitch(QWidget):
     """
-    Professional toggle switch with smooth spring animation.
+    Professional toggle switch with smooth, elegant animation.
     Features sophisticated micro-interactions and polished visual feedback.
     """
 
@@ -39,14 +39,34 @@ class ToggleSwitch(QWidget):
         super().__init__(parent)
         self._checked = initial_state
         self._circle_position = 24 if initial_state else 2
+        self._hovered = False
+        self._bg_opacity = 1.0 if initial_state else 0.0
+        self._hover_opacity = 0.0
 
         self.setFixedSize(52, 28)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setMouseTracking(True)
 
-        # Professional spring animation for smooth toggle
+        # Smooth, elegant animation for circle movement
         self.animation = QPropertyAnimation(self, b"circle_position")
-        self.animation.setDuration(250)
-        self.animation.setEasingCurve(QEasingCurve.Type.OutBack)  # Subtle spring effect
+        self.animation.setDuration(300)
+        self.animation.setEasingCurve(QEasingCurve.Type.InOutQuart)  # Smooth, elegant curve
+
+        # Background color transition animation
+        self.bg_animation = QPropertyAnimation(self, b"bg_opacity")
+        self.bg_animation.setDuration(300)
+        self.bg_animation.setEasingCurve(QEasingCurve.Type.InOutQuart)
+
+        # Hover glow animation for subtle brightness change
+        self.hover_animation = QVariantAnimation(self)
+        self.hover_animation.setDuration(140)
+        self.hover_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
+        self.hover_animation.valueChanged.connect(self._update_hover_opacity)
+
+    def _update_hover_opacity(self, value: float):
+        """Update hover intensity and repaint."""
+        self._hover_opacity = value
+        self.update()
 
     @pyqtProperty(int)
     def circle_position(self):
@@ -59,62 +79,148 @@ class ToggleSwitch(QWidget):
         self._circle_position = pos
         self.update()
 
+    @pyqtProperty(float)
+    def bg_opacity(self):
+        """Get background opacity for color transition."""
+        return self._bg_opacity
+
+    @bg_opacity.setter
+    def bg_opacity(self, opacity):
+        """Set background opacity for color transition."""
+        self._bg_opacity = opacity
+        self.update()
+
+    def enterEvent(self, event):
+        """Handle mouse enter for hover effect."""
+        self._hovered = True
+        self.hover_animation.stop()
+        self.hover_animation.setStartValue(self._hover_opacity)
+        self.hover_animation.setEndValue(1.0)
+        self.hover_animation.start()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        """Handle mouse leave for hover effect."""
+        self._hovered = False
+        self.hover_animation.stop()
+        self.hover_animation.setStartValue(self._hover_opacity)
+        self.hover_animation.setEndValue(0.0)
+        self.hover_animation.start()
+        super().leaveEvent(event)
+
     def paintEvent(self, event):
-        """Paint the toggle switch with professional depth and gradients."""
+        """Paint the toggle switch with professional depth and smooth gradients."""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        # Draw background track with subtle depth
-        if self._checked:
-            # Active state: terracotta with depth
-            bg_color = QColor(COLORS['terracotta'])
-            border_color = QColor(COLORS['terracotta_dark'])
-        else:
-            # Inactive state: subtle gray
-            bg_color = QColor(COLORS['border'])
-            border_color = QColor(COLORS['border_dark'])
+        # Interpolate colors for smooth transition
+        inactive_bg = QColor(COLORS['border'])
+        active_bg = QColor(COLORS['terracotta'])
+        inactive_border = QColor(COLORS['border_dark'])
+        active_border = QColor(COLORS['terracotta_dark'])
 
-        # Background with border for depth
+        # Blend colors based on animation progress
+        bg_color = QColor(
+            int(inactive_bg.red() + (active_bg.red() - inactive_bg.red()) * self._bg_opacity),
+            int(inactive_bg.green() + (active_bg.green() - inactive_bg.green()) * self._bg_opacity),
+            int(inactive_bg.blue() + (active_bg.blue() - inactive_bg.blue()) * self._bg_opacity)
+        )
+        border_color = QColor(
+            int(inactive_border.red() + (active_border.red() - inactive_border.red()) * self._bg_opacity),
+            int(inactive_border.green() + (active_border.green() - inactive_border.green()) * self._bg_opacity),
+            int(inactive_border.blue() + (active_border.blue() - inactive_border.blue()) * self._bg_opacity)
+        )
+
+        # Apply hover effect - slightly brighter with animation
+        if self._hover_opacity > 0:
+            brighten = 100 + int(10 * self._hover_opacity)
+            bg_color = bg_color.lighter(brighten)
+
+        # Draw outer shadow for depth (only when not hovered)
+        if not self._hovered:
+            outer_shadow = QColor(0, 0, 0, 8)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(QBrush(outer_shadow))
+            painter.drawRoundedRect(2, 2, 50, 26, 13, 13)
+
+        # Background track with rounded corners and border for depth
         painter.setPen(QPen(border_color, 2))
         painter.setBrush(QBrush(bg_color))
-        painter.drawRoundedRect(1, 1, 50, 26, 0, 0)  # Square corners with slight inset
+        painter.drawRoundedRect(1, 1, 50, 26, 13, 13)  # Rounded corners matching circle
 
-        # Draw circle with subtle shadow effect
-        circle_color = QColor(COLORS['bg_elevated']) if self._checked else QColor(COLORS['text_secondary'])
+        # Inner highlight for depth (subtle gradient effect)
+        if self._checked:
+            highlight_gradient = QLinearGradient(1, 1, 1, 14)
+            highlight_gradient.setColorAt(0.0, QColor(255, 255, 255, 30))
+            highlight_gradient.setColorAt(1.0, QColor(255, 255, 255, 0))
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(QBrush(highlight_gradient))
+            painter.drawRoundedRect(3, 3, 48, 12, 6, 6)
 
-        # Shadow
-        shadow_color = QColor(0, 0, 0, 20)
+        # Interpolate circle color
+        inactive_circle = QColor(COLORS['text_secondary'])
+        active_circle = QColor(COLORS['bg_elevated'])
+        circle_color = QColor(
+            int(inactive_circle.red() + (active_circle.red() - inactive_circle.red()) * self._bg_opacity),
+            int(inactive_circle.green() + (active_circle.green() - inactive_circle.green()) * self._bg_opacity),
+            int(inactive_circle.blue() + (active_circle.blue() - inactive_circle.blue()) * self._bg_opacity)
+        )
+
+        if self._hover_opacity > 0:
+            brighten = 100 + int(8 * self._hover_opacity)
+            circle_color = circle_color.lighter(brighten)
+
+        # Multi-layer shadow for circle depth
         painter.setPen(Qt.PenStyle.NoPen)
-        painter.setBrush(QBrush(shadow_color))
+
+        # Outer shadow (subtle)
+        shadow_outer = QColor(0, 0, 0, 25)
+        painter.setBrush(QBrush(shadow_outer))
         painter.drawEllipse(self._circle_position + 1, 3, 24, 24)
 
-        # Circle
+        # Inner shadow (more prominent)
+        shadow_inner = QColor(0, 0, 0, 15)
+        painter.setBrush(QBrush(shadow_inner))
+        painter.drawEllipse(self._circle_position + 0.5, 2.5, 24, 24)
+
+        # Circle with subtle border for definition
+        circle_border = QColor(COLORS['border_dark']) if not self._checked else QColor(COLORS['terracotta_dark'])
+        circle_border.setAlpha(40)
+        painter.setPen(QPen(circle_border, 1))
         painter.setBrush(QBrush(circle_color))
         painter.drawEllipse(self._circle_position, 2, 24, 24)
-    
+
+        # Highlight on circle for 3D effect
+        highlight = QColor(255, 255, 255, 80 if self._checked else 40)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QBrush(highlight))
+        painter.drawEllipse(self._circle_position + 4, 4, 10, 10)
+
     def mouseReleaseEvent(self, event):
-        """Handle mouse click."""
+        """Handle mouse click with smooth animation."""
         if event.button() == Qt.MouseButton.LeftButton:
             self._checked = not self._checked
-            
+
             # Animate circle position
-            if self._checked:
-                self.animation.setStartValue(self._circle_position)
-                self.animation.setEndValue(24)
-            else:
-                self.animation.setStartValue(self._circle_position)
-                self.animation.setEndValue(2)
-            
+            self.animation.setStartValue(self._circle_position)
+            self.animation.setEndValue(24 if self._checked else 2)
             self.animation.start()
+
+            # Animate background color transition
+            self.bg_animation.setStartValue(self._bg_opacity)
+            self.bg_animation.setEndValue(1.0 if self._checked else 0.0)
+            self.bg_animation.start()
+
             self.toggled.emit(self._checked)
-    
+
     def setChecked(self, checked: bool):
         """Set checked state programmatically."""
         if self._checked != checked:
             self._checked = checked
             self._circle_position = 24 if checked else 2
+            self._bg_opacity = 1.0 if checked else 0.0
             self.update()
-    
+
     def isChecked(self) -> bool:
         """Get checked state."""
         return self._checked
