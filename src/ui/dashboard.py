@@ -13,6 +13,7 @@ from ui.processes_tab import ProcessesTab
 from ui.animations import AnimationHelper
 from ui.widgets import MetricCard, GlassmorphicPanel
 from ui.charts import RealtimeLineChart, CircularGauge, BarChart
+from ui.styles import COLORS
 
 
 class Dashboard(QWidget):
@@ -117,19 +118,18 @@ class Dashboard(QWidget):
 
         # ==== TOP SECTION: CIRCULAR GAUGES ====
         gauges_layout = QHBoxLayout()
-        gauges_layout.setSpacing(30)
+        gauges_layout.setSpacing(50)
+        
+        # Center the two gauges
+        gauges_layout.addStretch()
 
-        # CPU Gauge
-        self.cpu_gauge = CircularGauge("CPU", "%")
+        # CPU Gauge - use golden yellow that complements the teal memory gauge
+        self.cpu_gauge = CircularGauge("CPU", "%", fixed_color=COLORS['golden'])
         gauges_layout.addWidget(self.cpu_gauge)
 
-        # Memory Gauge
-        self.memory_gauge = CircularGauge("MEMORY", "%")
+        # Memory Gauge - use teal for a creative, modern complement to sage green
+        self.memory_gauge = CircularGauge("MEMORY", "%", fixed_color=COLORS['teal'])
         gauges_layout.addWidget(self.memory_gauge)
-
-        # Disk Gauge (processes count as proxy)
-        self.processes_gauge = CircularGauge("PROCESSES", "")
-        gauges_layout.addWidget(self.processes_gauge)
 
         gauges_layout.addStretch()
 
@@ -225,7 +225,6 @@ class Dashboard(QWidget):
         title_layout.addStretch()
 
         # Hint text
-        from ui.styles import COLORS
         hint_label = QLabel("Click cards for details")
         hint_label.setStyleSheet(f"color: {COLORS['text_secondary']}; font-size: 12px;")
         title_layout.addWidget(hint_label)
@@ -313,7 +312,6 @@ class Dashboard(QWidget):
             self.memory_gauge.set_value(memory_percent, 100)
 
             process_count = self.process_monitor.get_process_count()
-            self.processes_gauge.set_value(process_count, 500)  # Max 500 processes
 
             # Update real-time charts
             self.cpu_chart.update_data(cpu_percent)

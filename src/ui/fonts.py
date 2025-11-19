@@ -26,7 +26,7 @@ FONTS = {
     'Fraunces': {
         'weights': _variable_entries(
             [300, 400, 600, 700],
-            'https://github.com/google/fonts/raw/main/ofl/fraunces/Fraunces%5Bopsz%2Cwght%5D.ttf',
+            'https://github.com/google/fonts/raw/main/ofl/fraunces/Fraunces%5BSOFT%2CWONK%2Copsz%2Cwght%5D.ttf',
             'Fraunces_Variable.ttf'
         )
     },
