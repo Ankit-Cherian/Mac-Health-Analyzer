@@ -30,10 +30,12 @@ COLORS = {
     'sage_dark': '#587258',       # Deeper sage
     'mustard': '#d4a843',         # Warm mustard (warning)
     'mustard_dark': '#b38f36',    # Deeper mustard
+    'golden': '#f4c430',          # Bright golden yellow (complements teal)
     'burnt_sienna': '#a0522d',    # Burnt orange/sienna (critical)
     'clay': '#8b7355',            # Clay brown (secondary accent)
     'clay_light': '#a38a6f',      # Lighter clay
     'olive': '#6c6c3d',           # Olive green (tertiary)
+    'teal': '#4a9b8e',            # Muted teal (creative complement to sage)
 
     # Sophisticated Gradients - Layered transitions
     'gradient_start': '#c1614a',   # Terracotta
@@ -120,12 +122,11 @@ def get_main_stylesheet() -> str:
         border: 2px solid {COLORS['border_subtle']};
         border-bottom: none;
         border-top: 3px solid transparent;
-        font-family: "Sora", "Helvetica Neue", sans-serif;
+        font-family: "Sora", "Helvetica Neue", Arial;
         font-size: 13px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 2px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }}
 
     QTabBar::tab:selected {{
@@ -135,7 +136,6 @@ def get_main_stylesheet() -> str:
         border: 2px solid {COLORS['terracotta']};
         border-bottom: none;
         border-top: 3px solid {COLORS['terracotta']};
-        box-shadow: 0 -2px 8px {COLORS['shadow_md']};
     }}
 
     QTabBar::tab:hover:!selected {{
@@ -188,7 +188,7 @@ def get_main_stylesheet() -> str:
         border: none;
         border-right: 1px solid rgba(255, 255, 255, 0.05);
         border-bottom: 2px solid {COLORS['terracotta']};
-        font-family: "Sora", "Helvetica Neue", sans-serif;
+        font-family: "Sora", "Helvetica Neue", Arial;
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
@@ -262,7 +262,7 @@ def get_main_stylesheet() -> str:
         border: 2px solid {COLORS['terracotta_dark']};
         border-radius: 0px;
         padding: 16px 32px;
-        font-family: "Sora", "Helvetica Neue", sans-serif;
+        font-family: "Sora", "Helvetica Neue", Arial;
         font-size: 13px;
         font-weight: 600;
         text-transform: uppercase;
@@ -318,10 +318,9 @@ def get_main_stylesheet() -> str:
         border-radius: 0px;
         padding: 14px 18px;
         color: {COLORS['text_primary']};
-        font-family: "Sora", "Helvetica Neue", sans-serif;
+        font-family: "Sora", "Helvetica Neue", Arial;
         font-size: 14px;
         font-weight: 400;
-        transition: all 0.2s ease;
     }}
 
     QLineEdit#searchField {{
@@ -370,7 +369,7 @@ def get_main_stylesheet() -> str:
     }}
 
     QLabel[heading="h3"] {{
-        font-family: "Sora", "Helvetica Neue", sans-serif;
+        font-family: "Sora", "Helvetica Neue", Arial;
         font-size: 14px;
         font-weight: 700;
         color: {COLORS['text_secondary']};
@@ -388,7 +387,7 @@ def get_main_stylesheet() -> str:
     }}
 
     QLabel[chartTitle="true"] {{
-        font-family: "Sora", "Helvetica Neue", sans-serif;
+        font-family: "Sora", "Helvetica Neue", Arial;
         font-size: 15px;
         font-weight: 600;
         color: {COLORS['terracotta']};
@@ -437,7 +436,6 @@ def get_main_stylesheet() -> str:
 
     QFrame[panel="true"][panelVariant="primary"]:hover {{
         border: 2px solid {COLORS['terracotta']};
-        box-shadow: 0 4px 12px {COLORS['shadow_md']};
     }}
 
     /* Minimal panel variant for nested content */
@@ -468,7 +466,7 @@ def get_main_stylesheet() -> str:
     QCheckBox {{
         color: {COLORS['text_primary']};
         spacing: 12px;
-        font-family: "Sora", "Helvetica Neue", sans-serif;
+        font-family: "Sora", "Helvetica Neue", Arial;
         font-size: 14px;
         line-height: 1.6;
     }}
@@ -501,7 +499,7 @@ def get_main_stylesheet() -> str:
         border-radius: 0px;
         padding: 14px 18px;
         color: {COLORS['text_primary']};
-        font-family: "Sora", "Helvetica Neue", sans-serif;
+        font-family: "Sora", "Helvetica Neue", Arial;
         font-size: 14px;
     }}
 

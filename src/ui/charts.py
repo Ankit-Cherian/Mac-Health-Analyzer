@@ -148,14 +148,15 @@ class CircularGauge(QWidget):
     Circular gauge widget with neon cyberpunk styling.
     """
 
-    def __init__(self, title: str = "Metric", unit: str = "%", parent=None):
+    def __init__(self, title: str = "Metric", unit: str = "%", fixed_color: str = None, parent=None):
         super().__init__(parent)
         self.title = title
         self.unit = unit
         self.value = 0.0
         self.max_value = 100.0
+        self.fixed_color = fixed_color
 
-        self.setMinimumSize(200, 220)
+        self.setMinimumSize(280, 300)
 
     def set_value(self, value: float, max_value: float = 100.0):
         """
@@ -171,12 +172,16 @@ class CircularGauge(QWidget):
 
     def get_color_for_value(self) -> str:
         """Get color based on value percentage."""
+        # Use fixed color if set
+        if self.fixed_color:
+            return self.fixed_color
+        
         percent = (self.value / self.max_value) * 100 if self.max_value > 0 else 0
 
         if percent < 50:
             return COLORS['sage']
         elif percent < 80:
-            return COLORS['mustard']
+            return COLORS['clay']
         else:
             return COLORS['terracotta']
 
@@ -188,14 +193,14 @@ class CircularGauge(QWidget):
         width = self.width()
         height = self.height() - 40  # Leave space for title
         size = min(width, height)
-
+        
         # Center the gauge
         center_x = width // 2
         center_y = (height // 2) + 20
-        radius = (size // 2) - 20
+        radius = (size // 2) - 15  # Larger radius for bigger circles
 
         # Draw background circle
-        bg_pen = QPen(QColor(COLORS['border']), 12, Qt.PenStyle.SolidLine)
+        bg_pen = QPen(QColor(COLORS['border']), 16, Qt.PenStyle.SolidLine)
         bg_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         painter.setPen(bg_pen)
         painter.drawArc(center_x - radius, center_y - radius,
@@ -207,7 +212,7 @@ class CircularGauge(QWidget):
         span_angle = int(value_percent * 360 * 16)
 
         color = self.get_color_for_value()
-        value_pen = QPen(QColor(color), 12, Qt.PenStyle.SolidLine)
+        value_pen = QPen(QColor(color), 16, Qt.PenStyle.SolidLine)
         value_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         painter.setPen(value_pen)
 
@@ -218,13 +223,13 @@ class CircularGauge(QWidget):
                        start_angle, -span_angle)
 
         # Draw center circle
-        center_radius = radius - 30
+        center_radius = radius - 35  # Adjusted for larger circles
         gradient = QConicalGradient(center_x, center_y, 0)
         gradient.setColorAt(0, QColor(COLORS['bg_card']))
         gradient.setColorAt(1, QColor(COLORS['bg_secondary']))
 
         painter.setBrush(QBrush(gradient))
-        painter.setPen(QPen(QColor(color), 2))
+        painter.setPen(QPen(QColor(color), 3))  # Slightly thicker border for larger circles
         painter.drawEllipse(center_x - center_radius, center_y - center_radius,
                            center_radius * 2, center_radius * 2)
 
@@ -234,7 +239,7 @@ class CircularGauge(QWidget):
 
         # Value
         value_font = painter.font()
-        value_font.setPointSize(24)
+        value_font.setPointSize(32)  # Larger font for bigger circles
         value_font.setBold(True)
         painter.setFont(value_font)
 
@@ -246,7 +251,7 @@ class CircularGauge(QWidget):
 
         # Unit
         unit_font = painter.font()
-        unit_font.setPointSize(12)
+        unit_font.setPointSize(14)  # Slightly larger unit text
         unit_font.setBold(False)
         painter.setFont(unit_font)
         painter.setPen(QColor(COLORS['text_secondary']))
@@ -258,7 +263,7 @@ class CircularGauge(QWidget):
 
         # Draw title at top
         title_font = painter.font()
-        title_font.setPointSize(14)
+        title_font.setPointSize(16)  # Larger title for bigger circles
         title_font.setBold(True)
         painter.setFont(title_font)
         painter.setPen(QColor(COLORS['text_primary']))
@@ -421,7 +426,7 @@ class BarChart(QWidget):
             if percent < 0.5:
                 color = COLORS['sage']
             elif percent < 0.8:
-                color = COLORS['mustard']
+                color = COLORS['clay']
             else:
                 color = COLORS['terracotta']
 
