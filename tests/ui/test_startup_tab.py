@@ -19,8 +19,22 @@ class TestStartupTab:
     """Test StartupTab class."""
 
     @pytest.fixture
-    def startup_tab(self, qapp, mock_startup_manager):
+    def startup_tab(self, qapp, mock_startup_manager, mock_process_monitor):
         """Create a StartupTab instance for testing."""
+        mock_process_monitor.get_processes.return_value = [
+            {
+                'pid': 101,
+                'name': 'Dropbox',
+                'cpu_percent': 12.5,
+                'memory_percent': 5.0,
+            },
+            {
+                'pid': 202,
+                'name': 'Slack Helper',
+                'cpu_percent': 3.2,
+                'memory_percent': 1.1,
+            },
+        ]
         mock_startup_manager.get_all_items.return_value = [
             {
                 'name': 'Dropbox',
@@ -42,7 +56,7 @@ class TestStartupTab:
             'disabled': 4,
         }
 
-        tab = StartupTab(mock_startup_manager)
+        tab = StartupTab(mock_startup_manager, mock_process_monitor)
         return tab
 
     def test_initialization(self, startup_tab, mock_startup_manager):
@@ -70,12 +84,14 @@ class TestStartupTab:
         table = startup_tab.table
 
         assert table is not None
-        assert table.columnCount() == 5
+        assert table.columnCount() == 7
         assert table.horizontalHeaderItem(0).text() == "Name"
         assert table.horizontalHeaderItem(1).text() == "Type"
         assert table.horizontalHeaderItem(2).text() == "Status"
-        assert table.horizontalHeaderItem(3).text() == "Location"
-        assert table.horizontalHeaderItem(4).text() == "Toggle"
+        assert table.horizontalHeaderItem(3).text() == "CPU %"
+        assert table.horizontalHeaderItem(4).text() == "Memory %"
+        assert table.horizontalHeaderItem(5).text() == "Location"
+        assert table.horizontalHeaderItem(6).text() == "Toggle"
 
     def test_update_data(self, startup_tab, mock_startup_manager):
         """Test data update."""
@@ -207,6 +223,9 @@ class TestStartupTab:
         assert startup_tab.table.item(0, 0).text() == "Dropbox"
         assert startup_tab.table.item(0, 1).text() == "Login Item"
         assert startup_tab.table.item(0, 2).text() == "Enabled"
+        assert startup_tab.table.item(0, 3).text() == "N/A"
+        assert startup_tab.table.item(0, 4).text() == "N/A"
+        assert startup_tab.table.item(0, 5).text() == "/Applications/Dropbox.app"
 
     def test_on_search(self, startup_tab):
         """Test search handler."""
@@ -216,11 +235,11 @@ class TestStartupTab:
 
     def test_on_refresh(self, startup_tab, mock_startup_manager):
         """Test refresh button handler."""
-        with patch.object(startup_tab, 'update_data') as mock_update:
-            startup_tab.on_refresh()
+        startup_tab.on_refresh()
 
-            mock_startup_manager.refresh.assert_called_once()
-            mock_update.assert_called_once()
+        mock_startup_manager.refresh.assert_called_once()
+        assert not startup_tab.refresh_btn.isEnabled()
+        assert startup_tab.refresh_btn.text() == "Refreshing..."
 
     def test_on_disable_selected_no_selection(self, startup_tab, qapp):
         """Test disable with no selection."""
