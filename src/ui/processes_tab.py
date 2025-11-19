@@ -54,6 +54,15 @@ class ProcessesTab(QWidget):
         
         header_layout.addStretch()
         
+        # Sort buttons
+        self.sort_cpu_btn = StyledButton("Sort by CPU", "secondary")
+        self.sort_cpu_btn.clicked.connect(self.on_sort_by_cpu)
+        header_layout.addWidget(self.sort_cpu_btn)
+        
+        self.sort_memory_btn = StyledButton("Sort by Memory", "secondary")
+        self.sort_memory_btn.clicked.connect(self.on_sort_by_memory)
+        header_layout.addWidget(self.sort_memory_btn)
+        
         # Show system processes toggle
         self.system_processes_cb = QCheckBox("Include System Processes")
         self.system_processes_cb.stateChanged.connect(self.on_system_toggle)
@@ -324,6 +333,34 @@ class ProcessesTab(QWidget):
     def on_search(self, query: str):
         """Handle search query change."""
         self.apply_filters()
+    
+    def on_sort_by_cpu(self):
+        """Handle sort by CPU button click."""
+        # Sort by CPU column (index 4) in descending order
+        self.table.sortItems(4, Qt.SortOrder.DescendingOrder)
+        
+        # Update button styles to show active state
+        self.sort_cpu_btn.setProperty("class", "primary")
+        self.sort_memory_btn.setProperty("class", "secondary")
+        # Force style update
+        self.sort_cpu_btn.style().unpolish(self.sort_cpu_btn)
+        self.sort_cpu_btn.style().polish(self.sort_cpu_btn)
+        self.sort_memory_btn.style().unpolish(self.sort_memory_btn)
+        self.sort_memory_btn.style().polish(self.sort_memory_btn)
+    
+    def on_sort_by_memory(self):
+        """Handle sort by Memory button click."""
+        # Sort by Memory % column (index 3) in descending order
+        self.table.sortItems(3, Qt.SortOrder.DescendingOrder)
+        
+        # Update button styles to show active state
+        self.sort_memory_btn.setProperty("class", "primary")
+        self.sort_cpu_btn.setProperty("class", "secondary")
+        # Force style update
+        self.sort_memory_btn.style().unpolish(self.sort_memory_btn)
+        self.sort_memory_btn.style().polish(self.sort_memory_btn)
+        self.sort_cpu_btn.style().unpolish(self.sort_cpu_btn)
+        self.sort_cpu_btn.style().polish(self.sort_cpu_btn)
     
     def on_refresh(self):
         """Handle refresh button click."""
