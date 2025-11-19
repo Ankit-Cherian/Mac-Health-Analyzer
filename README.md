@@ -6,25 +6,21 @@ A simple macOS app I built to see what's running on my Mac and manage startup it
 
 ### Onboarding
 
-<img src="docs/screenshots/start up step 1.png" width="700">
+<img src="docs/updated screenshots/OpeningPage.png" width="700">
 
-_First-time setup guide explaining what the app does_
-
-<img src="docs/screenshots/startupsetup4.png" width="700">
-
-_Helpful tips for using the app safely_
+_Welcome screen explaining what the app does and its key features_
 
 ### Main Interface
 
 **Startup Tab** - Manage what launches when you boot up
 
-<img src="docs/screenshots/MainStartupPage.png" width="700">
+<img src="docs/updated screenshots/HomePage.png" width="700">
 
 _View all your startup items with stats on enabled/disabled items_
 
 **Processes Tab** - Monitor what's running
 
-<img src="docs/screenshots/ProcessesTab.png" width="700">
+<img src="docs/updated screenshots/ProcessesPage.png" width="700">
 
 _Real-time CPU and memory monitoring for all running processes_
 
@@ -32,23 +28,15 @@ _Real-time CPU and memory monitoring for all running processes_
 
 **Startup Item Details**
 
-<img src="docs/screenshots/StartupItemDetails.png" width="700">
+<img src="docs/updated screenshots/Explanation.png" width="700">
 
-_Simple explanations for what each startup item does_
-
-<img src="docs/screenshots/StartupItemDetails2.png" width="700">
-
-_Smart recommendations based on the item type_
+_Simple explanations and smart recommendations for each startup item_
 
 **Process Details**
 
-<img src="docs/screenshots/ProcessDetails.png" width="700">
+<img src="docs/updated screenshots/ProcessDetails.png" width="700">
 
-_Detailed info for recognized processes_
-
-<img src="docs/screenshots/ProcessDetails2.png" width="700">
-
-_Safety warnings for critical system processes_
+_Detailed info and smart recommendations for recognized processes_
 
 ## How to Run
 
