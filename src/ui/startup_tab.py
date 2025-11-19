@@ -5,7 +5,7 @@ Displays and manages login items, Launch Agents, and Launch Daemons.
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
-    QLabel, QPushButton, QHeaderView, QMessageBox, QComboBox, QApplication
+    QLabel, QPushButton, QHeaderView, QMessageBox, QComboBox
 )
 from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
 from ui.widgets import SearchBar, ToggleSwitch, GlassmorphicPanel, StyledButton
@@ -203,105 +203,12 @@ class StartupTab(QWidget):
 
         return table
     
-    def match_items_to_processes(self, items: list) -> list:
-        """
-        Match startup items to running processes and add resource usage data.
-        Optimized to use efficient dictionary lookups instead of nested loops.
-        
-        Args:
-            items: List of startup items
-            
-        Returns:
-            List of items with added process data (cpu_percent, memory_percent, pid)
-        """
-        processes = self.process_monitor.get_processes()
-        
-        # Build efficient lookup indices upfront
-        # 1. Exact name match dict
-        process_by_name = {proc['name'].lower(): proc for proc in processes}
-        
-        # 2. Build a token-based index for faster partial matching
-        # Extract name tokens (words) from each process
-        token_to_processes = {}
-        for proc in processes:
-            proc_name_lower = proc['name'].lower()
-            # Split on common delimiters and extract meaningful tokens
-            tokens = proc_name_lower.replace('-', ' ').replace('_', ' ').split()
-            for token in tokens:
-                if len(token) >= 3:  # Only index meaningful tokens
-                    if token not in token_to_processes:
-                        token_to_processes[token] = []
-                    token_to_processes[token].append(proc)
-        
-        matched_items = []
-        
-        # Process items with periodic UI updates
-        for idx, item in enumerate(items):
-            # Keep UI responsive by processing events periodically
-            if idx % 10 == 0:
-                QApplication.processEvents()
-            
-            # Create a copy to avoid modifying original
-            item_copy = item.copy()
-            
-            # Try to match by name
-            item_name = item.get('name', '').lower()
-            label = item.get('label', '').lower()
-            matched_proc = None
-            
-            # Strategy 1: Direct exact match
-            if item_name in process_by_name:
-                matched_proc = process_by_name[item_name]
-            
-            # Strategy 2: Token-based matching (much faster than nested loops)
-            if not matched_proc and item_name:
-                # Extract tokens from item name
-                item_tokens = item_name.replace('-', ' ').replace('_', ' ').split()
-                for token in item_tokens:
-                    if len(token) >= 3 and token in token_to_processes:
-                        # Found a matching token, use first matching process
-                        matched_proc = token_to_processes[token][0]
-                        break
-            
-            # Strategy 3: Try label tokens
-            if not matched_proc and label:
-                label_tokens = label.replace('-', ' ').replace('_', ' ').replace('.', ' ').split()
-                for token in label_tokens:
-                    if len(token) >= 3 and token in token_to_processes:
-                        matched_proc = token_to_processes[token][0]
-                        break
-            
-            # Strategy 4: Substring matching (only as last resort, still optimized)
-            if not matched_proc and item_name:
-                # Check if item name is a substring of any process name
-                for proc_name_lower, proc in process_by_name.items():
-                    if item_name in proc_name_lower or proc_name_lower in item_name:
-                        matched_proc = proc
-                        break
-            
-            # Add process data if matched
-            if matched_proc:
-                item_copy['cpu_percent'] = matched_proc.get('cpu_percent', 0.0)
-                item_copy['memory_percent'] = matched_proc.get('memory_percent', 0.0)
-                item_copy['pid'] = matched_proc.get('pid', None)
-                item_copy['has_process'] = True
-            else:
-                item_copy['cpu_percent'] = 0.0
-                item_copy['memory_percent'] = 0.0
-                item_copy['pid'] = None
-                item_copy['has_process'] = False
-            
-            matched_items.append(item_copy)
-        
-        return matched_items
-    
     @pyqtSlot()
     def update_data(self):
         """Update the table with current startup items."""
-        # Populate logic
-        raw_items = self.startup_manager.get_all_items()
-        # Match items to processes
-        self.current_items = self.match_items_to_processes(raw_items)
+        # Items are now pre-matched to processes in the background worker thread
+        # No need to call match_items_to_processes here, avoiding UI freeze
+        self.current_items = self.startup_manager.get_all_items()
         self.apply_filters()
         self.update_summary()
 
