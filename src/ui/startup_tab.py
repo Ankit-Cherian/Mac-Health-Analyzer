@@ -20,17 +20,20 @@ class StartupTab(QWidget):
     
     refresh_requested = pyqtSignal()
     
-    def __init__(self, startup_manager, parent=None):
+    def __init__(self, startup_manager, process_monitor, parent=None):
         """
         Initialize startup tab.
         
         Args:
             startup_manager: StartupManager instance
+            process_monitor: ProcessMonitor instance
             parent: Parent widget
         """
         super().__init__(parent)
         self.startup_manager = startup_manager
+        self.process_monitor = process_monitor
         self.current_items = []
+        self.current_sort_mode = None  # Track current sort mode: 'cpu', 'memory', or None
         
         self.setup_ui()
         
@@ -51,6 +54,15 @@ class StartupTab(QWidget):
         header_layout.addWidget(title)
         
         header_layout.addStretch()
+        
+        # Sort buttons
+        self.sort_cpu_btn = StyledButton("Sort by CPU", "secondary")
+        self.sort_cpu_btn.clicked.connect(self.on_sort_by_cpu)
+        header_layout.addWidget(self.sort_cpu_btn)
+        
+        self.sort_memory_btn = StyledButton("Sort by Memory", "secondary")
+        self.sort_memory_btn.clicked.connect(self.on_sort_by_memory)
+        header_layout.addWidget(self.sort_memory_btn)
         
         # Refresh button
         self.refresh_btn = StyledButton("Refresh", "primary")
@@ -162,8 +174,8 @@ class StartupTab(QWidget):
             QTableWidget configured for startup items
         """
         table = QTableWidget()
-        table.setColumnCount(5)
-        table.setHorizontalHeaderLabels(["Name", "Type", "Status", "Location", "Toggle"])
+        table.setColumnCount(7)
+        table.setHorizontalHeaderLabels(["Name", "Type", "Status", "CPU %", "Memory %", "Location", "Toggle"])
         
         # Configure table
         table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
@@ -177,9 +189,11 @@ class StartupTab(QWidget):
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)  # Name
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)  # Type
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)  # Status
-        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)  # Location
-        header.setSectionResizeMode(4, QHeaderView.ResizeMode.Fixed)  # Toggle
-        table.setColumnWidth(4, 80)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)  # CPU %
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)  # Memory %
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)  # Location
+        header.setSectionResizeMode(6, QHeaderView.ResizeMode.Fixed)  # Toggle
+        table.setColumnWidth(6, 80)
         
         # Enable sorting
         table.setSortingEnabled(True)
@@ -189,11 +203,70 @@ class StartupTab(QWidget):
 
         return table
     
+    def match_items_to_processes(self, items: list) -> list:
+        """
+        Match startup items to running processes and add resource usage data.
+        
+        Args:
+            items: List of startup items
+            
+        Returns:
+            List of items with added process data (cpu_percent, memory_percent, pid)
+        """
+        processes = self.process_monitor.get_processes()
+        
+        # Create a dict for quick process lookup by name
+        process_dict = {proc['name'].lower(): proc for proc in processes}
+        
+        matched_items = []
+        for item in items:
+            # Create a copy to avoid modifying original
+            item_copy = item.copy()
+            
+            # Try to match by name
+            item_name = item.get('name', '').lower()
+            matched_proc = None
+            
+            # Direct match
+            if item_name in process_dict:
+                matched_proc = process_dict[item_name]
+            else:
+                # Try partial matching
+                for proc_name, proc in process_dict.items():
+                    # Check if startup item name is in process name or vice versa
+                    if item_name and (item_name in proc_name or proc_name in item_name):
+                        matched_proc = proc
+                        break
+                    
+                    # Also try matching the label
+                    label = item.get('label', '').lower()
+                    if label and (label in proc_name or proc_name in label):
+                        matched_proc = proc
+                        break
+            
+            # Add process data if matched
+            if matched_proc:
+                item_copy['cpu_percent'] = matched_proc.get('cpu_percent', 0.0)
+                item_copy['memory_percent'] = matched_proc.get('memory_percent', 0.0)
+                item_copy['pid'] = matched_proc.get('pid', None)
+                item_copy['has_process'] = True
+            else:
+                item_copy['cpu_percent'] = 0.0
+                item_copy['memory_percent'] = 0.0
+                item_copy['pid'] = None
+                item_copy['has_process'] = False
+            
+            matched_items.append(item_copy)
+        
+        return matched_items
+    
     @pyqtSlot()
     def update_data(self):
         """Update the table with current startup items."""
         # Populate logic
-        self.current_items = self.startup_manager.get_all_items()
+        raw_items = self.startup_manager.get_all_items()
+        # Match items to processes
+        self.current_items = self.match_items_to_processes(raw_items)
         self.apply_filters()
         self.update_summary()
 
@@ -245,6 +318,8 @@ class StartupTab(QWidget):
         Args:
             items: List of startup item dicts
         """
+        from utils.helpers import format_percentage
+        
         self.table.setSortingEnabled(False)
         self.table.setRowCount(len(items))
         
@@ -262,15 +337,35 @@ class StartupTab(QWidget):
             status_item = QTableWidgetItem(status_text)
             self.table.setItem(row, 2, status_item)
             
+            # CPU %
+            cpu_percent = item.get('cpu_percent', 0.0)
+            if item.get('has_process', False):
+                cpu_text = format_percentage(cpu_percent)
+            else:
+                cpu_text = "N/A"
+            cpu_item = QTableWidgetItem(cpu_text)
+            cpu_item.setData(Qt.ItemDataRole.DisplayRole, cpu_percent if item.get('has_process', False) else -1)
+            self.table.setItem(row, 3, cpu_item)
+            
+            # Memory %
+            memory_percent = item.get('memory_percent', 0.0)
+            if item.get('has_process', False):
+                memory_text = format_percentage(memory_percent)
+            else:
+                memory_text = "N/A"
+            memory_item = QTableWidgetItem(memory_text)
+            memory_item.setData(Qt.ItemDataRole.DisplayRole, memory_percent if item.get('has_process', False) else -1)
+            self.table.setItem(row, 4, memory_item)
+            
             # Location
             location = item.get('location', item.get('path', 'N/A'))
             location_item = QTableWidgetItem(location)
-            self.table.setItem(row, 3, location_item)
+            self.table.setItem(row, 5, location_item)
             
             # Toggle switch (as text for now, could be custom widget)
             toggle_item = QTableWidgetItem("●" if item.get('enabled', True) else "○")
             toggle_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.table.setItem(row, 4, toggle_item)
+            self.table.setItem(row, 6, toggle_item)
             
             # Store item data
             name_item.setData(Qt.ItemDataRole.UserRole, item)
@@ -280,6 +375,36 @@ class StartupTab(QWidget):
     def on_search(self, query: str):
         """Handle search query change."""
         self.apply_filters()
+    
+    def on_sort_by_cpu(self):
+        """Handle sort by CPU button click."""
+        self.current_sort_mode = 'cpu'
+        # Sort by CPU column (index 3) in descending order
+        self.table.sortItems(3, Qt.SortOrder.DescendingOrder)
+        
+        # Update button styles to show active state
+        self.sort_cpu_btn.setProperty("class", "primary")
+        self.sort_memory_btn.setProperty("class", "secondary")
+        # Force style update
+        self.sort_cpu_btn.style().unpolish(self.sort_cpu_btn)
+        self.sort_cpu_btn.style().polish(self.sort_cpu_btn)
+        self.sort_memory_btn.style().unpolish(self.sort_memory_btn)
+        self.sort_memory_btn.style().polish(self.sort_memory_btn)
+    
+    def on_sort_by_memory(self):
+        """Handle sort by Memory button click."""
+        self.current_sort_mode = 'memory'
+        # Sort by Memory column (index 4) in descending order
+        self.table.sortItems(4, Qt.SortOrder.DescendingOrder)
+        
+        # Update button styles to show active state
+        self.sort_memory_btn.setProperty("class", "primary")
+        self.sort_cpu_btn.setProperty("class", "secondary")
+        # Force style update
+        self.sort_memory_btn.style().unpolish(self.sort_memory_btn)
+        self.sort_memory_btn.style().polish(self.sort_memory_btn)
+        self.sort_cpu_btn.style().unpolish(self.sort_cpu_btn)
+        self.sort_cpu_btn.style().polish(self.sort_cpu_btn)
     
     def on_refresh(self):
         """Handle refresh button click."""
