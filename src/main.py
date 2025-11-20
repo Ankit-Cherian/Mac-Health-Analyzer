@@ -32,9 +32,9 @@ class MainWindow(QMainWindow):
         """Initialize main window."""
         super().__init__()
         
-        # Initialize managers
-        self.startup_manager = StartupManager()
+        # Initialize managers (process_monitor first, then passed to startup_manager)
         self.process_monitor = ProcessMonitor()
+        self.startup_manager = StartupManager(self.process_monitor)
         
         # Set up window
         self.setup_window()
