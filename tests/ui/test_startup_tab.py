@@ -84,14 +84,12 @@ class TestStartupTab:
         table = startup_tab.table
 
         assert table is not None
-        assert table.columnCount() == 7
+        assert table.columnCount() == 5
         assert table.horizontalHeaderItem(0).text() == "Name"
         assert table.horizontalHeaderItem(1).text() == "Type"
         assert table.horizontalHeaderItem(2).text() == "Status"
-        assert table.horizontalHeaderItem(3).text() == "CPU %"
-        assert table.horizontalHeaderItem(4).text() == "Memory %"
-        assert table.horizontalHeaderItem(5).text() == "Location"
-        assert table.horizontalHeaderItem(6).text() == "Toggle"
+        assert table.horizontalHeaderItem(3).text() == "Location"
+        assert table.horizontalHeaderItem(4).text() == "Toggle"
 
     def test_update_data(self, startup_tab, mock_startup_manager):
         """Test data update."""
@@ -223,9 +221,8 @@ class TestStartupTab:
         assert startup_tab.table.item(0, 0).text() == "Dropbox"
         assert startup_tab.table.item(0, 1).text() == "Login Item"
         assert startup_tab.table.item(0, 2).text() == "Enabled"
-        assert startup_tab.table.item(0, 3).text() == "N/A"
-        assert startup_tab.table.item(0, 4).text() == "N/A"
-        assert startup_tab.table.item(0, 5).text() == "/Applications/Dropbox.app"
+        assert startup_tab.table.item(0, 3).text() == "/Applications/Dropbox.app"
+        assert startup_tab.table.item(0, 4).text() == "●"
 
     def test_on_search(self, startup_tab):
         """Test search handler."""

@@ -211,7 +211,7 @@ class StartupGuide(QDialog):
             "<ul style='margin-left: 18px; padding-left: 6px;'>"
             "<li><b>🔒 Be Careful:</b> Avoid disabling Apple system processes unless you know what they do.</li>"
             "<li><b>⚡ Speed Up:</b> Disable startup items you don't need and close unused apps.</li>"
-            "<li><b>🔄 Refresh:</b> Click the Refresh button for the latest data.</li>"
+            "<li><b>🔄 Refresh:</b> Click Refresh on the Startup tab to update the items list after system changes.</li>"
             "<li><b>📊 Monitor:</b> Use the System tab to keep an eye on CPU and memory.</li>"
             "<li><b>❓ Need Help?</b> Toggle Simple Explanations inside detail dialogs.</li>"
             "</ul>"

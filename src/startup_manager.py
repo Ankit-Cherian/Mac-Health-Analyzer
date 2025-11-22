@@ -189,7 +189,7 @@ class StartupManager(QObject):
     def refresh(self):
         """
         Refresh all startup items asynchronously.
-        Triggers a background scan with process matching in the worker thread.
+        No longer performs process matching since CPU/Memory data is not displayed in startup tab.
         """
         now = time.time()
 
@@ -198,7 +198,8 @@ class StartupManager(QObject):
             self._launchctl_cache = set()
             self._launchctl_cache_ts = now
 
-        worker = StartupScanWorker(self._signals, self._launchctl_cache, self._process_monitor)
+        # Pass None for process_monitor to skip expensive process matching
+        worker = StartupScanWorker(self._signals, self._launchctl_cache, None)
         self._thread_pool.start(worker)
         
     @pyqtSlot(list, set)
