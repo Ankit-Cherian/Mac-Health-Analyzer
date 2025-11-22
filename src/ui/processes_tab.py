@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
     QLabel, QHeaderView, QMessageBox, QCheckBox
 )
-from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot, QTimer
 from ui.widgets import SearchBar, MetricCard, StyledButton
 from ui.styles import COLORS, get_status_color
 from ui.process_detail_dialog import ProcessDetailDialog
@@ -302,15 +302,34 @@ class ProcessesTab(QWidget):
                 
                 # Store process data
                 pid_item.setData(Qt.ItemDataRole.UserRole, proc)
-            
+
+            # Remember current sort state before re-enabling
+            header = self.table.horizontalHeader()
+            sort_column = header.sortIndicatorSection()
+            sort_order = header.sortIndicatorOrder()
+
+            # CRITICAL FIX: Clear sort indicator BEFORE re-enabling to prevent automatic re-sort
+            # This prevents Qt from automatically sorting on the UI thread, which causes freezes
+            header.setSortIndicator(-1, Qt.SortOrder.AscendingOrder)
+
             self.table.setSortingEnabled(True)
             self.table.blockSignals(False)
-            
-            # Only sort if it's not already sorted by something else to prevent jumping rows
-            # Default sort by memory usage if no header is clicked
-            if self.table.horizontalHeader().sortIndicatorSection() == -1:
-                self.table.sortItems(3, Qt.SortOrder.DescendingOrder)
-                
+
+            # Defer the sort operation to prevent blocking the UI thread
+            # Default sort by memory usage if no sort was previously active
+            if sort_column == -1:
+                # No previous sort, apply default sort
+                def apply_default_sort():
+                    header.setSortIndicator(3, Qt.SortOrder.DescendingOrder)
+                    self.table.sortItems(3, Qt.SortOrder.DescendingOrder)
+                QTimer.singleShot(0, apply_default_sort)
+            else:
+                # Restore previous sort
+                def apply_deferred_sort():
+                    header.setSortIndicator(sort_column, sort_order)
+                    self.table.sortItems(sort_column, sort_order)
+                QTimer.singleShot(0, apply_deferred_sort)
+
         except Exception as e:
             print(f"Error populating process table: {e}")
             self.table.setSortingEnabled(True)

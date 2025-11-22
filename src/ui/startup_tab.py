@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
     QLabel, QPushButton, QHeaderView, QMessageBox, QComboBox
 )
-from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot, QTimer
 from ui.widgets import SearchBar, ToggleSwitch, GlassmorphicPanel, StyledButton
 from ui.styles import COLORS
 from ui.startup_detail_dialog import StartupDetailDialog
@@ -256,29 +256,35 @@ class StartupTab(QWidget):
     def populate_table(self, items: list):
         """
         Populate table with startup items.
-        
+
         Args:
             items: List of startup item dicts
         """
         from utils.helpers import format_percentage
-        
+
+        # Remember current sort state before disabling
+        header = self.table.horizontalHeader()
+        sort_column = header.sortIndicatorSection()
+        sort_order = header.sortIndicatorOrder()
+        was_sorting_enabled = self.table.isSortingEnabled()
+
         self.table.setSortingEnabled(False)
         self.table.setRowCount(len(items))
-        
+
         for row, item in enumerate(items):
             # Name
             name_item = QTableWidgetItem(item['name'])
             self.table.setItem(row, 0, name_item)
-            
+
             # Type
             type_item = QTableWidgetItem(item['type'])
             self.table.setItem(row, 1, type_item)
-            
+
             # Status
             status_text = "Enabled" if item.get('enabled', True) else "Disabled"
             status_item = QTableWidgetItem(status_text)
             self.table.setItem(row, 2, status_item)
-            
+
             # CPU %
             cpu_percent = item.get('cpu_percent', 0.0)
             if item.get('has_process', False):
@@ -288,7 +294,7 @@ class StartupTab(QWidget):
             cpu_item = QTableWidgetItem(cpu_text)
             cpu_item.setData(Qt.ItemDataRole.DisplayRole, cpu_percent if item.get('has_process', False) else -1)
             self.table.setItem(row, 3, cpu_item)
-            
+
             # Memory %
             memory_percent = item.get('memory_percent', 0.0)
             if item.get('has_process', False):
@@ -298,21 +304,36 @@ class StartupTab(QWidget):
             memory_item = QTableWidgetItem(memory_text)
             memory_item.setData(Qt.ItemDataRole.DisplayRole, memory_percent if item.get('has_process', False) else -1)
             self.table.setItem(row, 4, memory_item)
-            
+
             # Location
             location = item.get('location', item.get('path', 'N/A'))
             location_item = QTableWidgetItem(location)
             self.table.setItem(row, 5, location_item)
-            
+
             # Toggle switch (as text for now, could be custom widget)
             toggle_item = QTableWidgetItem("●" if item.get('enabled', True) else "○")
             toggle_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setItem(row, 6, toggle_item)
-            
+
             # Store item data
             name_item.setData(Qt.ItemDataRole.UserRole, item)
-        
-        self.table.setSortingEnabled(True)
+
+        # CRITICAL FIX: Clear sort indicator BEFORE re-enabling to prevent automatic re-sort
+        # This prevents Qt from automatically sorting on the UI thread, which causes freezes
+        header.setSortIndicator(-1, Qt.SortOrder.AscendingOrder)
+
+        # Now it's safe to re-enable sorting without triggering a blocking sort operation
+        if was_sorting_enabled:
+            self.table.setSortingEnabled(True)
+
+            # Defer the sort operation to the next event loop iteration
+            # This prevents any potential blocking on the UI thread during refresh
+            # The 0ms timer queues the sort, keeping the UI responsive
+            if sort_column >= 0:
+                def apply_deferred_sort():
+                    header.setSortIndicator(sort_column, sort_order)
+                    self.table.sortItems(sort_column, sort_order)
+                QTimer.singleShot(0, apply_deferred_sort)
     
     def on_search(self, query: str):
         """Handle search query change."""
