@@ -23,7 +23,7 @@ class StartupTab(QWidget):
     def __init__(self, startup_manager, process_monitor, parent=None):
         """
         Initialize startup tab.
-        
+
         Args:
             startup_manager: StartupManager instance
             process_monitor: ProcessMonitor instance
@@ -34,9 +34,14 @@ class StartupTab(QWidget):
         self.process_monitor = process_monitor
         self.current_items = []
         self.current_sort_mode = None  # Track current sort mode: 'cpu', 'memory', or None
-        
+
+        # For chunked table population to prevent UI freezes
+        self._populate_timer = None
+        self._items_to_populate = []
+        self._populate_index = 0
+
         self.setup_ui()
-        
+
         # Connect to startup manager updates
         self.startup_manager.data_updated.connect(self.update_data)
     
@@ -255,12 +260,15 @@ class StartupTab(QWidget):
     
     def populate_table(self, items: list):
         """
-        Populate table with startup items.
+        Populate table with startup items using chunked rendering to prevent UI freeze.
 
         Args:
             items: List of startup item dicts
         """
-        from utils.helpers import format_percentage
+        # Cancel any ongoing population
+        if self._populate_timer:
+            self._populate_timer.stop()
+            self._populate_timer = None
 
         # Remember current sort state before disabling
         header = self.table.horizontalHeader()
@@ -268,10 +276,34 @@ class StartupTab(QWidget):
         sort_order = header.sortIndicatorOrder()
         was_sorting_enabled = self.table.isSortingEnabled()
 
+        # Disable sorting and prepare table
         self.table.setSortingEnabled(False)
         self.table.setRowCount(len(items))
 
-        for row, item in enumerate(items):
+        # Store items and state for chunked population
+        self._items_to_populate = items
+        self._populate_index = 0
+        self._populate_sort_column = sort_column
+        self._populate_sort_order = sort_order
+        self._populate_was_sorting_enabled = was_sorting_enabled
+
+        # Start chunked population (50 items per chunk to keep UI responsive)
+        self._populate_timer = QTimer()
+        self._populate_timer.timeout.connect(self._populate_chunk)
+        self._populate_timer.start(0)  # Process ASAP but yield to event loop
+
+    def _populate_chunk(self):
+        """Populate a chunk of table rows to keep UI responsive."""
+        from utils.helpers import format_percentage
+
+        CHUNK_SIZE = 50  # Process 50 rows at a time
+        start_idx = self._populate_index
+        end_idx = min(start_idx + CHUNK_SIZE, len(self._items_to_populate))
+
+        # Populate this chunk
+        for row in range(start_idx, end_idx):
+            item = self._items_to_populate[row]
+
             # Name
             name_item = QTableWidgetItem(item['name'])
             self.table.setItem(row, 0, name_item)
@@ -310,7 +342,7 @@ class StartupTab(QWidget):
             location_item = QTableWidgetItem(location)
             self.table.setItem(row, 5, location_item)
 
-            # Toggle switch (as text for now, could be custom widget)
+            # Toggle switch
             toggle_item = QTableWidgetItem("●" if item.get('enabled', True) else "○")
             toggle_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setItem(row, 6, toggle_item)
@@ -318,22 +350,31 @@ class StartupTab(QWidget):
             # Store item data
             name_item.setData(Qt.ItemDataRole.UserRole, item)
 
-        # CRITICAL FIX: Clear sort indicator BEFORE re-enabling to prevent automatic re-sort
-        # This prevents Qt from automatically sorting on the UI thread, which causes freezes
-        header.setSortIndicator(-1, Qt.SortOrder.AscendingOrder)
+        self._populate_index = end_idx
 
-        # Now it's safe to re-enable sorting without triggering a blocking sort operation
-        if was_sorting_enabled:
-            self.table.setSortingEnabled(True)
+        # Check if we're done
+        if self._populate_index >= len(self._items_to_populate):
+            # Stop timer
+            self._populate_timer.stop()
+            self._populate_timer = None
 
-            # Defer the sort operation to the next event loop iteration
-            # This prevents any potential blocking on the UI thread during refresh
-            # The 0ms timer queues the sort, keeping the UI responsive
-            if sort_column >= 0:
-                def apply_deferred_sort():
-                    header.setSortIndicator(sort_column, sort_order)
-                    self.table.sortItems(sort_column, sort_order)
-                QTimer.singleShot(0, apply_deferred_sort)
+            # CRITICAL FIX: Clear sort indicator BEFORE re-enabling
+            header = self.table.horizontalHeader()
+            header.setSortIndicator(-1, Qt.SortOrder.AscendingOrder)
+
+            # Re-enable sorting
+            if self._populate_was_sorting_enabled:
+                self.table.setSortingEnabled(True)
+
+                # Defer the sort operation
+                if self._populate_sort_column >= 0:
+                    sort_col = self._populate_sort_column
+                    sort_ord = self._populate_sort_order
+
+                    def apply_deferred_sort():
+                        header.setSortIndicator(sort_col, sort_ord)
+                        self.table.sortItems(sort_col, sort_ord)
+                    QTimer.singleShot(0, apply_deferred_sort)
     
     def on_search(self, query: str):
         """Handle search query change."""
