@@ -174,7 +174,7 @@ class StartupDetailDialog(QDialog):
         check_name = label_name if label_name else item_name
 
         if StartupDescriber.is_recognized(check_name):
-            known_badge = QLabel("✓ Recognized Startup Item")
+            known_badge = QLabel("Recognized Startup Item")
             known_badge.setStyleSheet(f"""
                 color: {COLORS['sage']};
                 font-size: 12px;
@@ -221,22 +221,19 @@ class StartupDetailDialog(QDialog):
 
         recommendation = StartupDescriber.get_recommendation(check_name, item_type)
 
-        # Recommendation icon and text based on should_enable
+        # Recommendation text based on should_enable
         if recommendation['should_enable'] is True:
-            icon = "✓"
             rec_color = COLORS['sage']
             rec_title = "Keep This Enabled"
         elif recommendation['should_enable'] is False:
-            icon = "✗"
             rec_color = COLORS['critical']
             rec_title = "Safe to Disable"
         else:  # None - depends on user
-            icon = "⚠"
             rec_color = COLORS['warning']
             rec_title = "Your Choice"
 
         # Recommendation header
-        rec_header = QLabel(f"{icon} {rec_title}")
+        rec_header = QLabel(rec_title)
         rec_header.setStyleSheet(f"""
             color: {rec_color};
             font-size: 16px;

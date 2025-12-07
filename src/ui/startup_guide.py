@@ -50,7 +50,7 @@ class StartupGuide(QDialog):
         layout.setContentsMargins(30, 30, 30, 30)
 
         # Title
-        title = QLabel("Welcome to Mac Health Analyzer! 👋")
+        title = QLabel("Welcome to Mac Health Analyzer!")
         title.setProperty("heading", "h1")
         title.setStyleSheet(f"color: {COLORS['terracotta']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -172,7 +172,7 @@ class StartupGuide(QDialog):
             "<li>Get simple recommendations to improve performance.</li>"
             "</ul>"
         )
-        return self._create_step_panel("🖥️", "What is Mac Health Analyzer?",
+        return self._create_step_panel("", "What is Mac Health Analyzer?",
                                        description_html, COLORS['terracotta'])
 
     def _create_step_2(self) -> QWidget:
@@ -187,7 +187,7 @@ class StartupGuide(QDialog):
             "</ul>"
             "<p><b>Tip:</b> Disable startup items you don't need to launch automatically.</p>"
         )
-        return self._create_step_panel("🚀", "Startup Items Tab",
+        return self._create_step_panel("", "Startup Items Tab",
                                        description_html, COLORS['sage'])
 
     def _create_step_3(self) -> QWidget:
@@ -202,18 +202,18 @@ class StartupGuide(QDialog):
             "</ul>"
             "<p><b>Tip:</b> If your Mac feels slow, look for processes using lots of memory or CPU.</p>"
         )
-        return self._create_step_panel("⚙️", "Processes Tab",
+        return self._create_step_panel("", "Processes Tab",
                                        description_html, COLORS['mustard'])
 
     def _create_step_4(self) -> QWidget:
         """Create step 4: Tips and tricks."""
         tips_html = (
             "<ul style='margin-left: 18px; padding-left: 6px;'>"
-            "<li><b>🔒 Be Careful:</b> Avoid disabling Apple system processes unless you know what they do.</li>"
-            "<li><b>⚡ Speed Up:</b> Disable startup items you don't need and close unused apps.</li>"
-            "<li><b>🔄 Refresh:</b> Click Refresh on the Startup tab to update the items list after system changes.</li>"
-            "<li><b>📊 Monitor:</b> Use the System tab to keep an eye on CPU and memory.</li>"
-            "<li><b>❓ Need Help?</b> Toggle Simple Explanations inside detail dialogs.</li>"
+            "<li><b>Be Careful:</b> Avoid disabling Apple system processes unless you know what they do.</li>"
+            "<li><b>Speed Up:</b> Disable startup items you don't need and close unused apps.</li>"
+            "<li><b>Refresh:</b> Click Refresh on the Startup tab to update the items list after system changes.</li>"
+            "<li><b>Monitor:</b> Use the System tab to keep an eye on CPU and memory.</li>"
+            "<li><b>Need Help?</b> Toggle Simple Explanations inside detail dialogs.</li>"
             "</ul>"
         )
         widget = QWidget()
@@ -221,7 +221,7 @@ class StartupGuide(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(12)
 
-        panel = self._create_step_panel("💡", "Tips for Success",
+        panel = self._create_step_panel("", "Tips for Success",
                                         tips_html, COLORS['terracotta'])
         layout.addWidget(panel, alignment=Qt.AlignmentFlag.AlignTop)
 

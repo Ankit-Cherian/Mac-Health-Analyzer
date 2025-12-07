@@ -167,7 +167,7 @@ class ProcessDetailDialog(QDialog):
         # Add info badge if process is known
         process_name = self.process_data.get('name', '')
         if ProcessDescriber.is_known_process(process_name):
-            known_badge = QLabel("✓ Recognized Process")
+            known_badge = QLabel("Recognized Process")
             known_badge.setStyleSheet(f"""
                 color: {COLORS['sage']};
                 font-size: 12px;
@@ -178,7 +178,7 @@ class ProcessDetailDialog(QDialog):
             """)
             panel_layout.addWidget(known_badge)
         else:
-            unknown_badge = QLabel("? Custom or System Process")
+            unknown_badge = QLabel("Custom or System Process")
             unknown_badge.setStyleSheet(f"""
                 color: {COLORS['warning']};
                 font-size: 12px;
@@ -215,11 +215,12 @@ class ProcessDetailDialog(QDialog):
                 rec_layout.setContentsMargins(0, 0, 0, 0)
                 rec_layout.setSpacing(12)
 
-                # Icon
-                icon_label = QLabel(rec['icon'])
-                icon_label.setStyleSheet("font-size: 20px;")
-                icon_label.setFixedWidth(30)
-                rec_layout.addWidget(icon_label)
+                # Icon (only show if not empty)
+                if rec.get('icon'):
+                    icon_label = QLabel(rec['icon'])
+                    icon_label.setStyleSheet("font-size: 20px;")
+                    icon_label.setFixedWidth(30)
+                    rec_layout.addWidget(icon_label)
 
                 # Text
                 text_label = QLabel(rec['text'])
@@ -238,7 +239,7 @@ class ProcessDetailDialog(QDialog):
                 panel_layout.addWidget(rec_widget)
         else:
             # No recommendations
-            no_rec = QLabel("✓ No issues detected. This process appears to be running normally.")
+            no_rec = QLabel("No issues detected. This process appears to be running normally.")
             no_rec.setStyleSheet(f"""
                 color: {COLORS['sage']};
                 font-size: 13px;
@@ -282,14 +283,14 @@ class ProcessDetailDialog(QDialog):
         # Recommendation 1: High memory usage
         if memory_percent > 5.0 and not is_critical:
             recommendations.append({
-                'icon': '⚠️',
+                'icon': '',
                 'text': f'This process is using {memory_percent:.1f}% of your total memory, which is quite high. '
                         f'If you\'re not actively using this app, consider closing it to free up memory.',
                 'color': COLORS['warning']
             })
         elif memory_percent > 10.0:
             recommendations.append({
-                'icon': '🔴',
+                'icon': '',
                 'text': f'This process is using {memory_percent:.1f}% of your total memory! '
                         f'This is very high. Consider closing it if possible to improve performance.',
                 'color': COLORS['critical']
@@ -298,14 +299,14 @@ class ProcessDetailDialog(QDialog):
         # Recommendation 2: High CPU usage
         if cpu_percent > 50.0 and not is_critical:
             recommendations.append({
-                'icon': '🔥',
+                'icon': '',
                 'text': f'This process is using {cpu_percent:.1f}% CPU, which may slow down your Mac. '
                         f'If you\'re not actively using it, try closing and reopening the app.',
                 'color': COLORS['critical']
             })
         elif cpu_percent > 20.0 and not is_critical:
             recommendations.append({
-                'icon': '⚡',
+                'icon': '',
                 'text': f'This process is using {cpu_percent:.1f}% CPU. '
                         f'This is normal if you\'re actively using the app, but consider closing it if not.',
                 'color': COLORS['warning']
@@ -314,7 +315,7 @@ class ProcessDetailDialog(QDialog):
         # Recommendation 3: Long running time
         if uptime_days > 7 and not is_critical:
             recommendations.append({
-                'icon': '⏰',
+                'icon': '',
                 'text': f'This process has been running for over {int(uptime_days)} days. '
                         f'Apps that run for a long time can accumulate memory leaks. '
                         f'Try closing and reopening it to free up resources.',
@@ -322,7 +323,7 @@ class ProcessDetailDialog(QDialog):
             })
         elif uptime_days > 3 and memory_percent > 2.0 and not is_critical:
             recommendations.append({
-                'icon': '🔄',
+                'icon': '',
                 'text': f'This process has been running for {int(uptime_days)} days and is using significant memory. '
                         f'Restarting it might improve performance.',
                 'color': COLORS['warning']
@@ -332,7 +333,7 @@ class ProcessDetailDialog(QDialog):
         if 'helper' in process_name and ('chrome' in process_name or 'firefox' in process_name or 'safari' in process_name):
             if memory_percent > 3.0:
                 recommendations.append({
-                    'icon': '🌐',
+                    'icon': '',
                     'text': 'This is a browser helper process using significant memory. '
                             'Try closing unused browser tabs or extensions to reduce resource usage.',
                     'color': COLORS['mustard']
@@ -341,7 +342,7 @@ class ProcessDetailDialog(QDialog):
         # Recommendation 5: System process warning
         if is_critical:
             recommendations.append({
-                'icon': '🔒',
+                'icon': '',
                 'text': 'This is a critical system process. Do NOT force quit it - doing so could cause your Mac to crash or behave unexpectedly.',
                 'color': COLORS['sage']
             })
@@ -350,7 +351,7 @@ class ProcessDetailDialog(QDialog):
         electron_apps = ['electron', 'slack', 'discord', 'teams', 'spotify', 'atom', 'vscode']
         if any(app in process_name for app in electron_apps) and memory_percent > 4.0:
             recommendations.append({
-                'icon': '💡',
+                'icon': '',
                 'text': 'This app is known to use significant resources. '
                         'Consider using a web browser version or lighter alternative if performance is an issue.',
                 'color': COLORS['mustard']

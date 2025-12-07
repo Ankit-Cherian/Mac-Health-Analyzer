@@ -86,7 +86,7 @@ class StartupTab(QWidget):
         layout.addLayout(filter_layout)
 
         # Hint label
-        hint_label = QLabel("💡 Double-click any item to see detailed information and recommendations")
+        hint_label = QLabel("Double-click any item to see detailed information and recommendations")
         hint_label.setStyleSheet(f"color: {COLORS['text_secondary']}; font-size: 12px; padding: 4px;")
         layout.addWidget(hint_label)
 

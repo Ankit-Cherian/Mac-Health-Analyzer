@@ -416,7 +416,7 @@ class SearchBar(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.line_edit = QLineEdit()
-        self.line_edit.setPlaceholderText(f"🔍 {placeholder}")
+        self.line_edit.setPlaceholderText(placeholder)
         self.line_edit.setObjectName("searchField")
         self.line_edit.setClearButtonEnabled(True)
         self.line_edit.textChanged.connect(self.search_changed.emit)

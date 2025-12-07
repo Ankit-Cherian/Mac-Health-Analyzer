@@ -97,7 +97,7 @@ class ProcessesTab(QWidget):
         search_layout.addWidget(self.search_bar)
 
         # Hint label
-        hint_label = QLabel("💡 Double-click any process to see detailed information")
+        hint_label = QLabel("Double-click any process to see detailed information")
         hint_label.setStyleSheet(f"""
             color: {COLORS['text_secondary']};
             font-size: 12px;

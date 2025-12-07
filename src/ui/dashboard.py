@@ -68,9 +68,9 @@ class Dashboard(QWidget):
         self.startup_tab = StartupTab(self.startup_manager, self.process_monitor)
         self.processes_tab = ProcessesTab(self.process_monitor)
 
-        # Add tabs with cyberpunk icons
-        self.tab_widget.addTab(self.startup_tab, "⚡ STARTUP")
-        self.tab_widget.addTab(self.processes_tab, "⚙ PROCESSES")
+        # Add tabs
+        self.tab_widget.addTab(self.startup_tab, "STARTUP")
+        self.tab_widget.addTab(self.processes_tab, "PROCESSES")
 
         # Create enhanced system overview tab
         self.overview_tab = self.create_enhanced_overview_tab()
