@@ -1,9 +1,5 @@
 # Mac Health Analyzer
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
-![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)
-
 A macOS app to monitor system resources and manage startup items.
 
 ## Screenshots
