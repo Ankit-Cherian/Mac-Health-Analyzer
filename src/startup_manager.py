@@ -4,9 +4,9 @@ Handles detection and management of login items, Launch Agents, and Launch Daemo
 """
 
 import logging
-from typing import List, Dict
+from typing import List, Dict, Set
 import time
-from PyQt6.QtCore import QObject, QRunnable, QThreadPool, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QObject, QRunnable, QThreadPool, pyqtSignal, pyqtSlot, QMutex
 
 logger = logging.getLogger(__name__)
 from utils.system_info import (
@@ -177,6 +177,7 @@ class StartupManager(QObject):
         self.all_items = []
         self._launchctl_cache = set()
         self._launchctl_cache_ts = 0.0
+        self._cache_mutex = QMutex()  # Thread safety for cache access
         self._process_monitor = process_monitor
 
         # Thread pool for async scans
@@ -189,6 +190,47 @@ class StartupManager(QObject):
         self.data_updated = self._signals.data_updated
         self.scan_error = self._signals.scan_error
 
+    def _get_cache_copy(self) -> Set[str]:
+        """
+        Get a thread-safe copy of the launchctl cache.
+
+        Returns:
+            Copy of the current cache set
+        """
+        self._cache_mutex.lock()
+        try:
+            return self._launchctl_cache.copy()
+        finally:
+            self._cache_mutex.unlock()
+
+    def _update_cache(self, new_cache: Set[str]) -> None:
+        """
+        Thread-safe update of the launchctl cache.
+
+        Args:
+            new_cache: New cache set to store
+        """
+        self._cache_mutex.lock()
+        try:
+            self._launchctl_cache = new_cache
+        finally:
+            self._cache_mutex.unlock()
+
+    def _reset_cache_if_stale(self, current_time: float) -> None:
+        """
+        Reset cache if it's stale (> 5 seconds old), thread-safe.
+
+        Args:
+            current_time: Current timestamp
+        """
+        self._cache_mutex.lock()
+        try:
+            if current_time - self._launchctl_cache_ts > 5:
+                self._launchctl_cache = set()
+                self._launchctl_cache_ts = current_time
+        finally:
+            self._cache_mutex.unlock()
+
     def refresh(self):
         """
         Refresh all startup items asynchronously.
@@ -196,26 +238,28 @@ class StartupManager(QObject):
         """
         now = time.time()
 
-        # Reset cache if stale (> 5 seconds)
-        if now - self._launchctl_cache_ts > 5:
-            self._launchctl_cache = set()
-            self._launchctl_cache_ts = now
+        # Reset cache if stale (> 5 seconds) - thread-safe
+        self._reset_cache_if_stale(now)
+
+        # Get thread-safe copy of cache to pass to worker
+        cache_copy = self._get_cache_copy()
 
         # Pass None for process_monitor to skip expensive process matching
-        worker = StartupScanWorker(self._signals, self._launchctl_cache, None)
+        worker = StartupScanWorker(self._signals, cache_copy, None)
         self._thread_pool.start(worker)
-        
+
     @pyqtSlot(list, set)
     def _on_scan_finished(self, items, launchctl_cache):
         """Handle completion of background scan."""
         self.all_items = items
-        self._launchctl_cache = launchctl_cache
-        
+        # Thread-safe update of the cache
+        self._update_cache(launchctl_cache)
+
         # Split back into categories for convenience
         self.login_items = [i for i in items if i.get('type') == 'Login Item']
         self.launch_agents = [i for i in items if i.get('type') == 'Launch Agent']
         self.launch_daemons = [i for i in items if i.get('type') == 'Launch Daemon']
-        
+
         self.data_updated.emit()
         
     @pyqtSlot(str)

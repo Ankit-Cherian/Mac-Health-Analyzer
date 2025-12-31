@@ -238,18 +238,18 @@ class Dashboard(QWidget):
         cards_grid = QGridLayout()
         cards_grid.setSpacing(15)
 
-        # Info metric cards
+        # Info metric cards with proper signal connections (not lambda overrides)
         self.total_memory_card = MetricCard("TOTAL RAM", "Loading...", "low")
         self.total_memory_card.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.total_memory_card.mouseReleaseEvent = lambda e: self._show_memory_info()
+        self.total_memory_card.clicked.connect(self._show_memory_info)
 
         self.cpu_cores_card = MetricCard("CPU CORES", "Loading...", "low")
         self.cpu_cores_card.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.cpu_cores_card.mouseReleaseEvent = lambda e: self._show_cpu_info()
+        self.cpu_cores_card.clicked.connect(self._show_cpu_info)
 
         self.startup_items_card = MetricCard("STARTUP ITEMS", "Loading...", "medium")
         self.startup_items_card.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.startup_items_card.mouseReleaseEvent = lambda e: self._show_startup_info()
+        self.startup_items_card.clicked.connect(self._show_startup_info)
 
         cards_grid.addWidget(self.total_memory_card, 0, 0)
         cards_grid.addWidget(self.cpu_cores_card, 0, 1)
@@ -502,6 +502,15 @@ class Dashboard(QWidget):
 
     def cleanup(self):
         """Clean up resources."""
+        # Disconnect signals from metric cards to prevent memory leaks
+        try:
+            self.total_memory_card.clicked.disconnect(self._show_memory_info)
+            self.cpu_cores_card.clicked.disconnect(self._show_cpu_info)
+            self.startup_items_card.clicked.disconnect(self._show_startup_info)
+        except (TypeError, RuntimeError):
+            # Signals may already be disconnected
+            pass
+
         # Stop the process monitor worker
         if hasattr(self, 'process_monitor'):
             self.process_monitor.cleanup()

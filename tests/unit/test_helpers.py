@@ -238,6 +238,120 @@ class TestKillProcess:
 
         assert result is False
 
+    # Security tests for PID reuse protection
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.helpers.psutil.Process')
+    def test_identity_verification_name_match(self, mock_process_class):
+        """Test that process is killed when name matches."""
+        mock_proc = MagicMock()
+        mock_proc.name.return_value = 'python3'
+        mock_process_class.return_value = mock_proc
+
+        result = kill_process(1234, force=False, expected_name='python3')
+
+        assert result is True
+        mock_proc.terminate.assert_called_once()
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.helpers.psutil.Process')
+    def test_identity_verification_name_mismatch(self, mock_process_class):
+        """Test that process is NOT killed when name mismatches (PID reuse attack)."""
+        mock_proc = MagicMock()
+        mock_proc.name.return_value = 'malicious_process'
+        mock_process_class.return_value = mock_proc
+
+        result = kill_process(1234, force=True, expected_name='python3')
+
+        assert result is False
+        mock_proc.kill.assert_not_called()
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.helpers.psutil.Process')
+    def test_identity_verification_create_time_match(self, mock_process_class):
+        """Test that process is killed when create_time matches."""
+        mock_proc = MagicMock()
+        mock_proc.create_time.return_value = 1700000000.0
+        mock_process_class.return_value = mock_proc
+
+        result = kill_process(1234, force=False, expected_create_time=1700000000.0)
+
+        assert result is True
+        mock_proc.terminate.assert_called_once()
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.helpers.psutil.Process')
+    def test_identity_verification_create_time_mismatch(self, mock_process_class):
+        """Test that process is NOT killed when create_time mismatches (PID reuse)."""
+        mock_proc = MagicMock()
+        # Process was created at a different time (PID was reused)
+        mock_proc.create_time.return_value = 1700001000.0  # 1000 seconds later
+        mock_process_class.return_value = mock_proc
+
+        result = kill_process(1234, force=True, expected_create_time=1700000000.0)
+
+        assert result is False
+        mock_proc.kill.assert_not_called()
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.helpers.psutil.Process')
+    def test_identity_verification_create_time_tolerance(self, mock_process_class):
+        """Test that small timing differences are tolerated."""
+        mock_proc = MagicMock()
+        # Small difference within tolerance (< 1 second)
+        mock_proc.create_time.return_value = 1700000000.5
+        mock_process_class.return_value = mock_proc
+
+        result = kill_process(1234, force=False, expected_create_time=1700000000.0)
+
+        assert result is True
+        mock_proc.terminate.assert_called_once()
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.helpers.psutil.Process')
+    def test_identity_verification_both_checks(self, mock_process_class):
+        """Test that both name and create_time are verified when provided."""
+        mock_proc = MagicMock()
+        mock_proc.name.return_value = 'test_app'
+        mock_proc.create_time.return_value = 1700000000.0
+        mock_process_class.return_value = mock_proc
+
+        # Both match
+        result = kill_process(
+            1234,
+            force=False,
+            expected_name='test_app',
+            expected_create_time=1700000000.0
+        )
+
+        assert result is True
+        mock_proc.terminate.assert_called_once()
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.helpers.psutil.Process')
+    def test_identity_verification_fails_on_name_mismatch(self, mock_process_class):
+        """Test that verification fails if name doesn't match even if time matches."""
+        mock_proc = MagicMock()
+        mock_proc.name.return_value = 'wrong_process'
+        mock_proc.create_time.return_value = 1700000000.0
+        mock_process_class.return_value = mock_proc
+
+        result = kill_process(
+            1234,
+            force=True,
+            expected_name='test_app',
+            expected_create_time=1700000000.0
+        )
+
+        assert result is False
+        mock_proc.kill.assert_not_called()
+
 
 # ========== Test get_resource_usage_color ==========
 

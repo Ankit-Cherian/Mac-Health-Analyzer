@@ -2,8 +2,11 @@
 Helper utilities for the Mac Health Analyzer.
 """
 
+import logging
 import psutil
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
+
+logger = logging.getLogger(__name__)
 
 
 def bytes_to_human_readable(bytes_value: int) -> str:
@@ -62,26 +65,72 @@ def get_cpu_info() -> Dict[str, any]:
     }
 
 
-def kill_process(pid: int, force: bool = False) -> bool:
+def kill_process(
+    pid: int,
+    force: bool = False,
+    expected_name: Optional[str] = None,
+    expected_create_time: Optional[float] = None
+) -> bool:
     """
-    Kill a process by PID.
-    
+    Kill a process by PID with optional identity verification.
+
+    To prevent PID reuse attacks (where a process exits and another process
+    takes its PID before we send the kill signal), this function supports
+    verifying the process identity before killing.
+
     Args:
         pid: Process ID
         force: If True, use SIGKILL instead of SIGTERM
-        
+        expected_name: Optional expected process name for verification
+        expected_create_time: Optional expected creation time for verification
+
     Returns:
         True if successful, False otherwise
     """
     try:
         proc = psutil.Process(pid)
+
+        # Verify process identity to prevent PID reuse attacks
+        if expected_name is not None:
+            actual_name = proc.name()
+            if actual_name != expected_name:
+                logger.warning(
+                    "PID %d name mismatch: expected '%s', got '%s'. "
+                    "Process may have changed - refusing to kill.",
+                    pid, expected_name, actual_name
+                )
+                return False
+
+        if expected_create_time is not None:
+            actual_create_time = proc.create_time()
+            # Allow 1 second tolerance for timing differences
+            if abs(actual_create_time - expected_create_time) > 1.0:
+                logger.warning(
+                    "PID %d create_time mismatch: expected %.2f, got %.2f. "
+                    "Process may have changed - refusing to kill.",
+                    pid, expected_create_time, actual_create_time
+                )
+                return False
+
         if force:
             proc.kill()  # SIGKILL
         else:
             proc.terminate()  # SIGTERM
+
+        logger.info("Successfully terminated process %d", pid)
         return True
+
+    except psutil.NoSuchProcess:
+        logger.info("Process %d no longer exists", pid)
+        return False
+    except psutil.AccessDenied:
+        logger.error("Access denied when trying to kill process %d", pid)
+        return False
+    except psutil.ZombieProcess:
+        logger.warning("Process %d is a zombie process", pid)
+        return False
     except Exception as e:
-        print(f"Error killing process {pid}: {e}")
+        logger.error("Error killing process %d: %s", pid, e)
         return False
 
 

@@ -7,10 +7,112 @@ import subprocess
 import os
 import logging
 import plistlib
+import re
 from pathlib import Path
 from typing import List, Dict, Optional, Set
 
 logger = logging.getLogger(__name__)
+
+
+# Allowed directories for plist files (used for symlink protection)
+ALLOWED_PLIST_DIRECTORIES = [
+    '/Library/LaunchAgents',
+    '/Library/LaunchDaemons',
+    '/System/Library/LaunchAgents',
+    '/System/Library/LaunchDaemons',
+]
+
+
+def _escape_applescript_string(s: str) -> str:
+    """
+    Escape special characters for AppleScript strings.
+
+    Args:
+        s: String to escape
+
+    Returns:
+        Escaped string safe for AppleScript interpolation
+    """
+    return s.replace('\\', '\\\\').replace('"', '\\"')
+
+
+def _validate_applescript_input(name: str) -> bool:
+    """
+    Validate input for AppleScript to prevent command injection.
+
+    Args:
+        name: Input string to validate
+
+    Returns:
+        True if input is safe, False otherwise
+    """
+    # Only allow alphanumeric, spaces, dots, hyphens, underscores, and parentheses
+    # This covers typical application names like "Google Chrome.app" or "Dropbox (daemon)"
+    if not name or len(name) > 256:
+        return False
+    return bool(re.match(r'^[\w\s.\-()]+$', name))
+
+
+def _is_safe_path(filepath: str, allowed_dirs: List[str]) -> bool:
+    """
+    Check if path is safe from symlink escape attacks.
+
+    This function specifically protects against symlink attacks where an attacker
+    places a symlink in an allowed directory that points outside of it.
+
+    On macOS, /System/Library may be firmlinked to /System/Volumes/Data, so we
+    can't simply check if the resolved path is within allowed directories.
+    Instead, we only block paths that are:
+    1. Actually symlinks AND
+    2. The symlink target is outside of standard system directories
+
+    Args:
+        filepath: Path to validate
+        allowed_dirs: List of allowed base directories
+
+    Returns:
+        True if path is safe, False if it's a symlink escape attempt
+    """
+    try:
+        file_path = Path(filepath)
+
+        # If it's not a symlink, it's safe (no escape possible)
+        if not file_path.is_symlink():
+            return True
+
+        # It's a symlink - check where it points
+        real_path = file_path.resolve()
+
+        # Check if the symlink target is within any allowed directory
+        for allowed_dir in allowed_dirs:
+            allowed_path = Path(allowed_dir).resolve()
+            try:
+                real_path.relative_to(allowed_path)
+                return True
+            except ValueError:
+                continue
+
+        # Also allow system directories that may be firmlinked
+        system_dirs = [
+            '/System/Volumes/Data/Library',
+            '/private/var',
+            '/usr',
+            '/bin',
+            '/sbin',
+        ]
+        for sys_dir in system_dirs:
+            try:
+                real_path.relative_to(Path(sys_dir))
+                return True
+            except ValueError:
+                continue
+
+        # Symlink points outside allowed areas - potential attack
+        return False
+
+    except (OSError, ValueError) as e:
+        logger.warning("Error validating path %s: %s", filepath, e)
+        return False
 
 
 def get_login_items() -> List[Dict[str, str]]:
@@ -107,18 +209,35 @@ def get_launch_agents(user_only: bool = False, loaded_labels: Optional[Set[str]]
             '/System/Library/LaunchAgents',
         ])
     
+    # Build allowed directories list for symlink protection
+    allowed_dirs = directories + ALLOWED_PLIST_DIRECTORIES
+    # Add user's LaunchAgents directory
+    user_launch_agents = os.path.expanduser('~/Library/LaunchAgents')
+    if user_launch_agents not in allowed_dirs:
+        allowed_dirs.append(user_launch_agents)
+
     for directory in directories:
         if not os.path.exists(directory):
             continue
-            
+
         try:
             for filename in os.listdir(directory):
                 if not filename.endswith('.plist'):
                     continue
-                    
+
                 filepath = os.path.join(directory, filename)
+
+                # Symlink protection: validate path is within allowed directories
+                if not _is_safe_path(filepath, allowed_dirs):
+                    logger.warning("Skipping unsafe path (possible symlink attack): %s", filepath)
+                    continue
+
+                # Ensure it's a regular file (not a symlink to a directory, etc.)
+                if not os.path.isfile(filepath):
+                    continue
+
                 agent_info = parse_plist_file(filepath)
-                
+
                 if agent_info:
                     agent_info['type'] = 'Launch Agent'
                     agent_info['location'] = directory
@@ -147,19 +266,29 @@ def get_launch_daemons(loaded_labels: Optional[Set[str]] = None) -> List[Dict[st
         '/Library/LaunchDaemons',
         '/System/Library/LaunchDaemons',
     ]
-    
+
     for directory in directories:
         if not os.path.exists(directory):
             continue
-            
+
         try:
             for filename in os.listdir(directory):
                 if not filename.endswith('.plist'):
                     continue
-                    
+
                 filepath = os.path.join(directory, filename)
+
+                # Symlink protection: validate path is within allowed directories
+                if not _is_safe_path(filepath, ALLOWED_PLIST_DIRECTORIES):
+                    logger.warning("Skipping unsafe path (possible symlink attack): %s", filepath)
+                    continue
+
+                # Ensure it's a regular file
+                if not os.path.isfile(filepath):
+                    continue
+
                 daemon_info = parse_plist_file(filepath)
-                
+
                 if daemon_info:
                     daemon_info['type'] = 'Launch Daemon'
                     daemon_info['location'] = directory
@@ -275,19 +404,27 @@ def get_launchctl_list() -> List[str]:
 def disable_login_item(name: str) -> bool:
     """
     Disable a login item using AppleScript.
-    
+
     Args:
         name: Name of the login item
-        
+
     Returns:
         True if successful, False otherwise
     """
+    # Validate input to prevent command injection
+    if not _validate_applescript_input(name):
+        logger.warning("Invalid login item name rejected: %s", name)
+        return False
+
+    # Escape special characters for safe interpolation
+    escaped_name = _escape_applescript_string(name)
+
     applescript = f'''
     tell application "System Events"
-        delete login item "{name}"
+        delete login item "{escaped_name}"
     end tell
     '''
-    
+
     try:
         result = subprocess.run(
             ['osascript', '-e', applescript],

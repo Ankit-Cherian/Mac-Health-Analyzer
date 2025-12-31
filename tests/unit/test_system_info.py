@@ -585,6 +585,182 @@ class TestDisableLoginItem:
 
         assert result is False
 
+    # Security tests for command injection prevention
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.system_info.subprocess.run')
+    def test_rejects_injection_with_quotes(self, mock_run):
+        """Test that command injection with quotes is rejected."""
+        # Attempt to inject AppleScript code
+        malicious_name = 'test" ; do shell script "whoami'
+        result = disable_login_item(malicious_name)
+
+        assert result is False
+        mock_run.assert_not_called()
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.system_info.subprocess.run')
+    def test_rejects_injection_with_semicolon(self, mock_run):
+        """Test that command injection with semicolon is rejected."""
+        malicious_name = 'test; rm -rf /'
+        result = disable_login_item(malicious_name)
+
+        assert result is False
+        mock_run.assert_not_called()
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.system_info.subprocess.run')
+    def test_rejects_empty_name(self, mock_run):
+        """Test that empty names are rejected."""
+        result = disable_login_item('')
+
+        assert result is False
+        mock_run.assert_not_called()
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.system_info.subprocess.run')
+    def test_rejects_very_long_name(self, mock_run):
+        """Test that overly long names are rejected."""
+        long_name = 'A' * 300
+        result = disable_login_item(long_name)
+
+        assert result is False
+        mock_run.assert_not_called()
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.system_info.subprocess.run')
+    def test_allows_valid_app_names(self, mock_run):
+        """Test that legitimate app names are allowed."""
+        mock_run.return_value = MagicMock(returncode=0)
+
+        # Test various valid app name formats
+        valid_names = [
+            'Google Chrome',
+            'Dropbox.app',
+            'iTerm2',
+            'Visual Studio Code',
+            'Slack (Beta)',
+            'App_Name-v2.0',
+        ]
+
+        for name in valid_names:
+            result = disable_login_item(name)
+            assert result is True, f"Valid name '{name}' was rejected"
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    @patch('utils.system_info.subprocess.run')
+    def test_escapes_special_characters(self, mock_run):
+        """Test that special characters are properly escaped."""
+        mock_run.return_value = MagicMock(returncode=0)
+
+        # Name with characters that need escaping but are allowed
+        result = disable_login_item('My App (v1.0)')
+
+        assert result is True
+        # Verify the AppleScript was called
+        mock_run.assert_called_once()
+
+
+# ========== Test symlink protection ==========
+
+class TestSymlinkProtection:
+    """Test suite for symlink TOCTOU protection."""
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    def test_is_safe_path_regular_file(self, tmp_path):
+        """Test that regular files (non-symlinks) are always accepted."""
+        from utils.system_info import _is_safe_path
+
+        # Create a test file
+        test_file = tmp_path / "test.plist"
+        test_file.touch()
+
+        # Regular files should always be safe (no symlink escape possible)
+        result = _is_safe_path(str(test_file), [str(tmp_path)])
+        assert result is True
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    def test_is_safe_path_regular_file_anywhere(self, tmp_path):
+        """Test that regular files are safe even outside allowed dirs."""
+        from utils.system_info import _is_safe_path
+
+        # Create a test file
+        test_file = tmp_path / "test.plist"
+        test_file.touch()
+
+        # Regular file should be safe even with different allowed dirs
+        # because it's not a symlink
+        result = _is_safe_path(str(test_file), ['/some/other/dir'])
+        assert result is True
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    def test_is_safe_path_symlink_escape(self, tmp_path):
+        """Test that symlink escapes are detected and rejected."""
+        from utils.system_info import _is_safe_path
+
+        # Create allowed directory
+        allowed_dir = tmp_path / "allowed"
+        allowed_dir.mkdir()
+
+        # Create a symlink that points outside the allowed directory
+        symlink_path = allowed_dir / "escape_symlink.plist"
+        try:
+            symlink_path.symlink_to('/etc/passwd')
+
+            # The symlink resolves to /etc/passwd, which is outside allowed_dir
+            # and not in system directories
+            result = _is_safe_path(str(symlink_path), [str(allowed_dir)])
+            assert result is False, "Symlink escape was not detected"
+        except OSError:
+            # Symlink creation may fail on some systems, skip test
+            pytest.skip("Unable to create symlink for test")
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    def test_is_safe_path_symlink_within_allowed(self, tmp_path):
+        """Test that symlinks within allowed directories are accepted."""
+        from utils.system_info import _is_safe_path
+
+        # Create allowed directory
+        allowed_dir = tmp_path / "allowed"
+        allowed_dir.mkdir()
+
+        # Create a target file
+        target_file = allowed_dir / "target.plist"
+        target_file.touch()
+
+        # Create a symlink that points within the allowed directory
+        symlink_path = allowed_dir / "link.plist"
+        try:
+            symlink_path.symlink_to(target_file)
+
+            # This symlink should be safe
+            result = _is_safe_path(str(symlink_path), [str(allowed_dir)])
+            assert result is True, "Valid symlink was rejected"
+        except OSError:
+            pytest.skip("Unable to create symlink for test")
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    def test_is_safe_path_nonexistent(self, tmp_path):
+        """Test that non-existent paths are handled safely."""
+        from utils.system_info import _is_safe_path
+
+        # Non-existent path - should return True because it's not a symlink
+        # (is_symlink() returns False for non-existent paths)
+        result = _is_safe_path('/nonexistent/path/file.plist', [str(tmp_path)])
+        # Non-existent file is not a symlink, so it's considered safe
+        # The file operations will fail later when trying to open it
+        assert result is True
+
 
 # ========== Test disable_launch_agent ==========
 
