@@ -271,6 +271,9 @@ class MetricCard(QWidget):
     Features refined typography, status indicators, and polished animations.
     """
 
+    # Signal emitted when the card is clicked
+    clicked = pyqtSignal()
+
     def __init__(self, title: str, value: str = "", status: str = "low", parent=None):
         """
         Initialize metric card.
@@ -349,6 +352,17 @@ class MetricCard(QWidget):
             self.value_label.style().polish(self.value_label)
             self.status_indicator.style().unpolish(self.status_indicator)
             self.status_indicator.style().polish(self.status_indicator)
+
+    def mouseReleaseEvent(self, event):
+        """
+        Handle mouse release to emit clicked signal.
+
+        Args:
+            event: Mouse event
+        """
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.clicked.emit()
+        super().mouseReleaseEvent(event)
 
 
 class StatRow(QWidget):

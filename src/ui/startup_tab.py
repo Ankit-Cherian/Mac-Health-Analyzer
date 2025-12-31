@@ -22,7 +22,7 @@ class StartupTab(QWidget):
     """
     
     refresh_requested = pyqtSignal()
-    
+
     def __init__(self, startup_manager, process_monitor, parent=None):
         """
         Initialize startup tab.

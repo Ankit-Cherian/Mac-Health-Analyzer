@@ -243,44 +243,44 @@ class ProcessesTab(QWidget):
         Args:
             processes: List of process dicts
         """
+        # Block signals during update for better performance
+        # Use try/finally to ensure signals are always unblocked even if an exception occurs
+        self.table.blockSignals(True)
+        self.table.setSortingEnabled(False)
         try:
-            # Block signals during update for better performance
-            self.table.blockSignals(True)
-            
             # Remember selection
             selected_pids = {
                 self.table.item(item.row(), 0).data(Qt.ItemDataRole.DisplayRole)
                 for item in self.table.selectedItems()
             }
-            
-            self.table.setSortingEnabled(False)
+
             # Limit to 100 processes max for performance
             processes = processes[:100]
             self.table.setRowCount(len(processes))
-            
+
             for row, proc in enumerate(processes):
                 # PID
                 pid_item = QTableWidgetItem(str(proc['pid']))
                 pid_item.setData(Qt.ItemDataRole.DisplayRole, proc['pid'])
                 self.table.setItem(row, 0, pid_item)
-                
+
                 # Restore selection
                 if proc['pid'] in selected_pids:
                     pid_item.setSelected(True)
-                
+
                 # Name
                 name_item = QTableWidgetItem(proc['name'])
                 self.table.setItem(row, 1, name_item)
                 if proc['pid'] in selected_pids:
                     name_item.setSelected(True)
-                
+
                 # Memory (human readable)
                 memory_item = QTableWidgetItem(proc['memory_human'])
                 memory_item.setData(Qt.ItemDataRole.DisplayRole, proc['memory_mb'])
                 self.table.setItem(row, 2, memory_item)
                 if proc['pid'] in selected_pids:
                     memory_item.setSelected(True)
-                
+
                 # Memory %
                 mem_percent = proc['memory_percent']
                 mem_percent_item = QTableWidgetItem(format_percentage(mem_percent))
@@ -291,7 +291,7 @@ class ProcessesTab(QWidget):
                 self.table.setItem(row, 3, mem_percent_item)
                 if proc['pid'] in selected_pids:
                     mem_percent_item.setSelected(True)
-                
+
                 # CPU %
                 cpu_percent = proc['cpu_percent']
                 cpu_percent_item = QTableWidgetItem(format_percentage(cpu_percent))
@@ -302,7 +302,7 @@ class ProcessesTab(QWidget):
                 self.table.setItem(row, 4, cpu_percent_item)
                 if proc['pid'] in selected_pids:
                     cpu_percent_item.setSelected(True)
-                
+
                 # Store process data
                 pid_item.setData(Qt.ItemDataRole.UserRole, proc)
 
@@ -314,9 +314,6 @@ class ProcessesTab(QWidget):
             # CRITICAL FIX: Clear sort indicator BEFORE re-enabling to prevent automatic re-sort
             # This prevents Qt from automatically sorting on the UI thread, which causes freezes
             header.setSortIndicator(-1, Qt.SortOrder.AscendingOrder)
-
-            self.table.setSortingEnabled(True)
-            self.table.blockSignals(False)
 
             # Defer the sort operation to prevent blocking the UI thread
             # Default sort by memory usage if no sort was previously active
@@ -335,6 +332,8 @@ class ProcessesTab(QWidget):
 
         except Exception as e:
             logger.error("Error populating process table: %s", e)
+        finally:
+            # Always re-enable sorting and signals, even if an exception occurred
             self.table.setSortingEnabled(True)
             self.table.blockSignals(False)
     
@@ -397,21 +396,25 @@ class ProcessesTab(QWidget):
     def on_force_quit(self):
         """Handle force quit selected processes."""
         selected_rows = set(item.row() for item in self.table.selectedItems())
-        
+
         if not selected_rows:
             QMessageBox.information(self, "No Selection", "Please select processes to force quit.")
             return
-        
-        # Get selected PIDs
-        pids = []
-        names = []
+
+        # Get selected process data including verification info
+        processes_to_kill = []
         for row in selected_rows:
             proc_data = self.table.item(row, 0).data(Qt.ItemDataRole.UserRole)
-            pids.append(proc_data['pid'])
-            names.append(proc_data['name'])
-        
+            processes_to_kill.append({
+                'pid': proc_data['pid'],
+                'name': proc_data['name'],
+                'create_time': proc_data.get('create_time'),  # For PID reuse protection
+            })
+
         # Confirm
-        process_list = "\n".join([f"- {name} (PID: {pid})" for name, pid in zip(names, pids)])
+        process_list = "\n".join([
+            f"- {p['name']} (PID: {p['pid']})" for p in processes_to_kill
+        ])
         reply = QMessageBox.warning(
             self,
             "Confirm Force Quit",
@@ -419,17 +422,23 @@ class ProcessesTab(QWidget):
             "This may cause data loss if the applications have unsaved work.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
-        
+
         if reply == QMessageBox.StandardButton.Yes:
             success_count = 0
-            for pid in pids:
-                if self.process_monitor.kill_process(pid, force=True):
+            for proc in processes_to_kill:
+                # Pass verification parameters to prevent PID reuse attacks
+                if self.process_monitor.kill_process(
+                    pid=proc['pid'],
+                    force=True,
+                    expected_name=proc['name'],
+                    expected_create_time=proc['create_time']
+                ):
                     success_count += 1
-            
+
             QMessageBox.information(
                 self,
                 "Force Quit Complete",
-                f"Successfully force quit {success_count} of {len(pids)} process(es)."
+                f"Successfully force quit {success_count} of {len(processes_to_kill)} process(es)."
             )
             
             # Refresh immediately

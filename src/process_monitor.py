@@ -270,12 +270,26 @@ class ProcessMonitor(QObject):
                 return proc
         return None
     
-    def kill_process(self, pid: int, force: bool = False) -> bool:
+    def kill_process(
+        self,
+        pid: int,
+        force: bool = False,
+        expected_name: Optional[str] = None,
+        expected_create_time: Optional[float] = None
+    ) -> bool:
         """
-        Kill a process by PID.
-        This is a write action, so we can just call the helper directly.
+        Kill a process by PID with optional identity verification.
+
+        Args:
+            pid: Process ID
+            force: If True, use SIGKILL instead of SIGTERM
+            expected_name: Expected process name for verification
+            expected_create_time: Expected creation time for verification
+
+        Returns:
+            True if successful, False otherwise
         """
-        return kill_process(pid, force)
+        return kill_process(pid, force, expected_name, expected_create_time)
     
     def get_memory_usage_percentage(self) -> float:
         """Get overall memory usage percentage."""
